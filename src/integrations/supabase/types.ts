@@ -349,3 +349,146 @@ export const Constants = {
     },
   },
 } as const
+// (updated) — add `media_url?: string` to ideas Row/Insert/Update
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
+  public: {
+    Tables: {
+      chat_requests: {
+        Row: {
+          created_at: string
+          founder_id: string
+          id: string
+          idea_id: string
+          investor_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          founder_id: string
+          id?: string
+          idea_id: string
+          investor_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          founder_id?: string
+          id?: string
+          idea_id?: string
+          investor_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_requests_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_requests_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_requests_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ideas: {
+        Row: {
+          created_at: string
+          description: string
+          domain: string
+          founder_id: string
+          id: string
+          investment_needed: number
+          investment_received: number | null
+          status: string | null
+          title: string
+          updated_at: string
+          media_url?: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          domain: string
+          founder_id: string
+          id?: string
+          investment_needed: number
+          investment_received?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          media_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          domain?: string
+          founder_id?: string
+          id?: string
+          investment_needed?: number
+          investment_received?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          media_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ideas_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          chat_request_id: string
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          chat_request_id: string
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          chat_request_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_request_id_fkey"
+``` 
