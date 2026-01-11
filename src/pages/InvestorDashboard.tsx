@@ -17,12 +17,6 @@ interface Profile {
   interested_domains: string[] | null;
 }
 
-interface FounderInfo {
-  id: string;
-  name: string;
-  user_type?: string;
-}
-
 interface Idea {
   id: string;
   title: string;
@@ -33,7 +27,7 @@ interface Idea {
   status: string;
   created_at: string;
   founder_id: string;
-  founder?: FounderInfo;
+  founder?: { id: string; name: string };
 }
 
 interface ChatRequest {
@@ -42,7 +36,7 @@ interface ChatRequest {
   investor_id: string;
   founder_id: string;
   status: string;
-  founder?: FounderInfo;
+  founder?: Profile;
   idea?: { title: string };
 }
 
