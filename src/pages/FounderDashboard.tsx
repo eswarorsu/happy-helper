@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X } from "lucide-react";
+import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, Zap, Shield } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import ChatBox from "@/components/ChatBox";
 
@@ -44,6 +44,7 @@ const COLORS = ["hsl(250, 84%, 54%)", "hsl(172, 66%, 50%)", "hsl(43, 96%, 56%)",
 
 const FounderDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -52,6 +53,8 @@ const FounderDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingIdea, setIsAddingIdea] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatRequest | null>(null);
+  const [showAddIdeaDialog, setShowAddIdeaDialog] = useState(false);
+  const [hasPaidSubscription, setHasPaidSubscription] = useState(false);
   
   const [newIdea, setNewIdea] = useState({
     title: "",
@@ -62,7 +65,15 @@ const FounderDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    // Check subscription status
+    const paid = localStorage.getItem("ideaSubscriptionPaid") === "true";
+    setHasPaidSubscription(paid);
+    
+    // Open dialog if redirected from payment
+    if (searchParams.get("showAddIdea") === "true") {
+      setShowAddIdeaDialog(true);
+    }
+  }, [searchParams]);
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -400,7 +411,7 @@ const FounderDashboard = () => {
         {/* Ideas Section */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Your Ideas</h2>
-          <Dialog>
+          <Dialog open={showAddIdeaDialog} onOpenChange={setShowAddIdeaDialog}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
@@ -408,53 +419,114 @@ const FounderDashboard = () => {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Submit New Idea</DialogTitle>
-                <DialogDescription>Share your innovative idea with investors</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={newIdea.title}
-                    onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })}
-                    placeholder="Your idea title"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newIdea.description}
-                    onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })}
-                    placeholder="Describe your idea in detail"
-                    rows={4}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="domain">Domain</Label>
-                  <Input
-                    id="domain"
-                    value={newIdea.domain}
-                    onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })}
-                    placeholder="e.g., FinTech, HealthTech"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="investment">Investment Needed ($)</Label>
-                  <Input
-                    id="investment"
-                    type="number"
-                    value={newIdea.investment_needed}
-                    onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })}
-                    placeholder="100000"
-                  />
-                </div>
-                <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
-                  {isAddingIdea ? "Submitting..." : "Submit Idea"}
-                </Button>
-              </div>
+              {hasPaidSubscription ? (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Submit New Idea</DialogTitle>
+                    <DialogDescription>Share your innovative idea with investors</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={newIdea.title}
+                        onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })}
+                        placeholder="Your idea title"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={newIdea.description}
+                        onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })}
+                        placeholder="Describe your idea in detail"
+                        rows={4}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="domain">Domain</Label>
+                      <Input
+                        id="domain"
+                        value={newIdea.domain}
+                        onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })}
+                        placeholder="e.g., FinTech, HealthTech"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="investment">Investment Needed ($)</Label>
+                      <Input
+                        id="investment"
+                        type="number"
+                        value={newIdea.investment_needed}
+                        onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })}
+                        placeholder="100000"
+                      />
+                    </div>
+                    <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
+                      {isAddingIdea ? "Submitting..." : "Submit Idea"}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <DialogHeader>
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <Zap className="w-8 h-8 text-primary" />
+                    </div>
+                    <DialogTitle className="text-center text-2xl">Unlock Idea Submission</DialogTitle>
+                    <DialogDescription className="text-center">
+                      Subscribe to share your innovative ideas with investors
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6 pt-4">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-2xl text-muted-foreground line-through">₹1000/-</span>
+                        <span className="text-4xl font-bold text-primary">₹199/-</span>
+                      </div>
+                      <p className="text-sm text-accent mt-2 font-medium">Limited Time Offer - 80% OFF!</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-accent" />
+                        </div>
+                        <span>Unlimited idea submissions</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-accent" />
+                        </div>
+                        <span>Direct chat with investors</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-accent" />
+                        </div>
+                        <span>Priority visibility & analytics</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full h-12 text-lg" 
+                      onClick={() => {
+                        setShowAddIdeaDialog(false);
+                        navigate("/payment");
+                      }}
+                    >
+                      Pay Now - ₹199
+                    </Button>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
+                      <Shield className="w-4 h-4" />
+                      <span>Secure payment · 100% money-back guarantee</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
