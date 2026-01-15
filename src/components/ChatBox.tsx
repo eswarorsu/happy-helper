@@ -114,7 +114,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg h-[600px] flex flex-col p-0">
+      <DialogContent className="sm:max-w-lg h-[600px] flex flex-col p-0 glass border-0 shadow-2xl">
         <DialogHeader className="p-4 border-b">
           <div className="flex items-center justify-between">
             <div>
@@ -139,24 +139,21 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.sender_id === currentUserId ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                    message.sender_id === currentUserId
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.sender_id === currentUserId
                       ? "bg-primary text-primary-foreground rounded-br-md"
                       : "bg-muted rounded-bl-md"
-                  }`}
+                    }`}
                 >
                   <p className="text-sm">{message.content}</p>
                   <p
-                    className={`text-xs mt-1 ${
-                      message.sender_id === currentUserId
+                    className={`text-xs mt-1 ${message.sender_id === currentUserId
                         ? "text-primary-foreground/70"
                         : "text-muted-foreground"
-                    }`}
+                      }`}
                   >
                     {new Date(message.created_at).toLocaleTimeString([], {
                       hour: "2-digit",

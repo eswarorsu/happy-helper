@@ -43,7 +43,7 @@ interface ChatRequest {
 const InvestorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
@@ -179,7 +179,13 @@ const InvestorDashboard = () => {
   const acceptedChats = chatRequests.filter((r) => r.status === "accepted");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
+      </div>
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -325,8 +331,8 @@ const InvestorDashboard = () => {
                             idea.status === "funded"
                               ? "default"
                               : idea.status === "in_progress"
-                              ? "secondary"
-                              : "outline"
+                                ? "secondary"
+                                : "outline"
                           }
                         >
                           {idea.status}
