@@ -9,14 +9,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X } from "lucide-react";
+import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, User, Briefcase, GraduationCap, Calendar, Mail, Phone, ChevronRight, Handshake } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ChatBox from "@/components/ChatBox";
 
 interface Profile {
   id: string;
   name: string;
   user_type: string;
+  email?: string;
+  experience?: string;
+  education?: string;
+  dob?: string;
+  phone?: string;
 }
 
 interface Idea {
@@ -36,11 +44,11 @@ interface ChatRequest {
   investor_id: string;
   founder_id: string;
   status: string;
-  investor?: Profile;
+  investor?: { id: string; name: string };
   idea?: { title: string };
 }
 
-const COLORS = ["hsl(250, 84%, 54%)", "hsl(172, 66%, 50%)", "hsl(43, 96%, 56%)", "hsl(280, 65%, 60%)"];
+const COLORS = ["#1e293b", "#4338ca", "#0f172a", "#3730a3"];
 
 const FounderDashboard = () => {
   const navigate = useNavigate();
@@ -62,6 +70,24 @@ const FounderDashboard = () => {
 
   useEffect(() => {
     fetchData();
+
+    const channel = supabase
+      .channel('founder-dashboard-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ideas' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'chat_requests' },
+        () => fetchData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -71,7 +97,6 @@ const FounderDashboard = () => {
       return;
     }
 
-    // Fetch profile
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -90,7 +115,6 @@ const FounderDashboard = () => {
 
     setProfile(profileData);
 
-    // Fetch ideas
     const { data: ideasData } = await supabase
       .from("ideas")
       .select("*")
@@ -99,7 +123,6 @@ const FounderDashboard = () => {
 
     setIdeas(ideasData || []);
 
-    // Fetch chat requests
     const { data: requestsData } = await supabase
       .from("chat_requests")
       .select(`
@@ -120,7 +143,6 @@ const FounderDashboard = () => {
 
   const handleAddIdea = async () => {
     if (!profile) return;
-
     setIsAddingIdea(true);
 
     const { error } = await supabase.from("ideas").insert({
@@ -138,14 +160,14 @@ const FounderDashboard = () => {
       setNewIdea({ title: "", description: "", domain: "", investment_needed: "" });
       fetchData();
     }
-
     setIsAddingIdea(false);
   };
 
   const handleChatRequestAction = async (requestId: string, action: "accepted" | "rejected") => {
+    const status = action === "accepted" ? "communicating" : "rejected";
     const { error } = await supabase
       .from("chat_requests")
-      .update({ status: action })
+      .update({ status: status })
       .eq("id", requestId);
 
     if (error) {
@@ -156,25 +178,40 @@ const FounderDashboard = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "deal_done":
+        return <Badge className="bg-green-600 hover:bg-green-600 text-white flex gap-1 items-center">Deal Done 🤝</Badge>;
+      case "communicating":
+        return <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">Communicating</Badge>;
+      case "deal_pending_investor":
+        return <Badge className="bg-amber-100 text-amber-700 animate-pulse border-amber-200">Investor Ready!</Badge>;
+      case "funded":
+        return <Badge variant="default" className="bg-blue-600">Funded</Badge>;
+      case "in_progress":
+        return <Badge variant="secondary">In Progress</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
-  // Calculate statistics
   const totalIdeas = ideas.length;
   const totalInvestmentNeeded = ideas.reduce((sum, idea) => sum + idea.investment_needed, 0);
   const totalInvestmentReceived = ideas.reduce((sum, idea) => sum + (idea.investment_received || 0), 0);
   const fundingGap = totalInvestmentNeeded - totalInvestmentReceived;
 
   const statusData = [
-    { name: "Pending", value: ideas.filter((i) => i.status === "pending").length },
-    { name: "In Progress", value: ideas.filter((i) => i.status === "in_progress").length },
+    { name: "Deal Done", value: ideas.filter((i) => i.status === "deal_done").length },
+    { name: "In Progress", value: ideas.filter((i) => i.status === "in_progress" || i.status === "pending").length },
     { name: "Funded", value: ideas.filter((i) => i.status === "funded").length },
-    { name: "Completed", value: ideas.filter((i) => i.status === "completed").length },
   ].filter((d) => d.value > 0);
 
   const investmentData = ideas.map((idea) => ({
@@ -183,119 +220,160 @@ const FounderDashboard = () => {
     received: idea.investment_received || 0,
   }));
 
-  const pendingRequests = chatRequests.filter((r) => r.status === "pending");
-  const acceptedChats = chatRequests.filter((r) => r.status === "accepted");
+  const pendingRequests = chatRequests.filter((r) => r.status === "pending" || !r.status);
+  const acceptedChats = chatRequests.filter((r) =>
+    ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
+      <div className="fixed inset-0 pointer-events-none opacity-40">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[120px] -mr-64 -mt-64" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -ml-64 -mb-64" />
       </div>
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Rocket className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-bold text-xl">INNOVESTOR</h1>
-              <p className="text-sm text-muted-foreground">Founder Dashboard</p>
+
+      <header className="relative z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 sticky top-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 rounded-full w-12 h-12">
+                  <User className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[400px] sm:w-[540px] p-0 border-r-0 shadow-2xl">
+                <div className="h-full flex flex-col bg-white">
+                  <div className="bg-[#1e293b] p-8 text-white">
+                    <Avatar className="w-20 h-20 border-4 border-white/20 mb-4">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.name}`} />
+                      <AvatarFallback className="text-2xl font-bold bg-indigo-600">{profile?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <h2 className="text-2xl font-bold mb-1">{profile?.name}</h2>
+                    <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest">{profile?.user_type}</p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-8">
+                    <div className="space-y-8">
+                      <section>
+                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Professional Details</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                            <Briefcase className="w-5 h-5 text-indigo-600 mt-0.5" />
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">Experience</p>
+                              <p className="text-sm font-semibold text-slate-700">{profile?.experience || "Not provided"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                            <GraduationCap className="w-5 h-5 text-indigo-600 mt-0.5" />
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">Education</p>
+                              <p className="text-sm font-semibold text-slate-700">{profile?.education || "Not provided"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Venture Portfolio</h3>
+                          <Badge variant="outline" className="rounded-full">{ideas.length} Ideas</Badge>
+                        </div>
+                        <div className="space-y-3">
+                          {ideas.map((idea) => (
+                            <div key={idea.id} className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 transition-all group">
+                              <div className="flex justify-between items-start mb-2">
+                                <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{idea.title}</p>
+                                {getStatusBadge(idea.status)}
+                              </div>
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="text-slate-400 font-bold uppercase">{idea.domain}</span>
+                                <span className="text-slate-900 font-bold">${idea.investment_received.toLocaleString()} / ${idea.investment_needed.toLocaleString()}</span>
+                              </div>
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div
+                                  className="h-full bg-indigo-600"
+                                  style={{ width: `${Math.min((idea.investment_received / idea.investment_needed) * 100, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <div className="flex flex-col">
+              <h1 className="font-black text-2xl tracking-tighter text-slate-900 leading-none">INNOVESTOR</h1>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 mt-1">Founder OS</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">Welcome, {profile?.name}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+            <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Ideas</p>
-                  <p className="text-3xl font-bold">{totalIdeas}</p>
+      <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: "Total Ventures", value: totalIdeas, icon: Lightbulb, color: "text-slate-900" },
+            { label: "Capital Secured", value: `$${totalInvestmentReceived.toLocaleString()}`, icon: TrendingUp, color: "text-indigo-600" },
+            { label: "Funding Gap", value: `$${fundingGap.toLocaleString()}`, icon: DollarSign, color: "text-slate-500" },
+            { label: "Active Interests", value: pendingRequests.length, icon: MessageSquare, color: "text-indigo-600" },
+          ].map((stat, i) => (
+            <Card key={i} className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300 group rounded-2xl overflow-hidden">
+              <div className="h-1 w-full bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-2.5 rounded-xl bg-slate-50 ${stat.color} group-hover:scale-110 transition-transform`}>
+                    <stat.icon className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Lightbulb className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Investment Received</p>
-                  <p className="text-3xl font-bold">${totalInvestmentReceived.toLocaleString()}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-accent" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Funding Gap</p>
-                  <p className="text-3xl font-bold">${fundingGap.toLocaleString()}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-destructive" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Chat Requests</p>
-                  <p className="text-3xl font-bold">{pendingRequests.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                <p className="text-2xl font-black text-slate-900">{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Charts */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card className="glass border-0">
+        <div className="grid lg:grid-cols-3 gap-8 mb-10">
+          <Card className="lg:col-span-2 bg-white border-0 shadow-sm rounded-2xl">
             <CardHeader>
-              <CardTitle>Ideas by Status</CardTitle>
+              <CardTitle className="text-lg font-bold">Portfolio Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {investmentData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={investmentData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <Tooltip />
+                    <Bar dataKey="needed" fill="#f1f5f9" radius={[4, 4, 0, 0]} name="Investment Needed" />
+                    <Bar dataKey="received" fill="#4338ca" radius={[4, 4, 0, 0]} name="Capital Secured" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-slate-300">No data available</div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-0 shadow-sm rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold">Venture Status</CardTitle>
             </CardHeader>
             <CardContent>
               {statusData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
+                    <Pie data={statusData} innerRadius={80} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
                       {statusData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
@@ -304,233 +382,149 @@ const FounderDashboard = () => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  No ideas yet
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardHeader>
-              <CardTitle>Investment Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {investmentData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={investmentData}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Bar dataKey="needed" fill="hsl(250, 84%, 54%)" name="Needed" />
-                    <Bar dataKey="received" fill="hsl(172, 66%, 50%)" name="Received" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  No ideas yet
-                </div>
+                <div className="h-[300px] flex items-center justify-center text-slate-300">Waiting for data</div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Chat Requests */}
-        {pendingRequests.length > 0 && (
-          <Card className="glass border-0 mb-8">
-            <CardHeader>
-              <CardTitle>Pending Chat Requests</CardTitle>
-              <CardDescription>Investors want to connect with you</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {pendingRequests.map((request) => (
-                  <div key={request.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">Your Ventures</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200">
+                    <Plus className="w-4 h-4 mr-2" /> Launch New Idea
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Launch Idea</DialogTitle>
+                    <DialogDescription>Fuel your next big thing</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-1.5">
+                      <Label>Title</Label>
+                      <Input value={newIdea.title} onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Domain</Label>
+                        <Input value={newIdea.domain} onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label>Goal ($)</Label>
+                        <Input type="number" value={newIdea.investment_needed} onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })} />
+                      </div>
+                    </div>
                     <div>
-                      <p className="font-medium">{request.investor?.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Interested in: {request.idea?.title}
-                      </p>
+                      <Label>Description</Label>
+                      <Textarea value={newIdea.description} onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })} rows={4} />
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleChatRequestAction(request.id, "accepted")}
-                      >
-                        <Check className="w-4 h-4 mr-1" />
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleChatRequestAction(request.id, "rejected")}
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Decline
-                      </Button>
-                    </div>
+                    <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
+                      {isAddingIdea ? "Processing..." : "Submit"}
+                    </Button>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </DialogContent>
+              </Dialog>
+            </div>
 
-        {/* Active Chats */}
-        {acceptedChats.length > 0 && (
-          <Card className="glass border-0 mb-8">
-            <CardHeader>
-              <CardTitle>Active Conversations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {acceptedChats.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
-                    onClick={() => setSelectedChat(chat)}
-                  >
-                    <div>
-                      <p className="font-medium">{chat.investor?.name}</p>
-                      <p className="text-sm text-muted-foreground">{chat.idea?.title}</p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {ideas.map((idea) => (
+                <Card key={idea.id} className="bg-white border-0 shadow-sm hover:shadow-lg transition-all group overflow-hidden rounded-2xl">
+                  <div className="h-1 bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        {idea.title} {idea.status === "deal_done" && "🤝"}
+                      </CardTitle>
+                      {getStatusBadge(idea.status)}
                     </div>
-                    <MessageSquare className="w-5 h-5 text-primary" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">{idea.domain}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500 mb-6 line-clamp-2">{idea.description}</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-[11px] font-bold">
+                        <span className="text-slate-400 uppercase tracking-tighter">Target</span>
+                        <span className="text-slate-900">${idea.investment_needed.toLocaleString()}</span>
+                      </div>
+                      <div className="w-full bg-slate-50 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-indigo-600 h-full"
+                          style={{ width: `${Math.min(((idea.investment_received || 0) / idea.investment_needed) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
 
-        {/* Ideas Section */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Your Ideas</h2>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Idea
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Submit New Idea</DialogTitle>
-                <DialogDescription>Share your innovative idea with investors</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={newIdea.title}
-                    onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })}
-                    placeholder="Your idea title"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newIdea.description}
-                    onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })}
-                    placeholder="Describe your idea in detail"
-                    rows={4}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="domain">Domain</Label>
-                  <Input
-                    id="domain"
-                    value={newIdea.domain}
-                    onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })}
-                    placeholder="e.g., FinTech, HealthTech"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="investment">Investment Needed ($)</Label>
-                  <Input
-                    id="investment"
-                    type="number"
-                    value={newIdea.investment_needed}
-                    onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })}
-                    placeholder="100000"
-                  />
-                </div>
-                <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
-                  {isAddingIdea ? "Submitting..." : "Submit Idea"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ideas.map((idea) => (
-            <Card key={idea.id} className="glass border-0">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{idea.title}</CardTitle>
-                  <Badge
-                    variant={
-                      idea.status === "funded"
-                        ? "default"
-                        : idea.status === "in_progress"
-                          ? "secondary"
-                          : "outline"
-                    }
-                  >
-                    {idea.status}
-                  </Badge>
-                </div>
-                <CardDescription>{idea.domain}</CardDescription>
+          <div className="space-y-8">
+            <Card className="bg-white border-0 shadow-sm rounded-2xl overflow-hidden">
+              <CardHeader className="bg-slate-50/50 pb-4">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-indigo-600" /> Connections
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                  {idea.description}
-                </p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Investment Needed</span>
-                    <span className="font-medium">${idea.investment_needed.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Received</span>
-                    <span className="font-medium text-accent">
-                      ${(idea.investment_received || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-2">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(
-                          ((idea.investment_received || 0) / idea.investment_needed) * 100,
-                          100
-                        )}%`,
-                      }}
-                    />
-                  </div>
+              <CardContent className="p-0">
+                <div className="divide-y divide-slate-50">
+                  {acceptedChats.length > 0 ? (
+                    acceptedChats.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="flex items-center gap-3 p-4 hover:bg-slate-50 cursor-pointer transition-all group"
+                        onClick={() => setSelectedChat(chat)}
+                      >
+                        <Avatar className="w-10 h-10 shadow-sm">
+                          <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold">
+                            {chat.investor?.name?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-900 text-sm truncate">{chat.investor?.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{chat.idea?.title}</p>
+                        </div>
+                        <MessageSquare className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-slate-300">No active connections</div>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          ))}
 
-          {ideas.length === 0 && (
-            <Card className="glass border-0 md:col-span-2 lg:col-span-3">
-              <CardContent className="p-12 text-center">
-                <Lightbulb className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No ideas yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start by adding your first innovative idea
-                </p>
-              </CardContent>
-            </Card>
-          )}
+            {pendingRequests.length > 0 && (
+              <Card className="bg-indigo-600 border-0 shadow-xl rounded-2xl overflow-hidden text-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <Rocket className="w-4 h-4" /> New Interests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 p-4">
+                  {pendingRequests.map((request) => (
+                    <div key={request.id} className="p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10">
+                      <div className="mb-3">
+                        <p className="font-bold text-sm">{request.investor?.name}</p>
+                        <p className="text-[10px] font-bold uppercase text-white/50">{request.idea?.title}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleChatRequestAction(request.id, "accepted")} className="flex-1 bg-white text-indigo-600 hover:bg-indigo-50">Accept</Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleChatRequestAction(request.id, "rejected")} className="flex-1 text-white hover:bg-white/10">Pass</Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </main>
 
-      {/* Chat Dialog */}
       {selectedChat && profile && (
         <ChatBox
           chatRequest={selectedChat}

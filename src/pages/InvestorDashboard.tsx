@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, LogOut, MessageSquare, Search, DollarSign, Lightbulb, Filter } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 
 interface Profile {
   id: string;
   name: string;
   user_type: string;
-  interested_domains: string[] | null;
 }
 
 interface Idea {
@@ -27,7 +27,7 @@ interface Idea {
   status: string;
   created_at: string;
   founder_id: string;
-  founder?: { id: string; name: string };
+  founder?: { name: string };
 }
 
 interface ChatRequest {
@@ -37,7 +37,7 @@ interface ChatRequest {
   founder_id: string;
   status: string;
   founder?: Profile;
-  idea?: { title: string };
+  idea?: { title: string; investment_needed: number };
 }
 
 const InvestorDashboard = () => {
@@ -48,12 +48,30 @@ const InvestorDashboard = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [domainFilter, setDomainFilter] = useState("all");
   const [selectedChat, setSelectedChat] = useState<ChatRequest | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState("all");
 
   useEffect(() => {
     fetchData();
+
+    const channel = supabase
+      .channel('investor-dashboard-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'chat_requests' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ideas' },
+        () => fetchData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -63,7 +81,6 @@ const InvestorDashboard = () => {
       return;
     }
 
-    // Fetch profile
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -82,24 +99,22 @@ const InvestorDashboard = () => {
 
     setProfile(profileData);
 
-    // Fetch all ideas with founder info
     const { data: ideasData } = await supabase
       .from("ideas")
       .select(`
         *,
-        founder:founder_id(id, name)
+        founder:profiles!ideas_founder_id_fkey(name)
       `)
       .order("created_at", { ascending: false });
 
     setIdeas(ideasData || []);
 
-    // Fetch chat requests
     const { data: requestsData } = await supabase
       .from("chat_requests")
       .select(`
         *,
         founder:profiles!chat_requests_founder_id_fkey(id, name, user_type),
-        idea:ideas!chat_requests_idea_id_fkey(title)
+        idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .eq("investor_id", profileData.id);
 
@@ -115,10 +130,10 @@ const InvestorDashboard = () => {
   const handleReachOut = async (idea: Idea) => {
     if (!profile) return;
 
-    // Check if request already exists
     const existingRequest = chatRequests.find((r) => r.idea_id === idea.id);
     if (existingRequest) {
-      if (existingRequest.status === "accepted") {
+      const activeStatuses = ["accepted", "communicating", "deal_pending_investor", "deal_done"];
+      if (activeStatuses.includes(existingRequest.status)) {
         setSelectedChat(existingRequest);
       } else {
         toast({
@@ -135,11 +150,12 @@ const InvestorDashboard = () => {
         idea_id: idea.id,
         investor_id: profile.id,
         founder_id: idea.founder_id,
+        status: "pending",
       })
       .select(`
         *,
         founder:profiles!chat_requests_founder_id_fkey(id, name, user_type),
-        idea:ideas!chat_requests_idea_id_fkey(title)
+        idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .single();
 
@@ -156,38 +172,27 @@ const InvestorDashboard = () => {
     return request?.status;
   };
 
+  const filteredIdeas = ideas.filter((idea) => {
+    const matchesSearch = idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idea.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idea.domain.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDomain = selectedDomain === "all" || idea.domain.toLowerCase() === selectedDomain.toLowerCase();
+    return matchesSearch && matchesDomain;
+  });
+
+  const domains = ["all", ...new Set(ideas.map((i) => i.domain.toLowerCase()))];
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // Get unique domains for filter
-  const domains = [...new Set(ideas.map((idea) => idea.domain))];
-
-  // Filter ideas
-  const filteredIdeas = ideas.filter((idea) => {
-    const matchesSearch =
-      idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      idea.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDomain = domainFilter === "all" || idea.domain === domainFilter;
-    return matchesSearch && matchesDomain;
-  });
-
-  const acceptedChats = chatRequests.filter((r) => r.status === "accepted");
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
-      </div>
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
@@ -199,8 +204,8 @@ const InvestorDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">Welcome, {profile?.name}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
+            <span className="text-sm text-muted-foreground font-medium">Welcome, {profile?.name}</span>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
@@ -209,207 +214,102 @@ const InvestorDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Available Ideas</p>
-                  <p className="text-3xl font-bold">{ideas.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Lightbulb className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Active Chats</p>
-                  <p className="text-3xl font-bold">{acceptedChats.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-accent" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Investment Capacity</p>
-                  <p className="text-3xl font-bold">
-                    ${profile?.interested_domains ? "Active" : "Set up"}
-                  </p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Active Chats */}
-        {acceptedChats.length > 0 && (
-          <Card className="glass border-0 mb-8">
-            <CardHeader>
-              <CardTitle>Active Conversations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {acceptedChats.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors min-w-[200px]"
-                    onClick={() => setSelectedChat(chat)}
-                  >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-primary font-medium">
-                        {chat.founder?.name?.charAt(0) || "F"}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium">{chat.founder?.name}</p>
-                      <p className="text-xs text-muted-foreground">{chat.idea?.title}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search ideas..."
+              placeholder="Search ideas, domains, or descriptions..."
+              className="pl-10 bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
-          <Select value={domainFilter} onValueChange={setDomainFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="Filter by domain" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Domains</SelectItem>
+          <div className="flex gap-2">
+            <Filter className="w-4 h-4 mt-3 text-muted-foreground" />
+            <select
+              className="bg-white border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              value={selectedDomain}
+              onChange={(e) => setSelectedDomain(e.target.value)}
+            >
               {domains.map((domain) => (
-                <SelectItem key={domain} value={domain}>
-                  {domain}
-                </SelectItem>
+                <option key={domain} value={domain}>
+                  {domain.charAt(0).toUpperCase() + domain.slice(1)}
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+            </select>
+          </div>
         </div>
 
-        {/* Ideas Grid */}
-        <h2 className="text-2xl font-bold mb-6">Discover Ideas</h2>
-        <div className="space-y-4">
-          {filteredIdeas.map((idea) => {
-            const requestStatus = getRequestStatus(idea.id);
-            return (
-              <Card key={idea.id} className="glass border-0 hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold">{idea.title}</h3>
-                        <Badge variant="secondary">{idea.domain}</Badge>
-                        <Badge
-                          variant={
-                            idea.status === "funded"
-                              ? "default"
-                              : idea.status === "in_progress"
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {idea.status}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground mb-4">{idea.description}</p>
-                      <div className="flex flex-wrap gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">By: </span>
-                          <span className="font-medium">{idea.founder?.name}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Investment Needed: </span>
-                          <span className="font-medium text-primary">
-                            ${idea.investment_needed.toLocaleString()}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Progress: </span>
-                          <span className="font-medium text-accent">
-                            {Math.round(
-                              ((idea.investment_received || 0) / idea.investment_needed) * 100
-                            )}
-                            %
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {requestStatus === "accepted" ? (
-                        <Button
-                          onClick={() => {
-                            const chat = chatRequests.find((r) => r.idea_id === idea.id);
-                            if (chat) setSelectedChat(chat);
-                          }}
-                        >
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Open Chat
-                        </Button>
-                      ) : requestStatus === "pending" ? (
-                        <Button variant="secondary" disabled>
-                          Request Pending
-                        </Button>
-                      ) : requestStatus === "rejected" ? (
-                        <Button variant="outline" disabled>
-                          Request Declined
-                        </Button>
-                      ) : (
-                        <Button onClick={() => handleReachOut(idea)}>
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Reach Out
-                        </Button>
-                      )}
-                    </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredIdeas.map((idea) => (
+            <Card key={idea.id} className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg mb-1">{idea.title}</CardTitle>
+                    <CardDescription className="flex items-center gap-1 font-medium text-primary">
+                      {idea.domain}
+                    </CardDescription>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-
-          {filteredIdeas.length === 0 && (
-            <Card className="glass border-0">
-              <CardContent className="p-12 text-center">
-                <Lightbulb className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No ideas found</h3>
-                <p className="text-muted-foreground">
-                  {searchQuery || domainFilter !== "all"
-                    ? "Try adjusting your search or filters"
-                    : "Check back later for new investment opportunities"}
+                  <Badge variant="outline" className="bg-slate-50">
+                    By {idea.founder?.name}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <p className="text-sm text-muted-foreground mb-6 line-clamp-3 leading-relaxed">
+                  {idea.description}
                 </p>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Investment Needed</span>
+                    <span className="font-bold text-slate-900">${idea.investment_needed.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Secured</span>
+                    <span className="font-bold text-accent">${(idea.investment_received || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-primary h-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(((idea.investment_received || 0) / idea.investment_needed) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </CardContent>
+              <div className="p-6 pt-0 mt-auto">
+                <Button
+                  className="w-full font-bold"
+                  onClick={() => handleReachOut(idea)}
+                  variant={getRequestStatus(idea.id) ? "outline" : "default"}
+                >
+                  {getRequestStatus(idea.id) === "accepted" || getRequestStatus(idea.id) === "communicating" || getRequestStatus(idea.id) === "deal_pending_investor" || getRequestStatus(idea.id) === "deal_done" ? (
+                    <>
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Open Chat
+                    </>
+                  ) : getRequestStatus(idea.id) === "pending" ? (
+                    "Request Pending"
+                  ) : (
+                    "Reach Out"
+                  )}
+                </Button>
+              </div>
             </Card>
-          )}
+          ))}
         </div>
+
+        {filteredIdeas.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+            <Lightbulb className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900">No ideas found</h3>
+            <p className="text-slate-500">Try adjusting your search or filters</p>
+          </div>
+        )}
       </main>
 
-      {/* Chat Dialog */}
       {selectedChat && profile && (
         <ChatBox
           chatRequest={selectedChat}
