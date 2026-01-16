@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Handshake, CheckCircle2, DollarSign, Badge } from "lucide-react";
+import { Send, Handshake, CheckCircle2, DollarSign, Badge, Paperclip, Image as ImageIcon, FileText, Download, File as FileIcon } from "lucide-react";
 
 interface Message {
   id: string;
@@ -27,7 +27,9 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [requestStatus, setRequestStatus] = useState(chatRequest.status);
   const [fundingAmount, setFundingAmount] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const isFounder = currentUserId === chatRequest.founder_id;
@@ -99,6 +101,122 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
       setNewMessage("");
     }
     setIsLoading(false);
+  };
+
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (requestStatus !== "deal_done") {
+      toast({
+        title: "Access Denied",
+        description: "Document sharing is only available after a deal is established.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({ title: "File too large", description: "Maximum file size is 10MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `${chatRequest.id}/${fileName}`;
+
+      console.log("Attempting upload to bucket: 'chat_attachments' at path:", filePath);
+      const { error: uploadError, data } = await supabase.storage
+        .from("chat_attachments")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Supabase Storage Error:", uploadError);
+        throw new Error(uploadError.message || "Failed to upload file to 'chat_attachments' bucket.");
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("chat_attachments")
+        .getPublicUrl(filePath);
+
+      const attachmentData = {
+        type: "attachment",
+        fileUrl: publicUrl,
+        fileName: file.name,
+        fileType: file.type,
+      };
+
+      const { error: msgError } = await supabase
+        .from("messages")
+        .insert({
+          chat_request_id: chatRequest.id,
+          sender_id: currentUserId,
+          content: JSON.stringify(attachmentData),
+        });
+
+      if (msgError) throw msgError;
+
+      toast({ title: "File shared", description: "Your document has been sent successfully." });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const renderMessageContent = (content: string) => {
+    try {
+      if (content.startsWith('{"type":"attachment"')) {
+        const data = JSON.parse(content);
+        const isImage = data.fileType.startsWith("image/");
+
+        if (isImage) {
+          return (
+            <div className="space-y-2">
+              <img
+                src={data.fileUrl}
+                alt={data.fileName}
+                className="max-w-full rounded-lg border border-slate-100 shadow-sm"
+              />
+              <p className="text-[10px] font-medium opacity-70 flex items-center gap-1">
+                <ImageIcon className="w-3 h-3" /> {data.fileName}
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center gap-3 p-2 bg-slate-50/50 rounded-lg border border-slate-100">
+            <div className="bg-indigo-100 p-2 rounded-lg">
+              {data.fileType.includes("pdf") ? <FileText className="w-5 h-5 text-indigo-600" /> : <FileIcon className="w-5 h-5 text-indigo-600" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-900 truncate">{data.fileName}</p>
+              <p className="text-[10px] text-slate-500 uppercase font-black">{data.fileType.split("/")[1]}</p>
+            </div>
+            <a
+              href={data.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+            >
+              <Download className="w-4 h-4 text-slate-600" />
+            </a>
+          </div>
+        );
+      }
+    } catch (e) {
+      // Not a JSON message or parse failed, fall back to text
+    }
+    return <p>{content}</p>;
   };
 
   const handleDealDone = async () => {
@@ -196,8 +314,8 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
                 onClick={handleDealDone}
                 size="sm"
                 className={`h-8 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isFounder
-                    ? (requestStatus === "deal_pending_investor" ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-slate-100 text-slate-400 cursor-not-allowed")
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  ? (requestStatus === "deal_pending_investor" ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-slate-100 text-slate-400 cursor-not-allowed")
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
                   }`}
               >
                 {isFounder
@@ -217,11 +335,11 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
               >
                 <div
                   className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${message.sender_id === currentUserId
-                      ? "bg-indigo-600 text-white rounded-tr-none"
-                      : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
+                    ? "bg-indigo-600 text-white rounded-tr-none"
+                    : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
                     }`}
                 >
-                  {message.content}
+                  {renderMessageContent(message.content)}
                   <p className={`text-[9px] mt-1 opacity-60 ${message.sender_id === currentUserId ? "text-right" : "text-left"}`}>
                     {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -252,6 +370,29 @@ const ChatBox = ({ chatRequest, currentUserId, onClose }: ChatBoxProps) => {
           )}
 
           <form onSubmit={handleSendMessage} className="flex gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.gif"
+            />
+            {requestStatus === "deal_done" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleFileClick}
+                disabled={isUploading}
+                className="h-11 w-11 rounded-xl border-slate-100 hover:bg-slate-50 shrink-0"
+              >
+                {isUploading ? (
+                  <div className="w-4 h-4 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                ) : (
+                  <Paperclip className="w-5 h-5 text-slate-500" />
+                )}
+              </Button>
+            )}
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}

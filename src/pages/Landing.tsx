@@ -142,24 +142,26 @@ const Landing = () => {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
-            <Rocket className="w-6 h-6 text-primary-foreground" />
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between p-6">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
+              <Rocket className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-slate-900">INNOVESTOR</span>
           </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">INNOVESTOR</span>
-        </div>
-        <div className="flex gap-3">
-          <Link to="/auth?mode=login">
-            <Button variant="ghost" size="lg" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
-              Login
-            </Button>
-          </Link>
-          <Link to="/auth?mode=register">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-              Create Account
-            </Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/auth?mode=login">
+              <Button variant="ghost" size="lg" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
+                Login
+              </Button>
+            </Link>
+            <Link to="/auth?mode=register">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+                Create Account
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,16 @@ const FounderDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingIdea, setIsAddingIdea] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatRequest | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      setIsDialogOpen(true);
+      // Clean up the URL
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
 
   const [newIdea, setNewIdea] = useState({
     title: "",
@@ -226,13 +236,13 @@ const FounderDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 font-sans relative">
       <div className="fixed inset-0 pointer-events-none opacity-40">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[120px] -mr-64 -mt-64" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -ml-64 -mb-64" />
       </div>
 
-      <header className="relative z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 sticky top-0">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Sheet>
@@ -327,7 +337,7 @@ const FounderDashboard = () => {
             { label: "Funding Gap", value: `$${fundingGap.toLocaleString()}`, icon: DollarSign, color: "text-slate-500" },
             { label: "Active Interests", value: pendingRequests.length, icon: MessageSquare, color: "text-indigo-600" },
           ].map((stat, i) => (
-            <Card key={i} className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300 group rounded-2xl overflow-hidden">
+            <Card key={i} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group rounded-2xl overflow-hidden">
               <div className="h-1 w-full bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -343,7 +353,7 @@ const FounderDashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
-          <Card className="lg:col-span-2 bg-white border-0 shadow-sm rounded-2xl">
+          <Card className="lg:col-span-2 bg-white border-0 shadow-lg rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg font-bold">Portfolio Performance</CardTitle>
             </CardHeader>
@@ -365,7 +375,7 @@ const FounderDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-0 shadow-sm rounded-2xl">
+          <Card className="bg-white border-0 shadow-lg rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg font-bold">Venture Status</CardTitle>
             </CardHeader>
@@ -392,12 +402,13 @@ const FounderDashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">Your Ventures</h2>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200">
-                    <Plus className="w-4 h-4 mr-2" /> Launch New Idea
-                  </Button>
-                </DialogTrigger>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Button
+                  onClick={() => navigate("/payment")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Launch New Idea
+                </Button>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Launch Idea</DialogTitle>
@@ -432,7 +443,7 @@ const FounderDashboard = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               {ideas.map((idea) => (
-                <Card key={idea.id} className="bg-white border-0 shadow-sm hover:shadow-lg transition-all group overflow-hidden rounded-2xl">
+                <Card key={idea.id} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl">
                   <div className="h-1 bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
@@ -464,7 +475,7 @@ const FounderDashboard = () => {
           </div>
 
           <div className="space-y-8">
-            <Card className="bg-white border-0 shadow-sm rounded-2xl overflow-hidden">
+            <Card className="bg-white border-0 shadow-lg rounded-2xl overflow-hidden">
               <CardHeader className="bg-slate-50/50 pb-4">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-indigo-600" /> Connections
