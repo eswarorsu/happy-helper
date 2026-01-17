@@ -1,6 +1,6 @@
-# Happy Helper
+# INNOVESTOR
 
-Happy Helper is your personal project assistant.
+INNOVESTOR - Connecting Innovators with Investors.
 
 ## Technologies Used
 
