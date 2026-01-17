@@ -365,7 +365,7 @@ const FounderDashboard = () => {
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
                     <Tooltip />
-                    <Bar dataKey="needed" fill="#f1f5f9" radius={[4, 4, 0, 0]} name="Investment Needed" />
+                    <Bar dataKey="needed" fill="#e5eaf0" radius={[4, 4, 0, 0]} name="Investment Needed" />
                     <Bar dataKey="received" fill="#4338ca" radius={[4, 4, 0, 0]} name="Capital Secured" />
                   </BarChart>
                 </ResponsiveContainer>
