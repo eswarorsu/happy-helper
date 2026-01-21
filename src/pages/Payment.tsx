@@ -59,7 +59,7 @@ const Payment = () => {
 
     try {
         // 1️⃣ Create order from backend
-        const res = await fetch("http://localhost:5050/api/payment/create-order", {
+        const res = await fetch("https://happy-helper.onrender.com", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -83,7 +83,7 @@ const Payment = () => {
                 console.log("PAYMENT RESPONSE:", response);
 
                 // 3️⃣ Verify payment with backend
-                const verifyRes = await fetch("http://localhost:5050/api/payment/verify", {
+                const verifyRes = await fetch("https://happy-helper.onrender.com", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
