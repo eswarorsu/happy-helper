@@ -367,7 +367,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     backgroundRepeat: "no-repeat",
   }}
 >
-  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none" />
+<div className="absolute inset-0 bg-white/70 backdrop-blur-sm pointer-events-none" />
 
   <div className="relative z-10 space-y-3">
     {messages.map((message) => (
