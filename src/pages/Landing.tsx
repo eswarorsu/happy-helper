@@ -148,7 +148,7 @@ const Landing = () => {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
               <Rocket className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">UNHALTGROWTH</span>
+            <span className="text-2xl font-bold tracking-tight text-slate-900">INNOVESTOR</span>
           </div>
           <div className="flex gap-3">
             <Link to="/auth?mode=login">
@@ -172,7 +172,7 @@ const Landing = () => {
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight text-slate-900">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">UNHALTGROWTH</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">INNOVESTOR</span>
         </h1>
 
         <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mb-12 leading-relaxed">
@@ -300,7 +300,7 @@ const Landing = () => {
               role="Founder, EcoTech Solutions"
               direction="left"
               delay={0}
-              content="Building a startup is an exhilarating yet daunting journey, especially when it comes to securing the right capital. UNHALTGROWTH completely transformed how we approached fundraising. Before joining, we spent months cold-emailing with little success. With Innovestor, we instantly gained access to a curated network of investors who genuinely understood our vision. The platform's intuitive design and direct connection features allowed us to bypass the usual barriers and pitch directly to decision-makers. Within just three weeks, we secured our seed round from a lead investor we met right here. It’s not just a platform; it’s a catalyst for innovation."
+              content="Building a startup is an exhilarating yet daunting journey, especially when it comes to securing the right capital. INNOVESTOR completely transformed how we approached fundraising. Before joining, we spent months cold-emailing with little success. With Innovestor, we instantly gained access to a curated network of investors who genuinely understood our vision. The platform's intuitive design and direct connection features allowed us to bypass the usual barriers and pitch directly to decision-makers. Within just three weeks, we secured our seed round from a lead investor we met right here. It’s not just a platform; it’s a catalyst for innovation."
             />
 
             <ReviewCard
@@ -316,7 +316,7 @@ const Landing = () => {
               role="Partner, Horizon VC"
               direction="right"
               delay={200}
-              content="I've been in venture capital for over 15 years, and I’ve seen countless platforms promise to democratize investment, but UNHALTGROWTH  actually delivers. The interface is remarkably 'classy' and professional, which reflects the caliber of founders on the site. What I appreciate most is the friction-free communication. Being able to chat directly with founders within a secure environment expedites the relationship-building process, which is fundamental to early-stage investing. The visuals, the data presentation, and the overall user experience are top-tier. It feels like a private club that’s open to anyone serious about the future of technology. Highly recommended for serious investors."
+              content="I've been in venture capital for over 15 years, and I’ve seen countless platforms promise to democratize investment, but INNOVESTOR  actually delivers. The interface is remarkably 'classy' and professional, which reflects the caliber of founders on the site. What I appreciate most is the friction-free communication. Being able to chat directly with founders within a secure environment expedites the relationship-building process, which is fundamental to early-stage investing. The visuals, the data presentation, and the overall user experience are top-tier. It feels like a private club that’s open to anyone serious about the future of technology. Highly recommended for serious investors."
             />
 
             <ReviewCard
@@ -324,7 +324,7 @@ const Landing = () => {
               role="Strategic Investor"
               direction="right"
               delay={200}
-              content="UNHALTGROWTH  stands out in the crowded fintech space by prioritizing clarity and connection. The design is not only beautiful but functional—allowing me to assess a startup's potential at a glance before diving deep. I was looking to diversify my portfolio into sustainable tech, and the search capabilities here made it effortless to find aligned founders. The 'Direct Connection' feature is brilliant; it removes the awkwardness of initial intros. I recently partnered with a green-energy firm I found here, and the process from discovery to term sheet was smoother than any traditional deal I’ve done. This is the future of deal-making."
+              content="INNOVESTOR  stands out in the crowded fintech space by prioritizing clarity and connection. The design is not only beautiful but functional—allowing me to assess a startup's potential at a glance before diving deep. I was looking to diversify my portfolio into sustainable tech, and the search capabilities here made it effortless to find aligned founders. The 'Direct Connection' feature is brilliant; it removes the awkwardness of initial intros. I recently partnered with a green-energy firm I found here, and the process from discovery to term sheet was smoother than any traditional deal I’ve done. This is the future of deal-making."
             />
           </div>
         </div>
@@ -333,7 +333,7 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 text-slate-500 text-sm">
-        © 2026 UNHALTGROWTH . All rights reserved.
+        © 2026 INNOVESTOR . All rights reserved.
       </footer>
     </div>
   );
