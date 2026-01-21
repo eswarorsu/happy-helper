@@ -358,7 +358,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
        <ScrollArea
   className="flex-1 p-4 relative"
   style={{
-    backgroundImage: "url('WhatsApp Image 2026-01-21 at 11.45.40 PM.png')",
+    backgroundImage: "url(WhatsApp Image 2026-01-21 at 11.45.40 PM.jpeg)",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
