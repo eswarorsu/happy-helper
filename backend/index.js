@@ -15,12 +15,14 @@ app.use(express.json());
 app.use("/api/payment", paymentRoutes);
 
 // 🔴 FORCE visibility of listen behavior
-const server = app.listen(5050, () => {
-  console.log("✅ Server is listening on http://localhost:5050");
+const PORT = process.env.PORT || 5050;
+const server = app.listen(port, () => {
+  console.log('✅ Server running on port ${port}');
 });
 
 // 🔴 CATCH SILENT FAILURES
 server.on("error", (err) => {
   console.error("❌ SERVER ERROR:", err);
 });
+
 
