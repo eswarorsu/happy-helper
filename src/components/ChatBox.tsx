@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import chatBg from "@/components/chat-bg.png"; 
+import chatBg from "./chat-bg.png"; 
 // or correct relative path like "../assets/chat-bg.png"
 
 import { Send, Handshake, CheckCircle2, DollarSign, Badge, Paperclip, Image as ImageIcon, FileText, Download, File as FileIcon } from "lucide-react";
