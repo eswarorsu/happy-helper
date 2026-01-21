@@ -355,7 +355,16 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 p-4 bg-slate-50/30">
+       <ScrollArea
+  className="flex-1 p-4 relative"
+  style={{
+    backgroundImage: "url('WhatsApp Image 2026-01-21 at 11.45.40 PM.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
+
           <div className="space-y-4">
             {messages.map((message) => (
               <div
