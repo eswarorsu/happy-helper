@@ -52,83 +52,86 @@ const Payment = () => {
         }, 1500);
     };
 
-   const handlePayment = async () => {
-    if (!isVerified) return;
+ const handlePayment = async () => {
+  if (!isVerified) return;
 
-    setIsProcessing(true);
+  setIsProcessing(true);
 
-    try {
-        // 1️⃣ Create order from backend
-        const res = await fetch("https://happy-helper.onrender.com", {
+  try {
+    // 1️⃣ Create order
+    const res = await fetch(
+      "https://happy-helper.onrender.com/api/payment/create-order",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: 499 }),
+      }
+    );
+
+    if (!res.ok) throw new Error("Order creation failed");
+
+    const order = await res.json();
+    console.log("ORDER CREATED:", order);
+
+    // 2️⃣ Razorpay checkout
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "INNOVESTOR",
+      description: "Founder Access Plan",
+      order_id: order.id,
+
+      handler: async function (response: any) {
+        console.log("PAYMENT RESPONSE:", response);
+
+        // 3️⃣ Verify payment
+        const verifyRes = await fetch(
+          "https://happy-helper.onrender.com/api/payment/verify",
+          {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ amount: 499}),
-        });
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          }
+        );
 
-        const order = await res.json();
-        console.log("ORDER CREATED:", order);
+        const result = await verifyRes.json();
 
-        // 2️⃣ Razorpay options
-        const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID, // TEST KEY
-            amount: order.amount,
-            currency: order.currency,
-            name: "INNOVESTOR",
-            description: "Founder Access Plan",
-            order_id: order.id,
-
-            handler: async function (response: any) {
-                console.log("PAYMENT RESPONSE:", response);
-
-                // 3️⃣ Verify payment with backend
-                const verifyRes = await fetch("https://happy-helper.onrender.com", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(response),
-                });
-
-                const result = await verifyRes.json();
-
-                if (result.success) {
-                    toast({
-                        title: "Payment Successful 🎉",
-                        description: "Redirecting to dashboard...",
-                    });
-
-                    navigate("/founder-dashboard?payment=success");
-                } else {
-                    toast({
-                        title: "Payment Failed",
-                        description: "Verification failed",
-                        variant: "destructive",
-                    });
-                }
-            },
-
-            theme: {
-                color: "#4f46e5",
-            },
-        };
-
-        // 4️⃣ Open Razorpay popup
-        const razorpay = new (window as any).Razorpay(options);
-        razorpay.open();
-
-        setIsProcessing(false);
-
-    } catch (error) {
-        console.error(error);
-        toast({
-            title: "Payment Error",
-            description: "Something went wrong",
+        if (result.success) {
+          toast({
+            title: "Payment Successful 🎉",
+            description: "Redirecting to dashboard...",
+          });
+          navigate("/founder-dashboard?payment=success");
+        } else {
+          toast({
+            title: "Payment Failed",
+            description: "Verification failed",
             variant: "destructive",
-        });
-        setIsProcessing(false);
-    }
+          });
+        }
+      },
+
+      theme: {
+        color: "#4f46e5",
+      },
+    };
+
+    const razorpay = new (window as any).Razorpay(options);
+    razorpay.open();
+
+  } catch (err) {
+    console.error(err);
+    toast({
+      title: "Payment Error",
+      description: "Unable to start payment",
+      variant: "destructive",
+    });
+  } finally {
+    setIsProcessing(false);
+  }
 };
 
 
