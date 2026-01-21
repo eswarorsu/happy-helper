@@ -357,8 +357,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
             )}
           </div>
         </DialogHeader>
-
-     <ScrollArea
+<ScrollArea
   className="flex-1 p-4 relative"
   style={{
     backgroundImage: `url(${chatBg})`,
@@ -367,33 +366,38 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     backgroundRepeat: "no-repeat",
   }}
 >
-  {/* overlay */}
-  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none" />
 
-  {/* messages */}
   <div className="relative z-10 space-y-4">
+    {messages.map((message) => (
+      <div
+        key={message.id}
+        className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"}`}
+      >
+        <div
+          className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${
+            message.sender_id === currentUserId
+              ? "bg-indigo-600 text-white rounded-tr-none"
+              : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
+          }`}
+        >
+          {renderMessageContent(message.content)}
+          <p className={`text-[9px] mt-1 opacity-60 ${
+            message.sender_id === currentUserId ? "text-right" : "text-left"
+          }`}>
+            {new Date(message.created_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        </div>
+      </div>
+    ))}
+    <div ref={scrollRef} />
+  </div>
+</ScrollArea>
 
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${message.sender_id === currentUserId
-                    ? "bg-indigo-600 text-white rounded-tr-none"
-                    : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
-                    }`}
-                >
-                  {renderMessageContent(message.content)}
-                  <p className={`text-[9px] mt-1 opacity-60 ${message.sender_id === currentUserId ? "text-right" : "text-left"}`}>
-                    {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            <div ref={scrollRef} />
-          </div>
-        </ScrollArea>
+    
 
         <div className="p-4 border-t bg-white space-y-4">
           {requestStatus === "deal_done" && isFounder && (
