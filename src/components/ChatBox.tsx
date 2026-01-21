@@ -319,8 +319,8 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
-        <DialogHeader className="p-4 border-b bg-white flex flex-row items-center justify-between">
+<DialogContent className="sm:max-w-[520px] h-[700px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
+        <DialogHeader className="px-4 py-3 border-b bg-white flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 border-2 border-indigo-100">
               <AvatarFallback className="bg-indigo-50 text-indigo-600 font-bold">
@@ -358,7 +358,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
           </div>
         </DialogHeader>
 <ScrollArea
-  className="flex-1 p-4 relative"
+   className="flex-1 px-4 py-2 relative""
   style={{
     backgroundImage: `url(${chatBg})`,
     backgroundSize: "cover",
@@ -368,7 +368,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
 >
   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none" />
 
-  <div className="relative z-10 space-y-4">
+  <div className="relative z-10 space-y-3">
     {messages.map((message) => (
       <div
         key={message.id}
