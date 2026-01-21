@@ -6,6 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import chatBg from "@/components/chat-bg.png"; 
+// or correct relative path like "../assets/chat-bg.png"
+
 import { Send, Handshake, CheckCircle2, DollarSign, Badge, Paperclip, Image as ImageIcon, FileText, Download, File as FileIcon } from "lucide-react";
 
 interface Message {
@@ -355,15 +358,16 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
           </div>
         </DialogHeader>
 
-       <ScrollArea
+     <ScrollArea
   className="flex-1 p-4 relative"
   style={{
-    backgroundImage: "url('src/chat-bg.png')",
+    backgroundImage: `url(${chatBg})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
   }}
 >
+
 
           <div className="space-y-4">
             {messages.map((message) => (
