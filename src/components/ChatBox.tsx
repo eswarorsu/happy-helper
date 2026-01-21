@@ -367,9 +367,12 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     backgroundRepeat: "no-repeat",
   }}
 >
+  {/* overlay */}
+  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
+  {/* messages */}
+  <div className="relative z-10 space-y-4">
 
-          <div className="space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
