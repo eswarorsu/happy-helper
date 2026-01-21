@@ -5,7 +5,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import paymentRoutes from "./routes/payment.js";
 
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 const app = express();
 
@@ -14,15 +14,17 @@ app.use(express.json());
 
 app.use("/api/payment", paymentRoutes);
 
-// 🔴 FORCE visibility of listen behavior
+// ✅ CORRECT PORT HANDLING FOR RENDER
 const PORT = process.env.PORT || 5050;
-const server = app.listen(port, () => {
-  console.log('✅ Server running on port ${port}');
+
+const server = app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
 
-// 🔴 CATCH SILENT FAILURES
+// 🔴 CATCH SERVER ERRORS
 server.on("error", (err) => {
   console.error("❌ SERVER ERROR:", err);
 });
+
 
 
