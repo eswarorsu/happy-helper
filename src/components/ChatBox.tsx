@@ -319,7 +319,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-<DialogContent className="sm:max-w-[520px] h-[700px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
+<DialogContent className="sm:max-w-[520px] h-[720px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
         <DialogHeader className="px-4 py-3 border-b bg-white flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 border-2 border-indigo-100">
