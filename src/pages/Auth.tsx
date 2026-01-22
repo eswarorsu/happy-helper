@@ -172,15 +172,24 @@ return (
     </div>
 
     {/* AUTH STAGE */}
-    <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+<div className="relative w-full h-full flex items-center justify-center">
 
       {/* LEFT – BULL */}
-      <img
-        src={bullMascot}
-        alt="Bull mascot"
-        style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
-        className="hidden lg:block absolute left-0 bottom-0 h-[85%] max-h-[700px] object-contain pointer-events-none"
-      />
+    <img
+  src={bullMascot}
+  alt="Bull mascot"
+  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  className="
+    hidden lg:block
+    absolute left-6 xl:left-16
+    bottom-0
+    h-[85%]
+    max-h-[720px]
+    object-contain
+    pointer-events-none
+  "
+/>
+
 
       {/* AUTH CARD */}
       <div className="relative z-10 w-full max-w-md">
@@ -268,12 +277,21 @@ return (
       </div>
 
       {/* RIGHT – LION */}
-      <img
-        src={lionMascot}
-        alt="Lion mascot"
-        style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
-        className="hidden lg:block absolute right-0 bottom-0 h-[85%] max-h-[700px] object-contain pointer-events-none"
-      />
+     <img
+  src={lionMascot}
+  alt="Lion mascot"
+  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  className="
+    hidden lg:block
+    absolute right-6 xl:right-16
+    bottom-0
+    h-[85%]
+    max-h-[720px]
+    object-contain
+    pointer-events-none
+  "
+/>
+
     </div>
   </div>
 );
