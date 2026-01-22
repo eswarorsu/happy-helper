@@ -178,6 +178,8 @@ const Landing = () => {
         <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mb-12 leading-relaxed">
           "Bridging the gap between visionary founders and strategic investors.
           Transform your ideas into reality."
+          “We are NOT an investment platform.
+We are a SaaS discovery / networking platform.”
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-20">
