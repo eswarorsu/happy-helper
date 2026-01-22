@@ -276,7 +276,31 @@ return (
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {mode === "login" ? "Sign In" : "Create Account"}
               </Button>
+
             </form>
+                     <div className="mt-6 text-center text-sm text-muted-foreground">
+  {mode === "login" ? (
+    <>
+      Don&apos;t have an account?{" "}
+      <Link
+        to="/auth?mode=register"
+        className="text-primary hover:underline font-medium"
+      >
+        Sign up
+      </Link>
+    </>
+  ) : (
+    <>
+      Already have an account?{" "}
+      <Link
+        to="/auth?mode=login"
+        className="text-primary hover:underline font-medium"
+      >
+        Sign in
+      </Link>
+    </>
+  )}
+</div>
           </CardContent>
         </Card>
       </div>
