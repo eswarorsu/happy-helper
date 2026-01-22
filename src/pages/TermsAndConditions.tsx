@@ -1,4 +1,6 @@
-const TermsAndConditions = () => {
+import React from "react";
+
+const TermsAndConditions: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 text-slate-700">
       <h1 className="text-3xl font-semibold mb-6">Terms & Conditions</h1>
@@ -31,3 +33,4 @@ const TermsAndConditions = () => {
 };
 
 export default TermsAndConditions;
+
