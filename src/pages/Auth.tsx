@@ -193,7 +193,7 @@ return (
         </Link>
 
         <Card className="glass border-0 shadow-xl">
-      <CardHeader className="text-center">
+          <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
                 <Rocket className="w-7 h-7 text-primary-foreground" />
@@ -208,8 +208,12 @@ return (
                 : "Join the INNOVESTOR community"}
             </CardDescription>
           </CardHeader>
+
           <CardContent>
-            <form onSubmit={mode === "login" ? handleLogin : handleRegister} className="space-y-4">
+            <form
+              onSubmit={mode === "login" ? handleLogin : handleRegister}
+              className="space-y-4"
+            >
               {mode === "register" && (
                 <>
                   <div className="space-y-2">
@@ -217,12 +221,9 @@ return (
                     <Input
                       id="name"
                       name="name"
-                      placeholder="John Doe"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={errors.name ? "border-destructive" : ""}
                     />
-                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -230,37 +231,9 @@ return (
                     <Input
                       id="phone"
                       name="phone"
-                      type="tel"
-                      placeholder="+1234567890"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className={errors.phone ? "border-destructive" : ""}
                     />
-                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>I am a</Label>
-                    <RadioGroup
-                      value={formData.userType}
-                      onValueChange={(value: "founder" | "investor") =>
-                        setFormData((prev) => ({ ...prev, userType: value }))
-                      }
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2 flex-1">
-                        <RadioGroupItem value="founder" id="founder" />
-                        <Label htmlFor="founder" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
-                          Founder
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 flex-1">
-                        <RadioGroupItem value="investor" id="investor" />
-                        <Label htmlFor="investor" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
-                          Investor
-                        </Label>
-                      </div>
-                    </RadioGroup>
                   </div>
                 </>
               )}
@@ -270,13 +243,9 @@ return (
                 <Input
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={errors.email ? "border-destructive" : ""}
                 />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
@@ -285,41 +254,20 @@ return (
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={errors.password ? "border-destructive" : ""}
                 />
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {mode === "login" ? "Sign In" : "Create Account"}
               </Button>
             </form>
-
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              {mode === "login" ? (
-                <>
-                  Don't have an account?{" "}
-                  <Link to="/auth?mode=register" className="text-primary hover:underline font-medium">
-                    Sign up
-                  </Link>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <Link to="/auth?mode=login" className="text-primary hover:underline font-medium">
-                    Sign in
-                  </Link>
-                </>
-              )}
-            </div>
           </CardContent>
-    </Card>
-  </div>
+        </Card>
+      </div>
 
- {/* RIGHT – LION */}
+      {/* RIGHT – LION */}
       <img
         src={lionMascot}
         alt="Lion mascot"
@@ -330,8 +278,6 @@ return (
   </div>
 );
 
-
-</div>
 
     <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background elements */}
