@@ -9,7 +9,7 @@ const PrivacyPolicy: React.FC = () => {
       </p>
 
       <p className="mb-4">
-        Innovest (“we”, “our”, “us”) operates the Innovest platform (“Service”).
+        Founders and Investors (“we”, “our”, “us”) operates the Innovestor platform (“Service”).
         This Privacy Policy explains how we collect, use, disclose, and protect
         your information when you use our website.
       </p>
