@@ -162,7 +162,7 @@ const Auth = () => {
   };
   
 return (
-  <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
+  <div className="<div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 relative overflow-hidden">
 
     {/* Background elements */}
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -172,23 +172,28 @@ return (
     </div>
 
     {/* AUTH STAGE */}
-<div className="relative w-full h-full flex items-center justify-center">
+<div className="relative z-10 flex items-center justify-center min-h-screen px-6">
 
       {/* LEFT – BULL */}
-    <img
+   <img
   src={bullMascot}
   alt="Bull mascot"
-  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  style={{
+    filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))",
+    transform: "translateX(12px)"
+  }}
   className="
     hidden lg:block
-    absolute left-6 xl:left-16
+    fixed
+    left-0
     bottom-0
-    h-[85%]
-    max-h-[720px]
+    h-[88%]
+    max-h-[760px]
     object-contain
     pointer-events-none
   "
 />
+
 
 
       {/* AUTH CARD */}
@@ -280,17 +285,22 @@ return (
      <img
   src={lionMascot}
   alt="Lion mascot"
-  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  style={{
+    filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))",
+    transform: "translateX(-12px)"
+  }}
   className="
     hidden lg:block
-    absolute right-6 xl:right-16
+    fixed
+    right-0
     bottom-0
-    h-[85%]
-    max-h-[720px]
+    h-[88%]
+    max-h-[760px]
     object-contain
     pointer-events-none
   "
 />
+
 
     </div>
   </div>
