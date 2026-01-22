@@ -226,10 +226,10 @@ const Landing = () => {
 
         {/* Stats Section */}
         <div className="w-full mt-32 px-4 max-w-7xl mx-auto grid grid-cols-4 gap-6">
-          <StatsCard icon={Building2} count={1} label="Colleges Registered" delay={0} />
-          <StatsCard icon={GraduationCap} count={5000} label="Student Users" delay={0} />
-          <StatsCard icon={Briefcase} count={1500} label="Working Professionals" delay={400} />
-          <StatsCard icon={CircleDollarSign} count={450} label="Investors Registered" delay={600} />
+          <StatsCard icon={Building2} count={5} label="Colleges Registered" delay={0} />
+          <StatsCard icon={GraduationCap} count={30} label="Student Users" delay={0} />
+          <StatsCard icon={Briefcase} count={10} label="Working Professionals" delay={400} />
+          <StatsCard icon={CircleDollarSign} count={12} label="Investors Registered" delay={600} />
         </div>
 
         {/* Scrolling College Bars */}
