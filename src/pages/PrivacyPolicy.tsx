@@ -1,4 +1,6 @@
-const PrivacyPolicy = () => {
+import React from "react";
+
+const PrivacyPolicy: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 text-slate-700">
       <h1 className="text-3xl font-semibold mb-6">Privacy Policy</h1>
@@ -23,17 +25,6 @@ const PrivacyPolicy = () => {
       </ul>
 
       <h2 className="text-xl font-semibold mt-8 mb-2">
-        2. How We Use Your Information
-      </h2>
-      <ul className="list-disc pl-6 space-y-1">
-        <li>Provide and maintain the service</li>
-        <li>Manage user accounts</li>
-        <li>Improve platform performance</li>
-        <li>Send service-related communication</li>
-        <li>Comply with legal obligations</li>
-      </ul>
-
-      <h2 className="text-xl font-semibold mt-8 mb-2">
         Contact Us
       </h2>
       <p>
@@ -45,3 +36,4 @@ const PrivacyPolicy = () => {
 };
 
 export default PrivacyPolicy;
+
