@@ -160,78 +160,40 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+  
+return (
+  <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
 
-  return (
-    {/* AUTH STAGE – mascots support the auth screen */}
-<div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+    {/* Background elements */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150" />
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
+    </div>
 
-  {/* LEFT – BULL */}
-  <img
-  src={bullMascot}
-  alt="Bull mascot"
-  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
-  className="
-    hidden lg:block
-    absolute left-0 bottom-0
-    h-[85%]
-    max-h-[700px]
-    object-contain
-    pointer-events-none
-  "
-/>
+    {/* AUTH STAGE */}
+    <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
 
+      {/* LEFT – BULL */}
+      <img
+        src={bullMascot}
+        alt="Bull mascot"
+        style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+        className="hidden lg:block absolute left-0 bottom-0 h-[85%] max-h-[700px] object-contain pointer-events-none"
+      />
 
-  {/* AUTH CARD */}
-  <div className="relative z-10 w-full max-w-md">
-    <Link
-      to="/"
-      className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-    >
-      <ArrowLeft className="w-4 h-4" />
-      Back to home
-    </Link>
-
-    <Card className="glass border-0 shadow-xl">
-      {/* ⬇️ KEEP ALL YOUR EXISTING CARD CONTENT AS-IS */}
-    </Card>
-  </div>
-
-  {/* RIGHT – LION */}
-  <img
-  src={LionMascot}
-  alt="Lion mascot"
-  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
-  className="
-    hidden lg:block
-    absolute right-0 bottom-0
-    h-[85%]
-    max-h-[700px]
-    object-contain
-    pointer-events-none
-  "
-/>
-
-
-</div>
-
-    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-md z-10">
-        <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
-
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
+      {/* AUTH CARD */}
+      <div className="relative z-10 w-full max-w-md">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to home
         </Link>
 
         <Card className="glass border-0 shadow-xl">
-          <CardHeader className="text-center">
+      <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
                 <Rocket className="w-7 h-7 text-primary-foreground" />
@@ -354,6 +316,41 @@ const Auth = () => {
               )}
             </div>
           </CardContent>
+    </Card>
+  </div>
+
+ {/* RIGHT – LION */}
+      <img
+        src={lionMascot}
+        alt="Lion mascot"
+        style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+        className="hidden lg:block absolute right-0 bottom-0 h-[85%] max-h-[700px] object-contain pointer-events-none"
+      />
+    </div>
+  </div>
+);
+
+
+</div>
+
+    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md z-10">
+        <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back to home
+        </Link>
+
+        <Card className="glass border-0 shadow-xl">
+          
         </Card>
       </div>
     </div>
