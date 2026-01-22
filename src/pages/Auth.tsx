@@ -159,6 +159,58 @@ const Auth = () => {
   };
 
   return (
+    {/* AUTH STAGE – mascots support the auth screen */}
+<div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+
+  {/* LEFT – BULL */}
+  <img
+  src="/mascots/bull.png"
+  alt="Bull mascot"
+  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  className="
+    hidden lg:block
+    absolute left-0 bottom-0
+    h-[85%]
+    max-h-[700px]
+    object-contain
+    pointer-events-none
+  "
+/>
+
+
+  {/* AUTH CARD */}
+  <div className="relative z-10 w-full max-w-md">
+    <Link
+      to="/"
+      className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Back to home
+    </Link>
+
+    <Card className="glass border-0 shadow-xl">
+      {/* ⬇️ KEEP ALL YOUR EXISTING CARD CONTENT AS-IS */}
+    </Card>
+  </div>
+
+  {/* RIGHT – LION */}
+  <img
+  src="/mascots/lion.png"
+  alt="Lion mascot"
+  style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
+  className="
+    hidden lg:block
+    absolute right-0 bottom-0
+    h-[85%]
+    max-h-[700px]
+    object-contain
+    pointer-events-none
+  "
+/>
+
+
+</div>
+
     <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -167,7 +219,9 @@ const Auth = () => {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-md z-10">
+        <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to home
