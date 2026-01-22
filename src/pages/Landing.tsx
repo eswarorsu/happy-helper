@@ -331,18 +331,60 @@ const Landing = () => {
 
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center py-8 text-slate-500 text-sm">
-         © 2026 Innovest
-Company Name: INNOVESTOR
-Email: support@INNOVESTOR.com
-Address: VIZAG,
-        ANDHRAPRADESH,
-        INDIA[530001]
+     {/* Footer */}
+<footer className="relative z-10 border-t border-slate-200 bg-white text-slate-600 text-sm">
+  <div className="max-w-6xl mx-auto px-4 py-8 text-center space-y-3">
 
-Privacy Policy | Terms & Conditions | Refund Policy
+    <p className="font-medium text-slate-700">
+      © 2026 Innovest
+    </p>
 
-      </footer>
+    <p>
+      <span className="font-medium">Company Name:</span> INNOVESTOR
+    </p>
+
+    <p>
+      <span className="font-medium">Email:</span>{" "}
+      <a
+        href="mailto:support@innovestor.com"
+        className="text-blue-600 hover:underline"
+      >
+        support@innovestor.com
+      </a>
+    </p>
+
+    <p className="leading-relaxed">
+      <span className="font-medium">Address:</span><br />
+      Vizag, Andhra Pradesh,<br />
+      India – 530001
+    </p>
+
+    <div className="flex justify-center gap-4 pt-2">
+      <a
+        href="/privacy-policy"
+        className="hover:text-blue-600 hover:underline"
+      >
+        Privacy Policy
+      </a>
+      <span>|</span>
+      <a
+        href="/terms-and-conditions"
+        className="hover:text-blue-600 hover:underline"
+      >
+        Terms & Conditions
+      </a>
+      <span>|</span>
+      <a
+        href="/refund-policy"
+        className="hover:text-blue-600 hover:underline"
+      >
+        Refund Policy
+      </a>
+    </div>
+
+  </div>
+</footer>
+
     </div>
   );
 };
