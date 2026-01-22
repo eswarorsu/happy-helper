@@ -9,6 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, ArrowLeft } from "lucide-react";
 import { z } from "zod";
+import bullMascot from "@/assets/mascots/bull.png";
+import lionMascot from "@/assets/mascots/lion.png";
+
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -164,7 +167,7 @@ const Auth = () => {
 
   {/* LEFT – BULL */}
   <img
-  src="/mascots/bull.png"
+  src={bullMascot}
   alt="Bull mascot"
   style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
   className="
@@ -195,7 +198,7 @@ const Auth = () => {
 
   {/* RIGHT – LION */}
   <img
-  src="/mascots/lion.png"
+  src={LionMascot}
   alt="Lion mascot"
   style={{ filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))" }}
   className="
