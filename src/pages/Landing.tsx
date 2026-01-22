@@ -177,8 +177,7 @@ const Landing = () => {
 
         <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mb-12 leading-relaxed">
           "Bridging the gap between visionary founders and strategic investors.
-          Transform your ideas into reality. We are NOT an investment platform.
-We are a SaaS discovery / networking platform.”
+          Transform your ideas into reality."
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-20">
@@ -227,8 +226,8 @@ We are a SaaS discovery / networking platform.”
 
         {/* Stats Section */}
         <div className="w-full mt-32 px-4 max-w-7xl mx-auto grid grid-cols-4 gap-6">
-          <StatsCard icon={Building2} count={120} label="Colleges Registered" delay={0} />
-          <StatsCard icon={GraduationCap} count={5000} label="Student Users" delay={200} />
+          <StatsCard icon={Building2} count={1} label="Colleges Registered" delay={0} />
+          <StatsCard icon={GraduationCap} count={5000} label="Student Users" delay={0} />
           <StatsCard icon={Briefcase} count={1500} label="Working Professionals" delay={400} />
           <StatsCard icon={CircleDollarSign} count={450} label="Investors Registered" delay={600} />
         </div>
@@ -261,7 +260,7 @@ We are a SaaS discovery / networking platform.”
                 <div className="flex animate-marquee hover:[animation-play-state:paused]">
                   <div className="flex shrink-0 gap-8 px-4">
                     {colleges.map((college, i) => (
-                      <span key={i} className="text-xl font-semibold text-slate-400 whitespace-nowrap px-4 border border-slate-200 py-2 rounded-full bg-white/50">{college}</span>
+                      <span key={i} className="text-xl font-semibold text-slate-400 whitespace-nowrap px-4 border border-slate-0 py-2 rounded-full bg-white/50">{college}</span>
                     ))}
                   </div>
                   <div className="flex shrink-0 gap-8 px-4">
@@ -334,7 +333,15 @@ We are a SaaS discovery / networking platform.”
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 text-slate-500 text-sm">
-        © 2024 INNOVESTOR. All rights reserved.
+         © 2026 Innovest
+Company Name: INNOVESTOR
+Email: support@INNOVESTOR.com
+Address: VIZAG,
+        ANDHRAPRADESH,
+        INDIA[530001]
+
+Privacy Policy | Terms & Conditions | Refund Policy
+
       </footer>
     </div>
   );
