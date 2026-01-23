@@ -68,6 +68,7 @@ const FounderDashboard = () => {
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
       setIsDialogOpen(true);
+      // Clean up the URL
       setSearchParams({}, { replace: true });
     }
   }, [searchParams]);
@@ -84,10 +85,26 @@ const FounderDashboard = () => {
 
     const channel = supabase
       .channel('founder-dashboard-sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_requests' }, () => fetchData())
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => fetchData())
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => fetchData())
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ideas' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'chat_requests' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages' },
+        () => fetchData()
+      )
       .subscribe();
 
     return () => {
@@ -97,7 +114,10 @@ const FounderDashboard = () => {
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return navigate("/auth?mode=login");
+    if (!session?.user) {
+      navigate("/auth?mode=login");
+      return;
+    }
 
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
@@ -105,8 +125,15 @@ const FounderDashboard = () => {
       .eq("user_id", session.user.id)
       .single();
 
-    if (profileError || !profileData) return navigate("/profile-setup?type=founder");
-    if (profileData.user_type !== "founder") return navigate("/investor-dashboard");
+    if (profileError || !profileData) {
+      navigate("/profile-setup?type=founder");
+      return;
+    }
+
+    if (profileData.user_type !== "founder") {
+      navigate("/investor-dashboard");
+      return;
+    }
 
     setProfile(profileData);
 
@@ -168,7 +195,6 @@ const FounderDashboard = () => {
     } else {
       toast({ title: "Success", description: "Idea submitted successfully" });
       setNewIdea({ title: "", description: "", domain: "", investment_needed: "" });
-      setIsDialogOpen(false);
       fetchData();
     }
     setIsAddingIdea(false);
@@ -206,12 +232,18 @@ const FounderDashboard = () => {
     }
   };
 
-  if (isLoading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-indigo-600 rounded-full border-t-transparent"></div></div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   const totalIdeas = ideas.length;
+  const totalInvestmentNeeded = ideas.reduce((sum, idea) => sum + idea.investment_needed, 0);
   const totalInvestmentReceived = ideas.reduce((sum, idea) => sum + (idea.investment_received || 0), 0);
-  const pendingRequests = chatRequests.filter((r) => r.status === "pending" || !r.status);
-  const acceptedChats = chatRequests.filter((r) => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status));
+  const fundingGap = totalInvestmentNeeded - totalInvestmentReceived;
 
   const statusData = [
     { name: "Deal Done", value: ideas.filter((i) => i.status === "deal_done").length },
@@ -224,6 +256,11 @@ const FounderDashboard = () => {
     needed: idea.investment_needed,
     received: idea.investment_received || 0,
   }));
+
+  const pendingRequests = chatRequests.filter((r) => r.status === "pending" || !r.status);
+  const acceptedChats = chatRequests.filter((r) =>
+    ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 font-sans relative">
@@ -251,6 +288,7 @@ const FounderDashboard = () => {
                     <h2 className="text-2xl font-bold mb-1">{profile?.name}</h2>
                     <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest">{profile?.user_type}</p>
                   </div>
+
                   <div className="flex-1 overflow-y-auto p-8">
                     <div className="space-y-8">
                       <section>
@@ -270,6 +308,33 @@ const FounderDashboard = () => {
                               <p className="text-sm font-semibold text-slate-700">{profile?.education || "Not provided"}</p>
                             </div>
                           </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Venture Portfolio</h3>
+                          <Badge variant="outline" className="rounded-full">{ideas.length} Ideas</Badge>
+                        </div>
+                        <div className="space-y-3">
+                          {ideas.map((idea) => (
+                            <div key={idea.id} className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 transition-all group">
+                              <div className="flex justify-between items-start mb-2">
+                                <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{idea.title}</p>
+                                {getStatusBadge(idea.status)}
+                              </div>
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="text-slate-400 font-bold uppercase">{idea.domain}</span>
+                                <span className="text-slate-900 font-bold">${idea.investment_received.toLocaleString()} / ${idea.investment_needed.toLocaleString()}</span>
+                              </div>
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div
+                                  className="h-full bg-indigo-600"
+                                  style={{ width: `${Math.min((idea.investment_received / idea.investment_needed) * 100, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </section>
                     </div>
@@ -298,18 +363,22 @@ const FounderDashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 md:px-12 py-10 relative z-10">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           {[
             { label: "Total Ventures", value: totalIdeas, icon: Lightbulb, color: "text-slate-900" },
             { label: "Capital Secured", value: `$${totalInvestmentReceived.toLocaleString()}`, icon: TrendingUp, color: "text-indigo-600" },
+            { label: "Funding Gap", value: `$${fundingGap.toLocaleString()}`, icon: DollarSign, color: "text-slate-500" },
             { label: "Active Interests", value: pendingRequests.length, icon: MessageSquare, color: "text-indigo-600" },
-            { label: "Status", value: profile?.is_approved ? "Verified" : "Under Review", icon: ShieldCheck, color: "text-green-600" }
           ].map((stat, i) => (
-            <Card key={i} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl">
-              <div className="h-1 bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
+            <Card key={i} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group rounded-2xl overflow-hidden">
+              <div className="h-1 w-full bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
               <CardContent className="p-6">
-                <stat.icon className={`w-5 h-5 mb-4 ${stat.color}`} />
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-2.5 rounded-xl bg-slate-50 ${stat.color} group-hover:scale-110 transition-transform`}>
+                    <stat.icon className="w-5 h-5" />
+                  </div>
+                </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
                 <p className="text-2xl font-black text-slate-900">{stat.value}</p>
               </CardContent>
@@ -319,31 +388,46 @@ const FounderDashboard = () => {
 
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
           <Card className="lg:col-span-2 bg-white border-0 shadow-lg rounded-2xl">
-            <CardHeader><CardTitle className="text-lg font-bold">Performance</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-lg font-bold">Portfolio Performance</CardTitle>
+            </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={investmentData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
-                  <Tooltip />
-                  <Bar dataKey="needed" fill="#cfd8e3" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="received" fill="#4338ca" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {investmentData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={investmentData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <Tooltip />
+                    <Bar dataKey="needed" fill="#cfd8e3" radius={[4, 4, 0, 0]} name="Investment Needed" />
+                    <Bar dataKey="received" fill="#4338ca" radius={[4, 4, 0, 0]} name="Capital Secured" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-slate-300">No data available</div>
+              )}
             </CardContent>
           </Card>
+
           <Card className="bg-white border-0 shadow-lg rounded-2xl">
-            <CardHeader><CardTitle className="text-lg font-bold">Venture Status</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-lg font-bold">Venture Status</CardTitle>
+            </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie data={statusData} innerRadius={80} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
-                    {statusData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {statusData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie data={statusData} innerRadius={80} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
+                      {statusData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-slate-300">Waiting for data</div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -360,62 +444,146 @@ const FounderDashboard = () => {
                     } else {
                       toast({
                         title: "Profile Under Review",
-                        description: "You'll be able to launch ideas once verified.",
+                        description: "You'll be able to launch ideas once the team verifies your profile.",
                         variant: "destructive",
                       });
                     }
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200"
                 >
                   <Plus className="w-4 h-4 mr-2" /> Launch New Idea
                 </Button>
                 <DialogContent>
-                  <DialogHeader><DialogTitle>New Venture</DialogTitle></DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle>Launch Idea</DialogTitle>
+                    <DialogDescription>Fuel your next big thing</DialogDescription>
+                  </DialogHeader>
                   <div className="space-y-4 pt-4">
-                    <Input placeholder="Title" value={newIdea.title} onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })} />
-                    <Input placeholder="Domain" value={newIdea.domain} onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })} />
-                    <Input type="number" placeholder="Funding Goal" value={newIdea.investment_needed} onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })} />
-                    <Textarea placeholder="Description" value={newIdea.description} onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })} />
-                    <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>Submit Idea</Button>
+                    <div className="space-y-1.5">
+                      <Label>Title</Label>
+                      <Input value={newIdea.title} onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Domain</Label>
+                        <Input value={newIdea.domain} onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label>Goal ($)</Label>
+                        <Input type="number" value={newIdea.investment_needed} onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea value={newIdea.description} onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })} rows={4} />
+                    </div>
+                    <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
+                      {isAddingIdea ? "Processing..." : "Submit"}
+                    </Button>
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               {ideas.map((idea) => (
-                <Card key={idea.id} className="bg-white border-0 shadow-lg rounded-2xl group overflow-hidden">
+                <Card key={idea.id} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl">
                   <div className="h-1 bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                       <h3 className="font-bold text-slate-900">{idea.title}</h3>
-                       {getStatusBadge(idea.status)}
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        {idea.title} {idea.status === "deal_done" && "🤝"}
+                      </CardTitle>
+                      {getStatusBadge(idea.status)}
                     </div>
-                    <p className="text-xs text-slate-500 mb-4">{idea.description}</p>
-                    <div className="w-full bg-slate-50 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-indigo-600 h-full" style={{ width: `${Math.min(((idea.investment_received || 0) / idea.investment_needed) * 100, 100)}%` }} />
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">{idea.domain}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500 mb-6 line-clamp-2">{idea.description}</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-[11px] font-bold">
+                        <span className="text-slate-400 uppercase tracking-tighter">Target</span>
+                        <span className="text-slate-900">${idea.investment_needed.toLocaleString()}</span>
+                      </div>
+                      <div className="w-full bg-slate-50 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-indigo-600 h-full"
+                          style={{ width: `${Math.min(((idea.investment_received || 0) / idea.investment_needed) * 100, 100)}%` }}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </div>
-          <Card className="bg-white border-0 shadow-lg rounded-2xl">
-              <CardHeader><CardTitle className="text-sm font-bold flex items-center gap-2"><MessageSquare className="w-4 h-4 text-indigo-600" /> Connections</CardTitle></CardHeader>
+
+          <div className="space-y-8">
+            <Card className="bg-white border-0 shadow-lg rounded-2xl overflow-hidden">
+              <CardHeader className="bg-slate-50/50 pb-4">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-indigo-600" /> Connections
+                </CardTitle>
+              </CardHeader>
               <CardContent className="p-0">
-                  <div className="divide-y divide-slate-50">
-                      {acceptedChats.map((chat) => (
-                          <div key={chat.id} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3" onClick={() => setSelectedChat(chat)}>
-                              <Avatar className="w-10 h-10"><AvatarFallback>{chat.investor?.name?.charAt(0)}</AvatarFallback></Avatar>
-                              <div className="flex-1 min-w-0">
-                                  <p className="font-bold text-sm truncate">{chat.investor?.name}</p>
-                                  <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{chat.idea?.title}</p>
-                              </div>
-                              {chat.unread_count ? <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">{chat.unread_count}</span> : <MessageSquare size={14} className="text-slate-300" />}
+                <div className="divide-y divide-slate-50">
+                  {acceptedChats.length > 0 ? (
+                    acceptedChats.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="flex items-center gap-3 p-4 hover:bg-slate-50 cursor-pointer transition-all group"
+                        onClick={() => setSelectedChat(chat)}
+                      >
+                        <Avatar className="w-10 h-10 shadow-sm">
+                          <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold">
+                            {chat.investor?.name?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-center">
+                            <p className="font-bold text-slate-900 text-sm truncate">{chat.investor?.name}</p>
+                            {(chat.id !== selectedChat?.id && (chat.unread_count || 0) > 0) && (
+                              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                {chat.unread_count}
+                              </span>
+                            )}
                           </div>
-                      ))}
-                  </div>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{chat.idea?.title}</p>
+                        </div>
+                        <MessageSquare className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-slate-300">No active connections</div>
+                  )}
+                </div>
               </CardContent>
-          </Card>
+            </Card>
+
+            {pendingRequests.length > 0 && (
+              <Card className="bg-indigo-600 border-0 shadow-xl rounded-2xl overflow-hidden text-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <Rocket className="w-4 h-4" /> New Interests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 p-4">
+                  {pendingRequests.map((request) => (
+                    <div key={request.id} className="p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10">
+                      <div className="mb-3">
+                        <p className="font-bold text-sm">{request.investor?.name}</p>
+                        <p className="text-[10px] font-bold uppercase text-white/50">{request.idea?.title}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleChatRequestAction(request.id, "accepted")} className="flex-1 bg-white text-indigo-600 hover:bg-indigo-50">Accept</Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleChatRequestAction(request.id, "rejected")} className="flex-1 text-white hover:bg-white/10">Pass</Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </main>
 
@@ -424,7 +592,14 @@ const FounderDashboard = () => {
           chatRequest={selectedChat}
           currentUserId={profile.id}
           onClose={() => setSelectedChat(null)}
-          onMessagesRead={() => fetchData()}
+          onMessagesRead={() => {
+            // Optimistically update local state to clear unread count for this chat
+            setChatRequests(prev => prev.map(req =>
+              req.id === selectedChat.id ? { ...req, unread_count: 0 } : req
+            ));
+            // Also trigger a real fetch to ensure sync
+            fetchData();
+          }}
         />
       )}
     </div>
@@ -432,4 +607,3 @@ const FounderDashboard = () => {
 };
 
 export default FounderDashboard;
-
