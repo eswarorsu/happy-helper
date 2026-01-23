@@ -9,9 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, ArrowLeft } from "lucide-react";
 import { z } from "zod";
-import bullMascot from "@/assets/mascots/bull.png";
-import lionMascot from "@/assets/mascots/lion.png";
-
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -160,48 +157,18 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-  
-return (
-  <div className="<div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 relative overflow-hidden">
 
-    {/* Background elements */}
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150" />
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
-    </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
+      </div>
 
-    {/* AUTH STAGE */}
-<div className="relative z-10 flex items-center justify-center min-h-screen px-6">
-
-      {/* LEFT – BULL */}
-   <img
-  src={bullMascot}
-  alt="Bull mascot"
-  style={{
-    filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))",
-    transform: "translateX(12px)"
-  }}
-  className="
-    hidden lg:block
-    fixed
-    left-0
-    bottom-0
-    h-[88%]
-    max-h-[760px]
-    object-contain
-    pointer-events-none
-  "
-/>
-
-
-
-      {/* AUTH CARD */}
-      <div className="relative z-10 w-full max-w-md">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-        >
+      <div className="w-full max-w-md relative z-10">
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to home
         </Link>
@@ -222,12 +189,8 @@ return (
                 : "Join the INNOVESTOR community"}
             </CardDescription>
           </CardHeader>
-
           <CardContent>
-            <form
-              onSubmit={mode === "login" ? handleLogin : handleRegister}
-              className="space-y-4"
-            >
+            <form onSubmit={mode === "login" ? handleLogin : handleRegister} className="space-y-4">
               {mode === "register" && (
                 <>
                   <div className="space-y-2">
@@ -235,9 +198,12 @@ return (
                     <Input
                       id="name"
                       name="name"
+                      placeholder="John Doe"
                       value={formData.name}
                       onChange={handleInputChange}
+                      className={errors.name ? "border-destructive" : ""}
                     />
+                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -245,9 +211,37 @@ return (
                     <Input
                       id="phone"
                       name="phone"
+                      type="tel"
+                      placeholder="+1234567890"
                       value={formData.phone}
                       onChange={handleInputChange}
+                      className={errors.phone ? "border-destructive" : ""}
                     />
+                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>I am a</Label>
+                    <RadioGroup
+                      value={formData.userType}
+                      onValueChange={(value: "founder" | "investor") =>
+                        setFormData((prev) => ({ ...prev, userType: value }))
+                      }
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2 flex-1">
+                        <RadioGroupItem value="founder" id="founder" />
+                        <Label htmlFor="founder" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
+                          Founder
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2 flex-1">
+                        <RadioGroupItem value="investor" id="investor" />
+                        <Label htmlFor="investor" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
+                          Investor
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 </>
               )}
@@ -257,9 +251,13 @@ return (
                 <Input
                   id="email"
                   name="email"
+                  type="email"
+                  placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
+                  className={errors.email ? "border-destructive" : ""}
                 />
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
@@ -268,67 +266,41 @@ return (
                   id="password"
                   name="password"
                   type="password"
+                  placeholder="••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
+                  className={errors.password ? "border-destructive" : ""}
                 />
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {mode === "login" ? "Sign In" : "Create Account"}
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
               </Button>
-
             </form>
-                     <div className="mt-6 text-center text-sm text-muted-foreground">
-  {mode === "login" ? (
-    <>
-      Don&apos;t have an account?{" "}
-      <Link
-        to="/auth?mode=register"
-        className="text-primary hover:underline font-medium"
-      >
-        Sign up
-      </Link>
-    </>
-  ) : (
-    <>
-      Already have an account?{" "}
-      <Link
-        to="/auth?mode=login"
-        className="text-primary hover:underline font-medium"
-      >
-        Sign in
-      </Link>
-    </>
-  )}
-</div>
+
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              {mode === "login" ? (
+                <>
+                  Don't have an account?{" "}
+                  <Link to="/auth?mode=register" className="text-primary hover:underline font-medium">
+                    Sign up
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <Link to="/auth?mode=login" className="text-primary hover:underline font-medium">
+                    Sign in
+                  </Link>
+                </>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* RIGHT – LION */}
-     <img
-  src={lionMascot}
-  alt="Lion mascot"
-  style={{
-    filter: "drop-shadow(0 30px 35px rgba(0,0,0,0.18))",
-    transform: "translateX(-12px)"
-  }}
-  className="
-    hidden lg:block
-    fixed
-    right-0
-    bottom-0
-    h-[88%]
-    max-h-[760px]
-    object-contain
-    pointer-events-none
-  "
-/>
-
-
     </div>
-  </div>
-);
+  );
 };
 
 export default Auth;
