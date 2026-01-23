@@ -6,8 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import chatBg from "@/assets/chat-bg.png";
-// or correct relative path like "../assets/chat-bg.png"
+import chatBg from "./chat-bg.png";
 
 import { Send, Handshake, CheckCircle2, DollarSign, Badge, Paperclip, Image as ImageIcon, FileText, Download, File as FileIcon } from "lucide-react";
 
@@ -43,7 +42,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     fetchMessages();
 
     const channel = supabase
-      .channel(`chat:${chatRequest.id, currentUserId, onMessagesRead}`)
+      .channel(`chat:${chatRequest.id}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `chat_request_id=eq.${chatRequest.id}` },
@@ -74,7 +73,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [chatRequest.id]);
+  }, [chatRequest.id, currentUserId, onMessagesRead]);
 
   useEffect(() => {
     if (scrollRef.current) {
