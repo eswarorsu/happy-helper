@@ -164,11 +164,8 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -176,22 +173,11 @@ const Auth = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to home
         </Link>
-
         <Card className="glass border-0 shadow-xl">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                <Rocket className="w-7 h-7 text-primary-foreground" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl">
-              {mode === "login" ? "Welcome Back" : "Create Account"}
-            </CardTitle>
-            <CardDescription>
-              {mode === "login"
-                ? "Sign in to your INNOVESTOR account"
-                : "Join the INNOVESTOR community"}
-            </CardDescription>
+            <div className="flex justify-center mb-4"><div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center"><Rocket className="w-7 h-7 text-primary-foreground" /></div></div>
+            <CardTitle className="text-2xl">{mode === "login" ? "Welcome Back" : "Create Account"}</CardTitle>
+            <CardDescription>{mode === "login" ? "Sign in to your account" : "Join the INNOVESTOR community"}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={mode === "login" ? handleLogin : handleRegister} className="space-y-4">
@@ -199,106 +185,35 @@ const Auth = () => {
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className={errors.name ? "border-destructive" : ""}
-                    />
-                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                    <Input id="name" name="name" placeholder="John Doe" value={formData.name} onChange={handleInputChange} />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="+1234567890"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className={errors.phone ? "border-destructive" : ""}
-                    />
-                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                    <Input id="phone" name="phone" type="tel" placeholder="+1..." value={formData.phone} onChange={handleInputChange} />
                   </div>
-
                   <div className="space-y-3">
-                    <Label>I am a</Label>
-                    <RadioGroup
-                      value={formData.userType}
-                      onValueChange={(value: "founder" | "investor") =>
-                        setFormData((prev) => ({ ...prev, userType: value }))
-                      }
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2 flex-1">
-                        <RadioGroupItem value="founder" id="founder" />
-                        <Label htmlFor="founder" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
-                          Founder
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 flex-1">
-                        <RadioGroupItem value="investor" id="investor" />
-                        <Label htmlFor="investor" className="cursor-pointer flex-1 p-3 rounded-lg border hover:bg-muted transition-colors">
-                          Investor
-                        </Label>
-                      </div>
+                    <Label>User Type</Label>
+                    <RadioGroup value={formData.userType} onValueChange={(value: any) => setFormData(prev => ({ ...prev, userType: value }))} className="flex gap-4">
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="founder" id="founder" /><Label htmlFor="founder">Founder</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="investor" id="investor" /><Label htmlFor="investor">Investor</Label></div>
                     </RadioGroup>
                   </div>
                 </>
               )}
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={errors.email ? "border-destructive" : ""}
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={errors.password ? "border-destructive" : ""}
-                />
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                <Input id="password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} />
               </div>
-
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
-              </Button>
+              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isLoading}>{isLoading ? "Processing..." : mode === "login" ? "Sign In" : "Sign Up"}</Button>
             </form>
-
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              {mode === "login" ? (
-                <>
-                  Don't have an account?{" "}
-                  <Link to="/auth?mode=register" className="text-primary hover:underline font-medium">
-                    Sign up
-                  </Link>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <Link to="/auth?mode=login" className="text-primary hover:underline font-medium">
-                    Sign in
-                  </Link>
-                </>
-              )}
+            <div className="mt-6 text-center text-sm">
+                <Link to={mode === "login" ? "/auth?mode=register" : "/auth?mode=login"} className="text-indigo-600 hover:underline">
+                    {mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}
+                </Link>
             </div>
           </CardContent>
         </Card>
@@ -306,5 +221,4 @@ const Auth = () => {
     </div>
   );
 };
-
 export default Auth;
