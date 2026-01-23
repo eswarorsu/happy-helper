@@ -260,7 +260,7 @@ const InvestorDashboard = () => {
                   <span className="text-xl font-black tracking-tight text-slate-900">INNOVESTOR</span>
                   {profile?.is_approved && (
                     <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full flex items-center text-[10px]">
-                      <ShieldCheck size={12}/> Verified LP
+                      <ShieldCheck size={12}/> Verified
                     </Badge>
                   )}
                 </div>
