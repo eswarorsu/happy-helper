@@ -10,11 +10,10 @@ import FounderDashboard from "./pages/FounderDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
-import { Routes, Route } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
-
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,10 +30,10 @@ const App = () => (
           <Route path="/founder-dashboard" element={<FounderDashboard />} />
           <Route path="/investor-dashboard" element={<InvestorDashboard />} />
           <Route path="/payment" element={<Payment />} />
-  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-  <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-  <Route path="/refund-policy" element={<RefundPolicy />} />
-
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="/admin-innovestor" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -44,4 +43,3 @@ const App = () => (
 );
 
 export default App;
-
