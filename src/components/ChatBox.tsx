@@ -36,7 +36,6 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
   const isFounder = currentUserId === chatRequest.founder_id;
   const otherPartyName = isFounder ? chatRequest.investor?.name : chatRequest.founder?.name;
 
@@ -44,7 +43,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     fetchMessages();
 
     const channel = supabase
-      .channel(`chat:${chatRequest.id}`)
+      .channel(`chat:${chatRequest.id, currentUserId, onMessagesRead}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `chat_request_id=eq.${chatRequest.id}` },
@@ -232,7 +231,8 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-900 truncate">{data.fileName}</p>
-              <p className="text-[10px] text-slate-500 uppercase font-black">{data.fileType.split("/")[1]}</p>
+              <p className="text-[10px] text-slate-500 uppercase font-black">
+                {data.fileType.split("/")[1]}</p>
             </div>
             <a
               href={data.fileUrl}
@@ -318,7 +318,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
   };
 
   return (
-    <Dialog open={true} onOpenChange={() => onClose()}>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
 <DialogContent className="sm:max-w-[520px] h-[700px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
         <DialogHeader className="px-4 py-3 border-b bg-white flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
