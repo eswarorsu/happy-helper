@@ -63,7 +63,11 @@ const Auth = () => {
       .single();
 
     if (profile) {
-      navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
+      if ((profile as any).is_admin) {
+        navigate("/admin-innovestor");
+      } else {
+        navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
+      }
     }
   };
 
