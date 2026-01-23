@@ -13,7 +13,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminPortal from "./pages/AdminPortal";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +33,9 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
-          <Route path="/admin-innovestor" element={<AdminDashboard />} />
+          <Route path="/admin-innovestor" element={<AdminPortal />} />
+
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
