@@ -461,24 +461,6 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Newsletter Section */}
-          <div className="border-t border-slate-700 pt-8 mb-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <h3 className="text-white font-semibold text-xl mb-2">Stay Updated</h3>
-              <p className="text-slate-400 mb-4">Subscribe to our newsletter for the latest opportunities and updates</p>
-              <div className="flex gap-2 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-                  Subscribe
-                </Button>
-              </div>
-            </div>
-          </div>
-
           {/* Bottom Bar */}
           <div className="border-t border-slate-700 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-500 text-sm">
