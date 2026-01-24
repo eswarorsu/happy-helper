@@ -37,14 +37,6 @@ const AdminDashboard = () => {
 
     checkAdmin();
     fetchData();
-
-    const userChannel = supabase.channel("admin_users").on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchData()).subscribe();
-    const ideaChannel = supabase.channel("admin_ideas").on("postgres_changes", { event: "*", schema: "public", table: "ideas" }, () => fetchData()).subscribe();
-
-    return () => {
-      supabase.removeChannel(userChannel);
-      supabase.removeChannel(ideaChannel);
-    };
   }, []);
 
   const fetchData = async () => {
@@ -61,7 +53,7 @@ const AdminDashboard = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Success", description: `User ${!currentStatus ? 'approved' : 'unapproved'}` });
-      fetchData(); // Manually refresh data
+      fetchData(); // Instant Refresh
     }
   };
 
@@ -71,7 +63,7 @@ const AdminDashboard = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Idea status updated" });
-      fetchData(); // Manually refresh data
+      fetchData(); // Instant Refresh
     }
   };
 
