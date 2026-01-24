@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, User, Briefcase, GraduationCap, Calendar, Mail, Phone, ChevronRight, Handshake, ShieldCheck } from "lucide-react";
+import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, User, Briefcase, GraduationCap, Calendar, Mail, Phone, ChevronRight, Handshake, ShieldCheck, Activity } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -20,12 +20,12 @@ interface Profile {
   id: string;
   name: string;
   user_type: string;
+  is_approved?: boolean;
   email?: string;
   experience?: string;
   education?: string;
   dob?: string;
   phone?: string;
-  is_approved?: boolean;
 }
 
 interface Idea {
@@ -68,7 +68,6 @@ const FounderDashboard = () => {
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
       setIsDialogOpen(true);
-      // Clean up the URL
       setSearchParams({}, { replace: true });
     }
   }, [searchParams]);
@@ -85,26 +84,11 @@ const FounderDashboard = () => {
 
     const channel = supabase
       .channel('founder-dashboard-sync')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'ideas' },
-        () => fetchData()
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'chat_requests' },
-        () => fetchData()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        () => fetchData()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'messages' },
-        () => fetchData()
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_requests' }, () => fetchData())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => fetchData())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => fetchData())
       .subscribe();
 
     return () => {
@@ -180,6 +164,10 @@ const FounderDashboard = () => {
 
   const handleAddIdea = async () => {
     if (!profile) return;
+    if (!profile.is_approved) {
+      toast({ title: "Access Denied", description: "Your account is not yet verified.", variant: "destructive" });
+      return;
+    }
     setIsAddingIdea(true);
 
     const { error } = await supabase.from("ideas").insert({
@@ -188,14 +176,16 @@ const FounderDashboard = () => {
       description: newIdea.description,
       domain: newIdea.domain,
       investment_needed: parseFloat(newIdea.investment_needed),
+      status: 'pending'
     });
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Success", description: "Idea submitted successfully" });
+      toast({ title: "Success", description: "Idea submitted for review" });
       setNewIdea({ title: "", description: "", domain: "", investment_needed: "" });
       fetchData();
+      setIsDialogOpen(false);
     }
     setIsAddingIdea(false);
   };
@@ -219,6 +209,12 @@ const FounderDashboard = () => {
     switch (status) {
       case "deal_done":
         return <Badge className="bg-green-600 hover:bg-green-600 text-white flex gap-1 items-center">Deal Done 🤝</Badge>;
+      case "approved":
+        return <Badge className="bg-emerald-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><Check size={12}/> Verified & Live</Badge>;
+      case "rejected":
+        return <Badge className="bg-red-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><X size={12}/> Rejected</Badge>;
+      case "pending":
+        return <Badge className="bg-amber-100 text-amber-700 border-amber-200">Waiting Approval</Badge>;
       case "communicating":
         return <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">Communicating</Badge>;
       case "deal_pending_investor":
@@ -247,7 +243,7 @@ const FounderDashboard = () => {
 
   const statusData = [
     { name: "Deal Done", value: ideas.filter((i) => i.status === "deal_done").length },
-    { name: "In Progress", value: ideas.filter((i) => i.status === "in_progress" || i.status === "pending").length },
+    { name: "Live Ventures", value: ideas.filter((i) => i.status === "approved" || i.status === "in_progress").length },
     { name: "Funded", value: ideas.filter((i) => i.status === "funded").length },
   ].filter((d) => d.value > 0);
 
@@ -343,19 +339,23 @@ const FounderDashboard = () => {
               </SheetContent>
             </Sheet>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="font-black text-2xl tracking-tighter text-slate-900 leading-none">INNOVESTOR</h1>
-                {profile?.is_approved && (
-                  <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full flex items-center text-[10px]">
-                    <ShieldCheck size={12}/> Verified
-                  </Badge>
-                )}
-              </div>
+              <h1 className="font-black text-2xl tracking-tighter text-slate-900 leading-none">INNOVESTOR</h1>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 mt-1">Founder OS</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+              {profile?.is_approved ? (
+                <Badge className="bg-emerald-500 text-white gap-1 px-2 py-0.5 rounded-full text-[10px] mt-1 shadow-sm shadow-emerald-100 ring-2 ring-emerald-50">
+                  <ShieldCheck size={12}/> Verified Founder
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[9px] gap-1 px-2 py-0.5 rounded-full mt-1 bg-slate-100 text-slate-500">
+                  <Activity size={10}/> Verification Pending
+                </Badge>
+              )}
+            </div>
             <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
@@ -437,22 +437,22 @@ const FounderDashboard = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">Your Ventures</h2>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <Button
-                  onClick={() => {
-                    if (profile?.is_approved) {
-                      navigate("/payment");
-                    } else {
-                      toast({
-                        title: "Profile Under Review",
-                        description: "You'll be able to launch ideas once the team verifies your profile.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Launch New Idea
-                </Button>
+              <Button
+                onClick={() => {
+                  if (!profile?.is_approved) {
+                    toast({ 
+                      title: "Verification Required", 
+                      description: "Your profile must be verified by an admin before you can launch an idea.", 
+                      variant: "destructive" 
+                    });
+                    return;
+                  }
+                  navigate("/payment");
+                }}
+                className={`rounded-xl shadow-lg transition-all ${profile?.is_approved ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
+              >
+                <Plus className="w-4 h-4 mr-2" /> Launch New Idea
+              </Button>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Launch Idea</DialogTitle>
@@ -593,11 +593,9 @@ const FounderDashboard = () => {
           currentUserId={profile.id}
           onClose={() => setSelectedChat(null)}
           onMessagesRead={() => {
-            // Optimistically update local state to clear unread count for this chat
             setChatRequests(prev => prev.map(req =>
               req.id === selectedChat.id ? { ...req, unread_count: 0 } : req
             ));
-            // Also trigger a real fetch to ensure sync
             fetchData();
           }}
         />

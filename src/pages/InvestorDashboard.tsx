@@ -120,12 +120,14 @@ const InvestorDashboard = () => {
 
     setProfile(profileData);
 
+    // CRITICAL: Filter for Approved / Live Ideas Only
     const { data: ideasData } = await supabase
       .from("ideas")
       .select(`
         *,
         founder:profiles!ideas_founder_id_fkey(name)
       `)
+      .in("status", ["approved", "in_progress", "funded", "deal_done"])
       .order("created_at", { ascending: false });
 
     setIdeas(ideasData || []);
@@ -150,13 +152,9 @@ const InvestorDashboard = () => {
 
   const handleReachOut = async (idea: Idea) => {
     if (!profile) return;
-
-    if (!profile?.is_approved) {
-      toast({
-        title: "Verification Required",
-        description: "Your profile is under review. You'll be able to reach out once verified.",
-        variant: "destructive",
-      });
+    
+    if (!profile.is_approved) {
+      toast({ title: "Verification Required", description: "Wait for an admin to verify your profile.", variant: "destructive" });
       return;
     }
 
@@ -242,14 +240,12 @@ const InvestorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 font-sans relative overflow-hidden">
-      {/* Background elements */}
       <div className="fixed inset-0 pointer-events-none opacity-40">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[120px] -mr-64 -mt-64" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -ml-64 -mb-64" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 flex justify-between items-center">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
@@ -257,14 +253,10 @@ const InvestorDashboard = () => {
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-black tracking-tight text-slate-900">INNOVESTOR</span>
-                  {profile?.is_approved && (
-                    <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full flex items-center text-[10px]">
-                      <ShieldCheck size={12}/> Verified
-                    </Badge>
-                  )}
+                  <span className="text-xl font-black tracking-tight text-slate-900 uppercase">Innovestor</span>
+                  {profile?.is_approved && <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full text-[10px]"><ShieldCheck size={12}/> Verified LP</Badge>}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 mt-1 uppercase">Investor Hub</span>
+                <span className="text-[10px] font-black uppercase text-indigo-600 tracking-widest">Investor Hub</span>
               </div>
             </div>
           </div>
@@ -274,17 +266,15 @@ const InvestorDashboard = () => {
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           </div>
-        </div>
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-10">
-        {/* Portfolio Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           {[
-            { label: "Total Deployed", value: "$1.2M", icon: DollarSign, color: "text-indigo-600", trend: "+12.5%", positive: true },
+            { label: "Total Deployed", value: "$3.8M", icon: DollarSign, color: "text-indigo-600", trend: "+12.5%", positive: true },
             { label: "Active Deals", value: chatRequests.filter(r => r.status === 'deal_done').length, icon: Activity, color: "text-slate-900", trend: "Stable", positive: true },
             { label: "Avg. RoI", value: "24.8%", icon: TrendingUp, color: "text-green-600", trend: "+2.1%", positive: true },
-            { label: "Market Trend", value: "Bullish", icon: Zap, color: "text-amber-500", trend: "High", positive: true },
+            { label: "Market Status", value: "Verified", icon: Zap, color: "text-amber-500", trend: "High", positive: true },
           ].map((stat, i) => (
             <Card key={i} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group rounded-2xl overflow-hidden">
               <div className="h-1 w-full bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
@@ -304,11 +294,10 @@ const InvestorDashboard = () => {
           ))}
         </div>
 
-        {/* Charts Section */}
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
           <Card className="lg:col-span-2 bg-white border-0 shadow-lg rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg font-bold">Portfolio Growth & Inflows</CardTitle>
+              <CardTitle className="text-lg font-bold">Portfolio Growth & Strategy</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -333,7 +322,7 @@ const InvestorDashboard = () => {
 
           <Card className="bg-white border-0 shadow-lg rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg font-bold">Hot Domains (Market Trends)</CardTitle>
+              <CardTitle className="text-lg font-bold">Hot Domains</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -358,7 +347,7 @@ const InvestorDashboard = () => {
               <div className="mt-4 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
                 <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1">Growth Insight</p>
                 <p className="text-[11px] text-indigo-900 font-medium">
-                  {marketTrends[0] ? `${marketTrends[0].name} is currently the top-moving sector with the highest founder activity.` : "Waiting for market data..."}
+                  {marketTrends[0] ? `${marketTrends[0].name} is currently the top-moving sector.` : "Calculating market flows..."}
                 </p>
               </div>
             </CardContent>
@@ -435,16 +424,15 @@ const InvestorDashboard = () => {
 
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-100 group-hover:bg-white transition-colors">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target</p>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Capital</p>
                       <p className="text-sm font-black text-slate-900">${idea.investment_needed.toLocaleString()}</p>
                     </div>
                     <div className="p-3 rounded-xl bg-indigo-50/30 border border-indigo-100 group-hover:bg-white transition-colors">
-                      <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Secured</p>
+                      <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Raised</p>
                       <p className="text-sm font-black text-indigo-600">${(idea.investment_received || 0).toLocaleString()}</p>
                     </div>
                   </div>
 
-                  {/* Project Analytics Section */}
                   <div className="space-y-4 mb-6">
                     <div>
                       <div className="flex justify-between text-[11px] font-bold mb-2">
@@ -463,33 +451,32 @@ const InvestorDashboard = () => {
 
                     <div className="bg-slate-900/5 p-4 rounded-xl space-y-3">
                       <div className="flex items-center justify-between text-[10px] font-bold">
-                        <span className="text-slate-400 uppercase">Est. Profits</span>
+                        <span className="text-slate-400 uppercase">Growth Potential</span>
                         <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <ArrowUpRight className="w-3 h-3" /> +18.4%
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[10px] font-bold">
-                        <span className="text-slate-400 uppercase">Operational Spend</span>
-                        <span className="text-slate-600">$4.2K / mo</span>
+                        <span className="text-slate-400 uppercase">Market Velocity</span>
+                        <span className="text-slate-600">High</span>
                       </div>
                     </div>
                   </div>
 
                   <Button
                     className={`w-full h-12 rounded-xl font-bold transition-all shadow-lg ${status === 'deal_done' || status === 'accepted' || status === 'communicating'
-                      ? 'bg-indigo-600 text-white shadow-indigo-100 hover:shadow-indigo-200'
+                      ? 'bg-indigo-600 text-white shadow-indigo-100'
                       : 'bg-slate-900 text-white hover:bg-slate-800'
                       }`}
                     onClick={() => handleReachOut(idea)}
-                    variant={status ? "outline" : "default"}
                   >
-                    {status === "accepted" || status === "communicating" || status === "deal_pending_investor" || status === "deal_done" ? (
+                    {status === "accepted" || status === "communicating" || status === "deal_done" ? (
                       <>
                         <MessageSquare className="w-4 h-4 mr-2" />
-                        Open Strategic Chat
+                        Enter Private Portal
                       </>
                     ) : status === "pending" ? (
-                      "Interest Notified"
+                      "Connection Pending"
                     ) : (
                       "Reach Out to Founder"
                     )}
@@ -499,14 +486,6 @@ const InvestorDashboard = () => {
             );
           })}
         </div>
-
-        {filteredIdeas.length === 0 && (
-          <div className="text-center py-20 bg-white/50 backdrop-blur-md rounded-3xl border-2 border-dashed border-slate-200 mt-10">
-            <Lightbulb className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900">No matching ventures found</h3>
-            <p className="text-slate-500 text-sm">Update your search filters or browse other domains</p>
-          </div>
-        )}
       </main>
 
       {selectedChat && profile && (
