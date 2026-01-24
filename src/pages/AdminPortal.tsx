@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
-const AdminPortal = () => {
+const AdminDashboard = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,14 +57,22 @@ const AdminPortal = () => {
 
   const toggleApprove = async (userId: string, currentStatus: boolean) => {
     const { error } = await supabase.from("profiles").update({ is_approved: !currentStatus }).eq("id", userId);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Success", description: `User ${!currentStatus ? 'approved' : 'unapproved'}` });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: `User ${!currentStatus ? 'approved' : 'unapproved'}` });
+      fetchData(); // Manually refresh data
+    }
   };
 
   const updateIdeaStatus = async (ideaId: string, newStatus: string) => {
     const { error } = await supabase.from("ideas").update({ status: newStatus }).eq("id", ideaId);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Success", description: "Idea status updated" });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Idea status updated" });
+      fetchData(); // Manually refresh data
+    }
   };
 
   const filteredUsers = users.filter(u => u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || u.email?.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -191,4 +199,4 @@ const AdminPortal = () => {
   );
 };
 
-export default AdminPortal;
+export default AdminDashboard;
