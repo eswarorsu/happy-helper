@@ -40,12 +40,29 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        checkProfileAndRedirect(session.user.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event, 'Session:', session);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Check if user has a profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (!profile) {
+          // New user after email verification - redirect to profile setup
+          const userType = session.user.user_metadata?.user_type || 'founder';
+          navigate(`/profile-setup?type=${userType}`);
+        } else {
+          // Existing user - redirect to dashboard
+          checkProfileAndRedirect(session.user.id);
+        }
       }
     });
 
+    // Check current session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         checkProfileAndRedirect(session.user.id);
@@ -53,7 +70,7 @@ const Auth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const checkProfileAndRedirect = async (userId: string) => {
     const { data: profile } = await supabase
@@ -127,7 +144,7 @@ const Auth = () => {
         email: validated.email,
         password: validated.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `https://innovestor.vercel.app/auth`,
           data: {
             name: validated.name,
             phone: validated.phone,
@@ -139,12 +156,21 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.session) {
-        navigate(`/profile-setup?type=${validated.userType}`);
-        toast({ title: "Account created!", description: "Please complete your profile" });
-      } else if (data.user) {
-        // User created but validation pending
-        toast({ title: "Verification Required", description: "Please check your email to verify your account before logging in." });
-        navigate("/auth?mode=login");
+        // Email confirmation disabled - direct login
+        const userType = validated.userType;
+        navigate(`/profile-setup?type=${userType}`);
+        toast({
+          title: "Account created!",
+          description: "Please complete your profile to get started"
+        });
+      } else if (data.user && !data.session) {
+        // Email confirmation required
+        toast({
+          title: "Please verify your email",
+          description: "We've sent you a verification link. Check your inbox and click the link to activate your account.",
+          duration: 8000
+        });
+        // Stay on registration page or show a confirmation message
       }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
