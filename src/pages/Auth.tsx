@@ -138,11 +138,14 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.user) {
+      if (data.session) {
         navigate(`/profile-setup?type=${validated.userType}`);
+        toast({ title: "Account created!", description: "Please complete your profile" });
+      } else if (data.user) {
+        // User created but validation pending
+        toast({ title: "Verification Required", description: "Please check your email to verify your account before logging in." });
+        navigate("/auth?mode=login");
       }
-
-      toast({ title: "Account created!", description: "Please complete your profile" });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

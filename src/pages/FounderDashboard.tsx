@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,15 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, User, Briefcase, GraduationCap, Calendar, Mail, Phone, ChevronRight, Handshake, ShieldCheck, Activity } from "lucide-react";
+import { Rocket, Plus, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, Check, X, User, Users, Briefcase, GraduationCap, Handshake, ShieldCheck, Activity, Pencil, ExternalLink, Menu, Phone, Mail, Linkedin, Globe } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ChatBox from "@/components/ChatBox";
+
+const DOMAINS = [
+  "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
+  "CleanTech", "AgriTech", "PropTech", "Gaming", "Social Media", "Logistics", "Other"
+];
 
 interface Profile {
   id: string;
@@ -26,6 +31,7 @@ interface Profile {
   education?: string;
   dob?: string;
   phone?: string;
+  avatar_url?: string;
 }
 
 interface Idea {
@@ -37,6 +43,12 @@ interface Idea {
   investment_received: number;
   status: string;
   created_at: string;
+  media_url?: string;
+  team_size?: string;
+  market_size?: string;
+  traction?: string;
+  linkedin_url?: string;
+  website_url?: string;
 }
 
 interface ChatRequest {
@@ -55,29 +67,18 @@ const COLORS = ["#1e293b", "#4338ca", "#0f172a", "#3730a3"];
 const FounderDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const ideasRef = useRef<HTMLDivElement>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAddingIdea, setIsAddingIdea] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatRequest | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (searchParams.get("payment") === "success") {
-      setIsDialogOpen(true);
-      setSearchParams({}, { replace: true });
-    }
-  }, [searchParams]);
-
-  const [newIdea, setNewIdea] = useState({
-    title: "",
-    description: "",
-    domain: "",
-    investment_needed: "",
-  });
+  // View idea state
+  const [viewingIdea, setViewingIdea] = useState<Idea | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -95,6 +96,16 @@ const FounderDashboard = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Handle scroll to ideas when parameter is present
+  useEffect(() => {
+    const scrollTo = searchParams.get('scrollTo');
+    if (scrollTo === 'ideas' && ideasRef.current) {
+      setTimeout(() => {
+        ideasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [searchParams]);
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -162,32 +173,8 @@ const FounderDashboard = () => {
     navigate("/");
   };
 
-  const handleAddIdea = async () => {
-    if (!profile) return;
-    if (!profile.is_approved) {
-      toast({ title: "Access Denied", description: "Your account is not yet verified.", variant: "destructive" });
-      return;
-    }
-    setIsAddingIdea(true);
-
-    const { error } = await supabase.from("ideas").insert({
-      founder_id: profile.id,
-      title: newIdea.title,
-      description: newIdea.description,
-      domain: newIdea.domain,
-      investment_needed: parseFloat(newIdea.investment_needed),
-      status: 'pending'
-    });
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Success", description: "Idea submitted for review" });
-      setNewIdea({ title: "", description: "", domain: "", investment_needed: "" });
-      fetchData();
-      setIsDialogOpen(false);
-    }
-    setIsAddingIdea(false);
+  const scrollToIdeas = () => {
+    ideasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleChatRequestAction = async (requestId: string, action: "accepted" | "rejected") => {
@@ -205,24 +192,29 @@ const FounderDashboard = () => {
     }
   };
 
+  // Open view dialog
+  const openViewDialog = (idea: Idea) => {
+    setViewingIdea(idea);
+    setIsViewDialogOpen(true);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "deal_done":
-        return <Badge className="bg-green-600 hover:bg-green-600 text-white flex gap-1 items-center">Deal Done 🤝</Badge>;
-      case "approved":
-        return <Badge className="bg-emerald-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><Check size={12}/> Verified & Live</Badge>;
-      case "rejected":
-        return <Badge className="bg-red-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><X size={12}/> Rejected</Badge>;
       case "pending":
         return <Badge className="bg-amber-100 text-amber-700 border-amber-200">Waiting Approval</Badge>;
-      case "communicating":
-        return <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">Communicating</Badge>;
-      case "deal_pending_investor":
-        return <Badge className="bg-amber-100 text-amber-700 animate-pulse border-amber-200">Investor Ready!</Badge>;
-      case "funded":
-        return <Badge variant="default" className="bg-blue-600">Funded</Badge>;
       case "in_progress":
-        return <Badge variant="secondary">In Progress</Badge>;
+        return <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">In Progress</Badge>;
+      case "funded":
+        return <Badge variant="default" className="bg-blue-600 text-white">Funded</Badge>;
+      case "completed":
+        return <Badge className="bg-green-600 hover:bg-green-600 text-white flex gap-1 items-center">Completed 🎉</Badge>;
+      case "rejected":
+        return <Badge className="bg-red-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><X size={12} /> Rejected</Badge>;
+      // Backward compatibility for non-schema statuses
+      case "approved":
+        return <Badge className="bg-emerald-500 text-white border-0 flex gap-1 items-center px-2 py-0.5 rounded-full text-[10px]"><Check size={12} /> Verified & Live</Badge>;
+      case "deal_done":
+        return <Badge className="bg-green-600 hover:bg-green-600 text-white flex gap-1 items-center">Deal Done 🤝</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -242,8 +234,8 @@ const FounderDashboard = () => {
   const fundingGap = totalInvestmentNeeded - totalInvestmentReceived;
 
   const statusData = [
-    { name: "Deal Done", value: ideas.filter((i) => i.status === "deal_done").length },
-    { name: "Live Ventures", value: ideas.filter((i) => i.status === "approved" || i.status === "in_progress").length },
+    { name: "Completed", value: ideas.filter((i) => i.status === "completed").length },
+    { name: "In Progress", value: ideas.filter((i) => i.status === "in_progress").length },
     { name: "Funded", value: ideas.filter((i) => i.status === "funded").length },
   ].filter((d) => d.value > 0);
 
@@ -270,70 +262,34 @@ const FounderDashboard = () => {
           <div className="flex items-center gap-6">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 rounded-full w-12 h-12">
-                  <User className="w-6 h-6" />
+                <Button variant="ghost" size="icon" className="mr-2 text-slate-600 hover:bg-slate-100 rounded-full w-10 h-10">
+                  <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[400px] sm:w-[540px] p-0 border-r-0 shadow-2xl">
-                <div className="h-full flex flex-col bg-white">
-                  <div className="bg-[#1e293b] p-8 text-white">
-                    <Avatar className="w-20 h-20 border-4 border-white/20 mb-4">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.name}`} />
-                      <AvatarFallback className="text-2xl font-bold bg-indigo-600">{profile?.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <h2 className="text-2xl font-bold mb-1">{profile?.name}</h2>
-                    <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest">{profile?.user_type}</p>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-8">
-                    <div className="space-y-8">
-                      <section>
-                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Professional Details</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <Briefcase className="w-5 h-5 text-indigo-600 mt-0.5" />
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase">Experience</p>
-                              <p className="text-sm font-semibold text-slate-700">{profile?.experience || "Not provided"}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <GraduationCap className="w-5 h-5 text-indigo-600 mt-0.5" />
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase">Education</p>
-                              <p className="text-sm font-semibold text-slate-700">{profile?.education || "Not provided"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-
-                      <section>
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Venture Portfolio</h3>
-                          <Badge variant="outline" className="rounded-full">{ideas.length} Ideas</Badge>
-                        </div>
-                        <div className="space-y-3">
-                          {ideas.map((idea) => (
-                            <div key={idea.id} className="p-4 rounded-xl border border-slate-200 hover:border-indigo-300 transition-all group">
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{idea.title}</p>
-                                {getStatusBadge(idea.status)}
-                              </div>
-                              <div className="flex items-center justify-between text-[10px]">
-                                <span className="text-slate-400 font-bold uppercase">{idea.domain}</span>
-                                <span className="text-slate-900 font-bold">${idea.investment_received.toLocaleString()} / ${idea.investment_needed.toLocaleString()}</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-                                <div
-                                  className="h-full bg-indigo-600"
-                                  style={{ width: `${Math.min((idea.investment_received / idea.investment_needed) * 100, 100)}%` }}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    </div>
+              <SheetContent side="left" className="w-[300px]">
+                <SheetHeader className="mb-6">
+                  <SheetTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
+                    <Rocket className="w-5 h-5 text-indigo-600" /> Menu
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="space-y-2">
+                  <Button variant="ghost" className="w-full justify-start h-12 text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => navigate("/founder-dashboard")}>
+                    <Rocket className="w-5 h-5 mr-3" /> Dashboard
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start h-12 text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 group" onClick={scrollToIdeas}>
+                    <Lightbulb className="w-5 h-5 mr-3" />
+                    <span className="flex-1 text-left">Ideas Submitted</span>
+                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 border-0 ml-2 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                      {totalIdeas}
+                    </Badge>
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start h-12 text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => navigate("/profile")}>
+                    <User className="w-5 h-5 mr-3" /> Profile
+                  </Button>
+                  <div className="pt-4 mt-4 border-t border-slate-100">
+                    <Button variant="ghost" className="w-full justify-start h-12 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
+                      <LogOut className="w-5 h-5 mr-3" /> Sign Out
+                    </Button>
                   </div>
                 </div>
               </SheetContent>
@@ -344,21 +300,26 @@ const FounderDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end">
+            <div className="hidden md:flex flex-col items-end">
               <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
               {profile?.is_approved ? (
                 <Badge className="bg-emerald-500 text-white gap-1 px-2 py-0.5 rounded-full text-[10px] mt-1 shadow-sm shadow-emerald-100 ring-2 ring-emerald-50">
-                  <ShieldCheck size={12}/> Verified Founder
+                  <ShieldCheck size={12} /> Verified Founder
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="text-[9px] gap-1 px-2 py-0.5 rounded-full mt-1 bg-slate-100 text-slate-500">
-                  <Activity size={10}/> Verification Pending
+                  <Activity size={10} /> Verification Pending
                 </Badge>
               )}
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </Button>
+            <Avatar className="h-10 w-10 border-2 border-slate-100 shadow-sm">
+              <AvatarImage src={profile?.avatar_url} />
+              <AvatarFallback className="font-bold bg-indigo-50 text-indigo-600">
+                {profile?.name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+
+
           </div>
         </div>
       </header>
@@ -432,18 +393,17 @@ const FounderDashboard = () => {
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8" ref={ideasRef}>
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">Your Ventures</h2>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <Button
                 onClick={() => {
                   if (!profile?.is_approved) {
-                    toast({ 
-                      title: "Verification Required", 
-                      description: "Your profile must be verified by an admin before you can launch an idea.", 
-                      variant: "destructive" 
+                    toast({
+                      title: "Verification Required",
+                      description: "Your profile must be verified by an admin before you can launch an idea.",
+                      variant: "destructive"
                     });
                     return;
                   }
@@ -453,53 +413,39 @@ const FounderDashboard = () => {
               >
                 <Plus className="w-4 h-4 mr-2" /> Launch New Idea
               </Button>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Launch Idea</DialogTitle>
-                    <DialogDescription>Fuel your next big thing</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <div className="space-y-1.5">
-                      <Label>Title</Label>
-                      <Input value={newIdea.title} onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Domain</Label>
-                        <Input value={newIdea.domain} onChange={(e) => setNewIdea({ ...newIdea, domain: e.target.value })} />
-                      </div>
-                      <div>
-                        <Label>Goal ($)</Label>
-                        <Input type="number" value={newIdea.investment_needed} onChange={(e) => setNewIdea({ ...newIdea, investment_needed: e.target.value })} />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Description</Label>
-                      <Textarea value={newIdea.description} onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })} rows={4} />
-                    </div>
-                    <Button onClick={handleAddIdea} className="w-full" disabled={isAddingIdea}>
-                      {isAddingIdea ? "Processing..." : "Submit"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               {ideas.map((idea) => (
-                <Card key={idea.id} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl">
+                <Card
+                  key={idea.id}
+                  className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl cursor-pointer"
+                  onClick={() => openViewDialog(idea)}
+                >
                   <div className="h-1 bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {idea.title} {idea.status === "deal_done" && "🤝"}
+                      <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center gap-2">
+                        {idea.title} {idea.status === "completed" && "🎉"}
+                        {/* <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" /> */}
                       </CardTitle>
                       {getStatusBadge(idea.status)}
                     </div>
                     <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">{idea.domain}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500 mb-6 line-clamp-2">{idea.description}</p>
+                    <p className="text-xs text-slate-500 mb-4 line-clamp-2">{idea.description}</p>
+                    {idea.media_url && (
+                      <a
+                        href={idea.media_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-700 font-bold mb-4"
+                      >
+                        <ExternalLink className="w-3 h-3" /> View Pitch Deck
+                      </a>
+                    )}
                     <div className="space-y-3">
                       <div className="flex justify-between text-[11px] font-bold">
                         <span className="text-slate-400 uppercase tracking-tighter">Target</span>
@@ -600,6 +546,63 @@ const FounderDashboard = () => {
           }}
         />
       )}
+
+      {/* View Idea Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-yellow-500" />
+              {viewingIdea?.title}
+            </DialogTitle>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-50">
+                {viewingIdea?.domain}
+              </Badge>
+              {viewingIdea?.status && getStatusBadge(viewingIdea.status)}
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Target</p>
+                <p className="text-lg font-black text-slate-900">${viewingIdea?.investment_needed.toLocaleString()}</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Raised</p>
+                <p className="text-lg font-black text-slate-900">${viewingIdea?.investment_received.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-indigo-600" />
+                Description
+              </h3>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 max-h-[300px] overflow-y-auto">
+                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                  {viewingIdea?.description}
+                </p>
+              </div>
+            </div>
+
+            {viewingIdea?.media_url && (
+              <div className="pt-2">
+                <a
+                  href={viewingIdea.media_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full p-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold transition-colors border border-indigo-100"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Pitch Deck / Documents
+                </a>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

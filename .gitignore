@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 backend/.env
+
+
+.agent

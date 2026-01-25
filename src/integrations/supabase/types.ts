@@ -71,6 +71,11 @@ export type Database = {
           title: string
           updated_at: string
           media_url?: string | null
+          team_size?: string | null
+          market_size?: string | null
+          traction?: string | null
+          linkedin_url?: string | null
+          website_url?: string | null
         }
         Insert: {
           created_at?: string
@@ -84,6 +89,11 @@ export type Database = {
           title: string
           updated_at?: string
           media_url?: string | null
+          team_size?: string | null
+          market_size?: string | null
+          traction?: string | null
+          linkedin_url?: string | null
+          website_url?: string | null
         }
         Update: {
           created_at?: string
@@ -97,6 +107,11 @@ export type Database = {
           title?: string
           updated_at?: string
           media_url?: string | null
+          team_size?: string | null
+          market_size?: string | null
+          traction?: string | null
+          linkedin_url?: string | null
+          website_url?: string | null
         }
         Relationships: [
           {
@@ -148,6 +163,73 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      payments: {
+        Row: {
+          id: string
+          user_id: string
+          profile_id: string | null
+          razorpay_order_id: string
+          razorpay_payment_id: string | null
+          razorpay_signature: string | null
+          amount: number
+          currency: string
+          status: string
+          idea_id: string | null
+          created_at: string
+          verified_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          profile_id?: string | null
+          razorpay_order_id: string
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          amount: number
+          currency?: string
+          status?: string
+          idea_id?: string | null
+          created_at?: string
+          verified_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          profile_id?: string | null
+          razorpay_order_id?: string
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          amount?: number
+          currency?: string
+          status?: string
+          idea_id?: string | null
+          created_at?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          }
         ]
       }
       profiles: {

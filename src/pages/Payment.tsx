@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, CreditCard, Wallet } from "lucide-react";
+import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, CreditCard, Wallet, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Valid coupon codes that skip payment (you can modify these)
+const VALID_COUPONS = ["FREEIDEA", "INNOVESTOR100", "SKIP2026"];
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -16,6 +20,11 @@ const Payment = () => {
     const [isVerifying, setIsVerifying] = useState(false);
     const [paymentStarted, setPaymentStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+
+    // Coupon code state
+    const [couponCode, setCouponCode] = useState("");
+    const [isCouponValid, setIsCouponValid] = useState(false);
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
     // Timer logic
     useEffect(() => {
@@ -50,6 +59,120 @@ const Payment = () => {
             setIsVerified(true);
             toast({ title: "UPI Verified", description: "Your UPI ID has been successfully verified." });
         }, 1500);
+    };
+
+    // Validate and redeem coupon code
+    const handleValidateCoupon = async () => {
+        if (!couponCode.trim()) return;
+
+        setIsValidatingCoupon(true);
+
+        // Simulate validation delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const isValid = VALID_COUPONS.includes(couponCode.toUpperCase().trim());
+        setIsCouponValid(isValid);
+        setIsValidatingCoupon(false);
+
+        if (isValid) {
+            toast({
+                title: "Coupon Applied! 🎉",
+                description: "Payment skipped. Redirecting to submit your idea..."
+            });
+
+            // Auto-redeem after successful validation
+            setIsProcessing(true);
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (session?.user) {
+                    // Create a "free" payment record with coupon
+                    const { error: paymentError } = await supabase
+                        .from("payments")
+                        .insert({
+                            user_id: session.user.id,
+                            razorpay_order_id: `COUPON_${couponCode.toUpperCase()}_${Date.now()}`,
+                            razorpay_payment_id: `FREE_${Date.now()}`,
+                            razorpay_signature: "COUPON_REDEMPTION",
+                            amount: 0,
+                            status: "success",
+                            verified_at: new Date().toISOString()
+                        });
+
+                    if (paymentError) {
+                        console.error("Failed to store coupon payment:", paymentError);
+                        toast({
+                            title: "Error",
+                            description: "Failed to apply coupon. Please try again.",
+                            variant: "destructive"
+                        });
+                        setIsProcessing(false);
+                        return;
+                    }
+                }
+
+                // Redirect to submit idea page
+                navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
+
+            } catch (error) {
+                console.error(error);
+                toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+                setIsProcessing(false);
+            }
+        } else {
+            toast({
+                title: "Invalid Coupon",
+                description: "This coupon code is not valid.",
+                variant: "destructive"
+            });
+        }
+    };
+
+    // Redeem coupon and skip payment
+    const handleRedeemCoupon = async () => {
+        if (!isCouponValid) return;
+
+        setIsProcessing(true);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (session?.user) {
+                // Create a "free" payment record with coupon
+                const { error: paymentError } = await supabase
+                    .from("payments")
+                    .insert({
+                        user_id: session.user.id,
+                        razorpay_order_id: `COUPON_${couponCode.toUpperCase()}_${Date.now()}`,
+                        razorpay_payment_id: `FREE_${Date.now()}`,
+                        razorpay_signature: "COUPON_REDEMPTION",
+                        amount: 0,
+                        status: "success",
+                        verified_at: new Date().toISOString()
+                    });
+
+                if (paymentError) {
+                    console.error("Failed to store coupon payment:", paymentError);
+                    toast({
+                        title: "Error",
+                        description: "Failed to apply coupon. Please try again.",
+                        variant: "destructive"
+                    });
+                    setIsProcessing(false);
+                    return;
+                }
+            }
+
+            // Redirect to submit idea page
+            navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
+
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const handlePayment = async () => {
@@ -94,12 +217,34 @@ const Payment = () => {
                     const result = await verifyRes.json();
 
                     if (result.success) {
+                        // 4️⃣ Store payment in Supabase database
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        if (session?.user) {
+                            const { error: paymentError } = await supabase
+                                .from("payments")
+                                .insert({
+                                    user_id: session.user.id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: 499,
+                                    status: "success",
+                                    verified_at: new Date().toISOString()
+                                });
+
+                            if (paymentError) {
+                                console.error("Failed to store payment:", paymentError);
+                            }
+                        }
+
                         toast({
                             title: "Payment Successful 🎉",
-                            description: "Redirecting to dashboard...",
+                            description: "Redirecting to submit your idea...",
                         });
 
-                        navigate("/founder-dashboard?payment=success");
+                        // 5️⃣ Redirect to submit idea page with payment ID
+                        navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
                     } else {
                         toast({
                             title: "Payment Failed",
@@ -269,7 +414,7 @@ const Payment = () => {
 
                                     <Button
                                         onClick={handlePayment}
-                                        disabled={isProcessing || !isVerified}
+                                        disabled={isProcessing || !isVerified || isCouponValid}
                                         className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xl shadow-indigo-100 text-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                                     >
                                         {isProcessing ? (
@@ -289,6 +434,70 @@ const Payment = () => {
                                     <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                         <ShieldCheck className="w-4 h-4 text-green-500" />
                                         Secure SSL Encrypted Payment
+                                    </div>
+
+                                    {/* Coupon Code Section */}
+                                    <div className="relative py-4">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <div className="w-full border-t border-slate-200" />
+                                        </div>
+                                        <div className="relative flex justify-center">
+                                            <span className="bg-white px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                Or use a coupon
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                <Input
+                                                    placeholder="Enter coupon code"
+                                                    value={couponCode}
+                                                    onChange={(e) => {
+                                                        setCouponCode(e.target.value.toUpperCase());
+                                                        setIsCouponValid(false);
+                                                    }}
+                                                    className={`h-12 pl-10 bg-slate-50/50 border-slate-200 focus:ring-indigo-600 rounded-xl font-medium uppercase ${isCouponValid ? "border-green-500 bg-green-50/30" : ""}`}
+                                                    disabled={isProcessing}
+                                                />
+                                                {isCouponValid && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Button
+                                                onClick={handleValidateCoupon}
+                                                disabled={isValidatingCoupon || isCouponValid || !couponCode.trim() || isProcessing}
+                                                variant="outline"
+                                                className={`h-12 px-6 rounded-xl font-bold border-2 transition-all ${isCouponValid ? "border-green-500 text-green-600 bg-green-50" : "border-indigo-100 text-indigo-600 hover:bg-indigo-50"}`}
+                                            >
+                                                {isValidatingCoupon ? "..." : isCouponValid ? "Valid" : "Apply"}
+                                            </Button>
+                                        </div>
+
+                                        {isCouponValid && (
+                                            <Button
+                                                onClick={handleRedeemCoupon}
+                                                disabled={isProcessing}
+                                                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg shadow-green-100 font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                            >
+                                                {isProcessing ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                        Processing...
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <Ticket className="w-4 h-4" />
+                                                        Skip Payment & Submit Idea
+                                                        <ArrowRight className="w-4 h-4 ml-1" />
+                                                    </div>
+                                                )}
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
