@@ -111,27 +111,37 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
       }
     }
   };
+import { ref, push, serverTimestamp } from "firebase/database";
+import { db } from "@/lib/firebase";
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || isLoading) return;
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!newMessage.trim() || isLoading) return;
 
-    setIsLoading(true);
-    //const { error } = await supabase
-    //.from("messages")
-      //.insert({
-        //chat_request_id: chatRequest.id,
-        //sender_id: currentUserId,
-        //content: newMessage,
-      //});
+  setIsLoading(true);
 
-    if (error) {
-      toast({ title: "Error", description: "Failed to send message", variant: "destructive" });
-    } else {
-      setNewMessage("");
-    }
+  try {
+    const chatId = `${chatRequest.founder_id}_${chatRequest.investor_id}`;
+
+    await push(ref(db, `chats/${chatId}/messages`), {
+      senderId: currentUserId,
+      text: newMessage,
+      createdAt: serverTimestamp(),
+    });
+
+    setNewMessage("");
+  } catch (err) {
+    toast({
+      title: "Error",
+      description: "Failed to send message (Firebase)",
+      variant: "destructive",
+    });
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
+
+  
 
   const handleFileClick = () => {
     fileInputRef.current?.click();
