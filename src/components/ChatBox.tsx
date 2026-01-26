@@ -183,13 +183,13 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
         fileType: file.type,
       };
 
-      const { error: msgError } = await supabase
-        .from("messages")
-        .insert({
-          chat_request_id: chatRequest.id,
-          sender_id: currentUserId,
-          content: JSON.stringify(attachmentData),
-        });
+     // const { error: msgError } = await supabase
+      //  .from("messages")
+        //.insert({
+          //chat_request_id: chatRequest.id,
+          //sender_id: currentUserId,
+          //content: JSON.stringify(attachmentData),
+      //  });
 
       if (msgError) throw msgError;
 
