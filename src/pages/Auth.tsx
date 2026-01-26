@@ -10,6 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Rocket, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { connectFirebase } from "@/lib/firebase";
+import { ref, set } from "firebase/database";
+import { db } from "@/lib/firebase";
+
 
 
 const registerSchema = z.object({
@@ -48,6 +51,11 @@ const Auth = () => {
       if (event === 'SIGNED_IN' && session?.user) {
   // 🔥 CONNECT FIREBASE HERE
   await connectFirebase();
+
+  set(ref(db, "debug-test"), {
+    ok: true,
+    time: Date.now(),
+  });
 
   // Check if user has a profile
   const { data: profile } = await supabase
