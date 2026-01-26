@@ -86,12 +86,12 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     setRequestStatus(chatRequest.status);
   }, [chatRequest.status]);
 
-  const fetchMessages = async () => {
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("chat_request_id", chatRequest.id)
-      .order("created_at", { ascending: true });
+ // const fetchMessages = async () => {
+   // const { data } = await supabase
+     // .from("messages")
+      //.select("*")
+      //.eq("chat_request_id", chatRequest.id)
+      //.order("created_at", { ascending: true });
 
     if (data) {
       setMessages(data);
