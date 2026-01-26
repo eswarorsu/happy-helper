@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
+import { connectFirebase } from "@/lib/firebase";
 
 const COLORS = ["#4338ca", "#6366f1", "#818cf8", "#a5b4fc"];
 
@@ -102,6 +103,12 @@ const InvestorDashboard = () => {
       return;
     }
 
+    try {
+      await connectFirebase();
+    } catch (e) {
+      console.error("Failed to connect to Firebase:", e);
+    }
+
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -152,7 +159,7 @@ const InvestorDashboard = () => {
 
   const handleReachOut = async (idea: Idea) => {
     if (!profile) return;
-    
+
     if (!profile.is_approved) {
       toast({ title: "Verification Required", description: "Wait for an admin to verify your profile.", variant: "destructive" });
       return;
@@ -246,26 +253,26 @@ const InvestorDashboard = () => {
       </div>
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                <Rocket className="w-6 h-6 text-white" />
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black tracking-tight text-slate-900 uppercase">Innovestor</span>
+                {profile?.is_approved && <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full text-[10px]"><ShieldCheck size={12} /> Verified LP</Badge>}
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-black tracking-tight text-slate-900 uppercase">Innovestor</span>
-                  {profile?.is_approved && <Badge className="bg-green-500 text-white gap-1 px-2 py-0.5 rounded-full text-[10px]"><ShieldCheck size={12}/> Verified LP</Badge>}
-                </div>
-                <span className="text-[10px] font-black uppercase text-indigo-600 tracking-widest">Investor Hub</span>
-              </div>
+              <span className="text-[10px] font-black uppercase text-indigo-600 tracking-widest">Investor Hub</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </Button>
-          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
+            <LogOut className="w-4 h-4 mr-2" /> Logout
+          </Button>
+        </div>
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-10">

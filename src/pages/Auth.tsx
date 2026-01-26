@@ -49,37 +49,36 @@ const Auth = () => {
       console.log('Auth event:', event, 'Session:', session);
 
       if (event === 'SIGNED_IN' && session?.user) {
-  // 🔥 CONNECT FIREBASE HERE
-  await connectFirebase();
+        // 🔥 CONNECT FIREBASE HERE
+        try {
+          await connectFirebase();
+        } catch (e) {
+          console.error("Auto-connect Firebase failed:", e);
+        }
 
-  set(ref(db, "debug-test"), {
-    ok: true,
-    time: Date.now(),
-  });
+        // Check if user has a profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
 
-  // Check if user has a profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .single();
-
-  if (!profile) {
-    const userType = session.user.user_metadata?.user_type || 'founder';
-    navigate(`/profile-setup?type=${userType}`);
-  } else {
-    checkProfileAndRedirect(session.user.id);
-  }
-}
+        if (!profile) {
+          const userType = session.user.user_metadata?.user_type || 'founder';
+          navigate(`/profile-setup?type=${userType}`);
+        } else {
+          checkProfileAndRedirect(session.user.id);
+        }
+      }
     });
 
     // Check current session on mount
-   supabase.auth.getSession().then(async ({ data: { session } }) => {
-  if (session?.user) {
-    await connectFirebase(); // ✅ ADD THIS
-    checkProfileAndRedirect(session.user.id);
-  }
-});
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        await connectFirebase(); // ✅ ADD THIS
+        checkProfileAndRedirect(session.user.id);
+      }
+    });
 
 
     return () => subscription.unsubscribe();
@@ -107,39 +106,53 @@ const Auth = () => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setErrors({});
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
 
-  try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    if (error) {
-      throw error;
+      if (error) {
+        throw error;
+      }
+
+      // ✅ SUPABASE LOGIN SUCCESS
+      toast({
+        title: "Welcome back!",
+        description: "Login successful",
+      });
+
+      // 🔥 CONNECT FIREBASE (non-blocking)
+      try {
+        await connectFirebase();
+      } catch (firebaseError: any) {
+        console.error("Firebase connection failed:", firebaseError);
+        // Only show warning if it's the specific restricted operation error
+        if (firebaseError.code === 'auth/admin-restricted-operation') {
+          toast({
+            title: "Chat Unavailable",
+            description: "Please enable 'Anonymous' sign-in in Firebase Console > Authentication.",
+            variant: "destructive",
+            duration: 10000
+          });
+        }
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    // ✅ SUPABASE LOGIN SUCCESS
-    // 🔥 NOW CONNECT FIREBASE (anonymous)
-
-    toast({
-      title: "Welcome back!",
-      description: "Login successful",
-    });
-
-  } catch (error: any) {
-    toast({
-      title: "Login failed",
-      description: error.message || "Invalid credentials",
-      variant: "destructive",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,7 +166,7 @@ const handleLogin = async (e: React.FormEvent) => {
         email: validated.email,
         password: validated.password,
         options: {
-          emailRedirectTo: `https://innovestor.vercel.app/auth`,
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             name: validated.name,
             phone: validated.phone,
@@ -164,15 +177,15 @@ const handleLogin = async (e: React.FormEvent) => {
 
       if (error) throw error;
 
-    if (data.session) {
+      if (data.session) {
 
-  const userType = validated.userType;
-  navigate(`/profile-setup?type=${userType}`);
-  toast({
-    title: "Account created!",
-    description: "Please complete your profile to get started",
-  });
-}else if (data.user && !data.session) {
+        const userType = validated.userType;
+        navigate(`/profile-setup?type=${userType}`);
+        toast({
+          title: "Account created!",
+          description: "Please complete your profile to get started",
+        });
+      } else if (data.user && !data.session) {
         // Email confirmation required
         toast({
           title: "Please verify your email",

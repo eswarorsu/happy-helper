@@ -8,14 +8,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import chatBg from "./chat-bg.png";
 
+import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as FirebaseMessage } from "@/lib/firebase";
 import { Send, Handshake, CheckCircle2, DollarSign, Badge, Paperclip, Image as ImageIcon, FileText, Download, File as FileIcon } from "lucide-react";
 
-interface Message {
+interface Message extends Omit<FirebaseMessage, 'id' | 'created_at'> {
   id: string;
-  sender_id: string;
-  content: string;
   created_at: string;
-  is_read?: boolean;
 }
 
 interface ChatBoxProps {
@@ -39,28 +37,31 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
   const otherPartyName = isFounder ? chatRequest.investor?.name : chatRequest.founder?.name;
 
   useEffect(() => {
-    fetchMessages();
+    const chatId = chatRequest.id;
+    const unsubscribe = subscribeToChat(chatId, (msgs) => {
+      const formattedMessages = msgs.map(msg => ({
+        ...msg,
+        id: msg.id || 'temp-id',
+        created_at: typeof msg.created_at === 'number'
+          ? new Date(msg.created_at).toISOString()
+          : new Date().toISOString()
+      }));
+      setMessages(formattedMessages);
+
+      // Mark unread messages from others as read
+      msgs.forEach(msg => {
+        if (!msg.is_read && msg.sender_id !== currentUserId && msg.id) {
+          markMessageAsRead(chatId, msg.id).catch(console.error);
+        }
+      });
+
+      if (msgs.some(m => !m.is_read && m.sender_id !== currentUserId)) {
+        onMessagesRead?.();
+      }
+    });
 
     const channel = supabase
-      .channel(`chat:${chatRequest.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `chat_request_id=eq.${chatRequest.id}` },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          setMessages((prev) => [...prev, newMessage]);
-
-          // If message is from other party, mark as read immediately
-          if (newMessage.sender_id !== currentUserId) {
-            supabase.rpc('mark_messages_as_read', {
-              p_chat_request_id: chatRequest.id
-            }).then(({ error }) => {
-              if (error) console.error("Error marking message as read (realtime RPC):", error);
-              else if (onMessagesRead) onMessagesRead();
-            });
-          }
-        }
-      )
+      .channel(`chat-status:${chatRequest.id}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "chat_requests", filter: `id=eq.${chatRequest.id}` },
@@ -71,6 +72,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
       .subscribe();
 
     return () => {
+      unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [chatRequest.id, currentUserId, onMessagesRead]);
@@ -86,62 +88,31 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     setRequestStatus(chatRequest.status);
   }, [chatRequest.status]);
 
- // const fetchMessages = async () => {
-   // const { data } = await supabase
-     // .from("messages")
-      //.select("*")
-      //.eq("chat_request_id", chatRequest.id)
-      //.order("created_at", { ascending: true });
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || isLoading) return;
 
-    if (data) {
-      setMessages(data);
+    setIsLoading(true);
 
-      // Mark unread messages as read
-      const unreadMessages = data.filter(m => !m.is_read && m.sender_id !== currentUserId);
-      if (unreadMessages.length > 0) {
-        const { error } = await supabase.rpc('mark_messages_as_read', {
-          p_chat_request_id: chatRequest.id
-        });
-
-        if (error) {
-          console.error("Error marking messages as read (RPC fetch):", error);
-        } else if (onMessagesRead) {
-          onMessagesRead();
-        }
-      }
+    try {
+      await sendMessage(chatRequest.id, {
+        sender_id: currentUserId,
+        content: newMessage,
+        type: 'text'
+      });
+      setNewMessage("");
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to send message (Firebase)",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-import { ref, push, serverTimestamp } from "firebase/database";
-import { db } from "@/lib/firebase";
 
-const handleSendMessage = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!newMessage.trim() || isLoading) return;
 
-  setIsLoading(true);
-
-  try {
-    const chatId = `${chatRequest.founder_id}_${chatRequest.investor_id}`;
-
-    await push(ref(db, `chats/${chatId}/messages`), {
-      senderId: currentUserId,
-      text: newMessage,
-      createdAt: serverTimestamp(),
-    });
-
-    setNewMessage("");
-  } catch (err) {
-    toast({
-      title: "Error",
-      description: "Failed to send message (Firebase)",
-      variant: "destructive",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  
 
   const handleFileClick = () => {
     fileInputRef.current?.click();
@@ -193,15 +164,14 @@ const handleSendMessage = async (e: React.FormEvent) => {
         fileType: file.type,
       };
 
-     // const { error: msgError } = await supabase
-      //  .from("messages")
-        //.insert({
-          //chat_request_id: chatRequest.id,
-          //sender_id: currentUserId,
-          //content: JSON.stringify(attachmentData),
-      //  });
-
-      if (msgError) throw msgError;
+      await sendMessage(chatRequest.id, {
+        sender_id: currentUserId,
+        content: JSON.stringify(attachmentData),
+        type: 'attachment',
+        fileUrl: publicUrl,
+        fileName: file.name,
+        fileType: file.type
+      });
 
       toast({ title: "File shared", description: "Your document has been sent successfully." });
     } catch (error: any) {
@@ -328,7 +298,7 @@ const handleSendMessage = async (e: React.FormEvent) => {
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-<DialogContent className="sm:max-w-[520px] h-[700px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
+      <DialogContent className="sm:max-w-[520px] h-[700px] flex flex-col p-0 overflow-hidden border-0 shadow-2xl">
         <DialogHeader className="px-4 py-3 border-b bg-white flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 border-2 border-indigo-100">
@@ -366,48 +336,46 @@ const handleSendMessage = async (e: React.FormEvent) => {
             )}
           </div>
         </DialogHeader>
-<ScrollArea
-   className="relative"
-  style={{
-    height: "calc(100% - 230px)", 
-    backgroundImage: `url(${chatBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  }}
->
-<div className="absolute inset-0 bg-white/0 backdrop-blur-sm pointer-events-none" />
-
-  <div className="relative z-10 space-y-3">
-    {messages.map((message) => (
-      <div
-        key={message.id}
-        className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"}`}
-      >
-        <div
-          className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${
-            message.sender_id === currentUserId
-              ? "bg-indigo-600 text-white rounded-tr-none"
-              : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
-          }`}
+        <ScrollArea
+          className="relative"
+          style={{
+            height: "calc(100% - 230px)",
+            backgroundImage: `url(${chatBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
         >
-          {renderMessageContent(message.content)}
-          <p className={`text-[9px] mt-1 opacity-60 ${
-            message.sender_id === currentUserId ? "text-right" : "text-left"
-          }`}>
-            {new Date(message.created_at).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-        </div>
-      </div>
-    ))}
-    <div ref={scrollRef} />
-  </div>
-</ScrollArea>
+          <div className="absolute inset-0 bg-white/0 backdrop-blur-sm pointer-events-none" />
 
-    
+          <div className="relative z-10 space-y-3">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${message.sender_id === currentUserId
+                    ? "bg-indigo-600 text-white rounded-tr-none"
+                    : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
+                    }`}
+                >
+                  {renderMessageContent(message.content)}
+                  <p className={`text-[9px] mt-1 opacity-60 ${message.sender_id === currentUserId ? "text-right" : "text-left"
+                    }`}>
+                    {new Date(message.created_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            <div ref={scrollRef} />
+          </div>
+        </ScrollArea>
+
+
 
         <div className="p-4 border-t bg-white space-y-4">
           {requestStatus === "deal_done" && isFounder && (

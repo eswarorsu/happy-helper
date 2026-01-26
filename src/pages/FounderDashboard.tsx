@@ -15,6 +15,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ChatBox from "@/components/ChatBox";
+import { getUnreadCount, connectFirebase } from "@/lib/firebase";
 
 const DOMAINS = [
   "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
@@ -114,6 +115,14 @@ const FounderDashboard = () => {
       return;
     }
 
+    console.log("Found session, connecting Firebase...");
+    try {
+      await connectFirebase();
+      console.log("Firebase connected.");
+    } catch (e) {
+      console.error("Failed to connect to Firebase:", e);
+    }
+
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -149,22 +158,24 @@ const FounderDashboard = () => {
       `)
       .eq("founder_id", profileData.id);
 
-    if (requestsData) {
-      const requestsWithCounts = await Promise.all(requestsData.map(async (request) => {
-        const { count } = await supabase
-          .from("messages")
-          .select("*", { count: 'exact', head: true })
-          .eq("chat_request_id", request.id)
-          .eq("is_read", false)
-          .neq("sender_id", profileData.id);
 
-        return { ...request, unread_count: count || 0 };
+    if (requestsData) {
+      console.log("Fetching message counts for", requestsData.length, "requests");
+      const requestsWithCounts = await Promise.all(requestsData.map(async (request) => {
+        try {
+          const count = await getUnreadCount(request.id, profileData.id);
+          return { ...request, unread_count: count };
+        } catch (err) {
+          console.error("Error fetching unread count for", request.id, err);
+          return { ...request, unread_count: 0 };
+        }
       }));
       setChatRequests(requestsWithCounts);
     } else {
       setChatRequests([]);
     }
 
+    console.log("Data fetch complete, disabling loading state");
     setIsLoading(false);
   };
 
