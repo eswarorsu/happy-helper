@@ -117,12 +117,12 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead }: ChatBo
     if (!newMessage.trim() || isLoading) return;
 
     setIsLoading(true);
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        chat_request_id: chatRequest.id,
-        sender_id: currentUserId,
-        content: newMessage,
+    const { error } = // await supabase
+      //.from("messages")
+      //.insert({
+        //chat_request_id: chatRequest.id,
+        //sender_id: currentUserId,
+        //content: newMessage,
       });
 
     if (error) {
