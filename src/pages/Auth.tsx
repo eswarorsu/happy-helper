@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, ArrowLeft } from "lucide-react";
 import { z } from "zod";
+import { connectFirebase } from "@/lib/firebase";
+
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -44,30 +46,33 @@ const Auth = () => {
       console.log('Auth event:', event, 'Session:', session);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        // Check if user has a profile
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single();
+  // 🔥 CONNECT FIREBASE HERE
+  await connectFirebase();
 
-        if (!profile) {
-          // New user after email verification - redirect to profile setup
-          const userType = session.user.user_metadata?.user_type || 'founder';
-          navigate(`/profile-setup?type=${userType}`);
-        } else {
-          // Existing user - redirect to dashboard
-          checkProfileAndRedirect(session.user.id);
-        }
-      }
+  // Check if user has a profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", session.user.id)
+    .single();
+
+  if (!profile) {
+    const userType = session.user.user_metadata?.user_type || 'founder';
+    navigate(`/profile-setup?type=${userType}`);
+  } else {
+    checkProfileAndRedirect(session.user.id);
+  }
+}
     });
 
     // Check current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        checkProfileAndRedirect(session.user.id);
-      }
-    });
+   supabase.auth.getSession().then(async ({ data: { session } }) => {
+  if (session?.user) {
+    await connectFirebase(); // ✅ ADD THIS
+    checkProfileAndRedirect(session.user.id);
+  }
+});
+
 
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -94,43 +99,39 @@ const Auth = () => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setErrors({});
 
-    try {
-      const validated = loginSchema.parse({
-        email: formData.email,
-        password: formData.password,
-      });
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
+    });
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: validated.email,
-        password: validated.password,
-      });
-
-      if (error) throw error;
-
-      toast({ title: "Welcome back!", description: "Login successful" });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
-        });
-        setErrors(fieldErrors);
-      } else {
-        toast({
-          title: "Login failed",
-          description: error.message || "Please check your credentials",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsLoading(false);
+    if (error) {
+      throw error;
     }
-  };
+
+    // ✅ SUPABASE LOGIN SUCCESS
+    // 🔥 NOW CONNECT FIREBASE (anonymous)
+
+    toast({
+      title: "Welcome back!",
+      description: "Login successful",
+    });
+
+  } catch (error: any) {
+    toast({
+      title: "Login failed",
+      description: error.message || "Invalid credentials",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,15 +156,15 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.session) {
-        // Email confirmation disabled - direct login
-        const userType = validated.userType;
-        navigate(`/profile-setup?type=${userType}`);
-        toast({
-          title: "Account created!",
-          description: "Please complete your profile to get started"
-        });
-      } else if (data.user && !data.session) {
+    if (data.session) {
+
+  const userType = validated.userType;
+  navigate(`/profile-setup?type=${userType}`);
+  toast({
+    title: "Account created!",
+    description: "Please complete your profile to get started",
+  });
+}else if (data.user && !data.session) {
         // Email confirmation required
         toast({
           title: "Please verify your email",
