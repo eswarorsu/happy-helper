@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, CreditCard, Wallet, Ticket } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, Wallet, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Valid coupon codes that skip payment (you can modify these)
 const VALID_COUPONS = ["FREEIDEA", "INNOVESTOR100", "SKIP2026"];
 
 const Payment = () => {
@@ -19,32 +19,23 @@ const Payment = () => {
     const [isVerified, setIsVerified] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [paymentStarted, setPaymentStarted] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+    const [timeLeft, setTimeLeft] = useState(600);
 
-    // Coupon code state
     const [couponCode, setCouponCode] = useState("");
     const [isCouponValid, setIsCouponValid] = useState(false);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
-    // Timer logic
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (paymentStarted && timeLeft > 0) {
-            timer = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
-            }, 1000);
+            timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
         } else if (timeLeft === 0 && paymentStarted) {
             setPaymentStarted(false);
-            toast({
-                title: "Payment Expired",
-                description: "The payment window has closed. Please try again.",
-                variant: "destructive"
-            });
+            toast({ title: "Payment Expired", description: "The payment window has closed. Please try again.", variant: "destructive" });
         }
         return () => clearInterval(timer);
     }, [paymentStarted, timeLeft, toast]);
 
-    // Format time (600 -> 10:00)
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -61,13 +52,9 @@ const Payment = () => {
         }, 1500);
     };
 
-    // Validate and redeem coupon code
     const handleValidateCoupon = async () => {
         if (!couponCode.trim()) return;
-
         setIsValidatingCoupon(true);
-
-        // Simulate validation delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         const isValid = VALID_COUPONS.includes(couponCode.toUpperCase().trim());
@@ -75,74 +62,13 @@ const Payment = () => {
         setIsValidatingCoupon(false);
 
         if (isValid) {
-            toast({
-                title: "Coupon Applied! 🎉",
-                description: "Payment skipped. Redirecting to submit your idea..."
-            });
-
-            // Auto-redeem after successful validation
+            toast({ title: "Coupon Applied! 🎉", description: "Payment skipped. Redirecting to submit your idea..." });
             setIsProcessing(true);
 
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-
                 if (session?.user) {
-                    // Create a "free" payment record with coupon
-                    const { error: paymentError } = await supabase
-                        .from("payments")
-                        .insert({
-                            user_id: session.user.id,
-                            razorpay_order_id: `COUPON_${couponCode.toUpperCase()}_${Date.now()}`,
-                            razorpay_payment_id: `FREE_${Date.now()}`,
-                            razorpay_signature: "COUPON_REDEMPTION",
-                            amount: 0,
-                            status: "success",
-                            verified_at: new Date().toISOString()
-                        });
-
-                    if (paymentError) {
-                        console.error("Failed to store coupon payment:", paymentError);
-                        toast({
-                            title: "Error",
-                            description: "Failed to apply coupon. Please try again.",
-                            variant: "destructive"
-                        });
-                        setIsProcessing(false);
-                        return;
-                    }
-                }
-
-                // Redirect to submit idea page
-                navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
-
-            } catch (error) {
-                console.error(error);
-                toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
-                setIsProcessing(false);
-            }
-        } else {
-            toast({
-                title: "Invalid Coupon",
-                description: "This coupon code is not valid.",
-                variant: "destructive"
-            });
-        }
-    };
-
-    // Redeem coupon and skip payment
-    const handleRedeemCoupon = async () => {
-        if (!isCouponValid) return;
-
-        setIsProcessing(true);
-
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-
-            if (session?.user) {
-                // Create a "free" payment record with coupon
-                const { error: paymentError } = await supabase
-                    .from("payments")
-                    .insert({
+                    await supabase.from("payments").insert({
                         user_id: session.user.id,
                         razorpay_order_id: `COUPON_${couponCode.toUpperCase()}_${Date.now()}`,
                         razorpay_payment_id: `FREE_${Date.now()}`,
@@ -151,212 +77,150 @@ const Payment = () => {
                         status: "success",
                         verified_at: new Date().toISOString()
                     });
-
-                if (paymentError) {
-                    console.error("Failed to store coupon payment:", paymentError);
-                    toast({
-                        title: "Error",
-                        description: "Failed to apply coupon. Please try again.",
-                        variant: "destructive"
-                    });
-                    setIsProcessing(false);
-                    return;
                 }
+                navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
+            } catch (error) {
+                toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+                setIsProcessing(false);
             }
-
-            // Redirect to submit idea page
-            navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
-
-        } catch (error) {
-            console.error(error);
-            toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
-        } finally {
-            setIsProcessing(false);
+        } else {
+            toast({ title: "Invalid Coupon", description: "This coupon code is not valid.", variant: "destructive" });
         }
     };
 
     const handlePayment = async () => {
         if (!isVerified) return;
-
         setIsProcessing(true);
 
         try {
-            // 1️⃣ Create order from backend
             const res = await fetch("https://happy-helper.onrender.com/api/payment/create-order", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amount: 499 }),
             });
 
             const order = await res.json();
-            console.log("ORDER CREATED:", order);
 
-            // 2️⃣ Razorpay options
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID, // TEST KEY
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
                 name: "INNOVESTOR",
                 description: "Founder Access Plan",
                 order_id: order.id,
-
                 handler: async function (response: any) {
-                    console.log("PAYMENT RESPONSE:", response);
-
-                    // 3️⃣ Verify payment with backend
                     const verifyRes = await fetch("https://happy-helper.onrender.com/api/payment/verify", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(response),
                     });
 
                     const result = await verifyRes.json();
 
                     if (result.success) {
-                        // 4️⃣ Store payment in Supabase database
                         const { data: { session } } = await supabase.auth.getSession();
-
                         if (session?.user) {
-                            const { error: paymentError } = await supabase
-                                .from("payments")
-                                .insert({
-                                    user_id: session.user.id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    amount: 499,
-                                    status: "success",
-                                    verified_at: new Date().toISOString()
-                                });
-
-                            if (paymentError) {
-                                console.error("Failed to store payment:", paymentError);
-                            }
+                            await supabase.from("payments").insert({
+                                user_id: session.user.id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                amount: 499,
+                                status: "success",
+                                verified_at: new Date().toISOString()
+                            });
                         }
-
-                        toast({
-                            title: "Payment Successful 🎉",
-                            description: "Redirecting to submit your idea...",
-                        });
-
-                        // 5️⃣ Redirect to submit idea page with payment ID
+                        toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
                         navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
                     } else {
-                        toast({
-                            title: "Payment Failed",
-                            description: "Verification failed",
-                            variant: "destructive",
-                        });
+                        toast({ title: "Payment Failed", description: "Verification failed", variant: "destructive" });
                     }
                 },
-
-                theme: {
-                    color: "#4f46e5",
-                },
+                theme: { color: "#0f172a" },
             };
 
-            // 4️⃣ Open Razorpay popup
             const razorpay = new (window as any).Razorpay(options);
             razorpay.open();
-
             setIsProcessing(false);
-
         } catch (error) {
-            console.error(error);
-            toast({
-                title: "Payment Error",
-                description: "Something went wrong",
-                variant: "destructive",
-            });
+            toast({ title: "Payment Error", description: "Something went wrong", variant: "destructive" });
             setIsProcessing(false);
         }
     };
 
-
-
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#ffffff] via-[#f8f9fc] to-[#e2e8f0] flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[120px] -mr-64 -mt-64" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -ml-64 -mb-64" />
-            </div>
-
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
             <div className="w-full max-w-lg relative z-10">
-                <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl">
-                    <CardHeader className="text-center pb-2">
+                {/* Back Button */}
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate("/founder-dashboard")}
+                    className="mb-6 text-slate-500 hover:text-slate-700"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+                </Button>
+
+                <Card className="border border-slate-200 shadow-lg bg-white">
+                    <CardHeader className="text-center pb-4">
                         <div className="flex justify-center mb-6">
-                            <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                                <Rocket className="w-8 h-8 text-white" />
+                            <div className="w-14 h-14 rounded-xl bg-slate-900 flex items-center justify-center shadow-sm">
+                                <Rocket className="w-7 h-7 text-white" />
                             </div>
                         </div>
-                        <CardTitle className="text-3xl font-black tracking-tight text-slate-900">
+                        <CardTitle className="text-2xl font-bold text-slate-900 tracking-tight">
                             {paymentStarted ? "Awaiting Payment" : "Unlock Your Vision"}
                         </CardTitle>
-                        <CardDescription className="text-slate-500 font-medium mt-2">
-                            {paymentStarted
-                                ? "Please check your UPI app for the request"
-                                : "Launch your next big idea on INNOVESTOR"}
+                        <CardDescription className="text-slate-500 mt-2">
+                            {paymentStarted ? "Please check your UPI app for the request" : "Launch your next big idea on INNOVESTOR"}
                         </CardDescription>
                     </CardHeader>
 
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-4">
                         {paymentStarted ? (
-                            <div className="space-y-8 py-4">
-                                <div className="flex flex-col items-center justify-center p-8 bg-indigo-50/50 rounded-3xl border border-indigo-100 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] animate-pulse" />
-                                    <div className="relative z-10 text-center">
-                                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4">Verification Sent to {upiId}</p>
-                                        <div className="text-5xl font-black text-slate-900 tabular-nums">
-                                            {formatTime(timeLeft)}
-                                        </div>
-                                        <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest">Window closing soon</p>
+                            <div className="space-y-6 py-4">
+                                <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-xl border border-slate-200">
+                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+                                        Verification Sent to {upiId}
+                                    </p>
+                                    <div className="text-5xl font-bold text-slate-900 tabular-nums">
+                                        {formatTime(timeLeft)}
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider font-medium">Window closing soon</p>
+                                </div>
+
+                                <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                    <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                                        <div className="w-5 h-5 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-900">Waiting for Confirmation</p>
+                                        <p className="text-xs text-slate-500">Do not refresh or close this page</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                                            <div className="w-5 h-5 border-2 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-900">Waiting for Confirmation</p>
-                                            <p className="text-[11px] font-medium text-slate-500">Do not refresh or close this page</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => setPaymentStarted(false)}
-                                            className="flex-1 text-slate-400 hover:text-slate-600 text-[10px] font-black uppercase tracking-widest"
-                                        >
-                                            Cancel Request
-                                        </Button>
-                                    </div>
-                                </div>
+                                <Button variant="ghost" onClick={() => setPaymentStarted(false)} className="w-full text-slate-400 hover:text-slate-600">
+                                    Cancel Request
+                                </Button>
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                <div className="bg-slate-50 rounded-2xl p-8 text-center border border-slate-100 relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-3">
-                                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase text-[10px] font-black tracking-widest">Special Offer</Badge>
+                                {/* Pricing Box */}
+                                <div className="bg-slate-50 rounded-xl p-8 text-center border border-slate-200 relative">
+                                    <div className="absolute top-4 right-4">
+                                        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                                            Special Offer
+                                        </Badge>
                                     </div>
-
-                                    <p className="text-slate-400 text-sm font-bold line-through mb-1">₹1999/-</p>
+                                    <p className="text-slate-400 text-sm font-medium line-through mb-1">₹1999/-</p>
                                     <div className="flex items-center justify-center gap-1 mb-2">
-                                        <span className="text-5xl font-black text-slate-900">₹499</span>
-                                        <span className="text-slate-500 font-bold text-lg">/-</span>
+                                        <span className="text-4xl font-bold text-slate-900">₹499</span>
+                                        <span className="text-slate-500 font-medium text-lg">/-</span>
                                     </div>
-                                    <p className="text-indigo-600 font-bold text-xs uppercase tracking-widest">Only for today</p>
+                                    <p className="text-slate-500 font-medium text-xs uppercase tracking-wider">One-time payment</p>
                                 </div>
 
-                                <div className="space-y-4">
+                                {/* Features */}
+                                <div className="space-y-3">
                                     {[
                                         "Unlimited Visibility to Top Investors",
                                         "Direct Secured Chat Requests",
@@ -364,140 +228,104 @@ const Payment = () => {
                                         "Premium Founder Support"
                                     ].map((feature, i) => (
                                         <div key={i} className="flex items-center gap-3">
-                                            <div className="bg-green-100 p-1 rounded-full">
-                                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                            <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                             </div>
-                                            <span className="text-sm font-semibold text-slate-600">{feature}</span>
+                                            <span className="text-sm font-medium text-slate-700">{feature}</span>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="pt-4 space-y-4">
-                                    <div className="space-y-2 text-left">
-                                        <Label htmlFor="upi-id" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                                            Enter UPI ID
-                                        </Label>
-                                        <div className="flex gap-2">
-                                            <div className="relative flex-1">
-                                                <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                                <Input
-                                                    id="upi-id"
-                                                    placeholder="username@bank"
-                                                    value={upiId}
-                                                    onChange={(e) => {
-                                                        setUpiId(e.target.value);
-                                                        setIsVerified(false);
-                                                    }}
-                                                    className={`h-12 pl-10 bg-slate-50/50 border-slate-200 focus:ring-indigo-600 rounded-xl font-medium ${isVerified ? "border-green-500 bg-green-50/30" : ""}`}
-                                                />
-                                                {isVerified && (
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <Button
-                                                onClick={handleVerify}
-                                                disabled={isVerifying || isVerified || !upiId.includes("@")}
-                                                variant="outline"
-                                                className={`h-12 px-6 rounded-xl font-bold border-2 transition-all ${isVerified ? "border-green-500 text-green-600 bg-green-50" : "border-indigo-100 text-indigo-600 hover:bg-indigo-50"}`}
-                                            >
-                                                {isVerifying ? "..." : isVerified ? "Verified" : "Verify"}
-                                            </Button>
+                                {/* UPI Input */}
+                                <div className="space-y-3 pt-4">
+                                    <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                        Enter UPI ID
+                                    </Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Input
+                                                placeholder="username@bank"
+                                                value={upiId}
+                                                onChange={(e) => { setUpiId(e.target.value); setIsVerified(false); }}
+                                                className={`h-11 pl-10 bg-white border-slate-200 rounded-lg ${isVerified ? "border-emerald-500 bg-emerald-50/30" : ""}`}
+                                            />
+                                            {isVerified && (
+                                                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-600" />
+                                            )}
                                         </div>
-                                        {isVerified && (
-                                            <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest ml-1 animate-in fade-in slide-in-from-top-1">
-                                                UPI ID Verified Successfully
-                                            </p>
-                                        )}
+                                        <Button
+                                            onClick={handleVerify}
+                                            disabled={isVerifying || isVerified || !upiId.includes("@")}
+                                            variant="outline"
+                                            className={`h-11 px-5 rounded-lg font-semibold border-2 ${isVerified ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                                        >
+                                            {isVerifying ? "..." : isVerified ? "Verified" : "Verify"}
+                                        </Button>
                                     </div>
+                                </div>
 
-                                    <Button
-                                        onClick={handlePayment}
-                                        disabled={isProcessing || !isVerified || isCouponValid}
-                                        className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xl shadow-indigo-100 text-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
-                                    >
-                                        {isProcessing ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Finalizing...
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2">
-                                                <CreditCard className="w-5 h-5" />
-                                                Make Payment
-                                                <ArrowRight className="w-5 h-5 ml-1 opacity-50" />
-                                            </div>
-                                        )}
-                                    </Button>
+                                {/* Pay Button */}
+                                <Button
+                                    onClick={handlePayment}
+                                    disabled={isProcessing || !isVerified || isCouponValid}
+                                    className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-sm text-base font-semibold disabled:opacity-50"
+                                >
+                                    {isProcessing ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Processing...
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <CreditCard className="w-5 h-5" />
+                                            Make Payment
+                                            <ArrowRight className="w-4 h-4 ml-1" />
+                                        </div>
+                                    )}
+                                </Button>
 
-                                    <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                        <ShieldCheck className="w-4 h-4 text-green-500" />
-                                        Secure SSL Encrypted Payment
+                                <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-medium">
+                                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                    Secure SSL Encrypted Payment
+                                </div>
+
+                                {/* Divider */}
+                                <div className="relative py-4">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-slate-200" />
                                     </div>
-
-                                    {/* Coupon Code Section */}
-                                    <div className="relative py-4">
-                                        <div className="absolute inset-0 flex items-center">
-                                            <div className="w-full border-t border-slate-200" />
-                                        </div>
-                                        <div className="relative flex justify-center">
-                                            <span className="bg-white px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                Or use a coupon
-                                            </span>
-                                        </div>
+                                    <div className="relative flex justify-center">
+                                        <span className="bg-white px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                            Or use a coupon
+                                        </span>
                                     </div>
+                                </div>
 
-                                    <div className="space-y-3">
-                                        <div className="flex gap-2">
-                                            <div className="relative flex-1">
-                                                <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                                <Input
-                                                    placeholder="Enter coupon code"
-                                                    value={couponCode}
-                                                    onChange={(e) => {
-                                                        setCouponCode(e.target.value.toUpperCase());
-                                                        setIsCouponValid(false);
-                                                    }}
-                                                    className={`h-12 pl-10 bg-slate-50/50 border-slate-200 focus:ring-indigo-600 rounded-xl font-medium uppercase ${isCouponValid ? "border-green-500 bg-green-50/30" : ""}`}
-                                                    disabled={isProcessing}
-                                                />
-                                                {isCouponValid && (
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <Button
-                                                onClick={handleValidateCoupon}
-                                                disabled={isValidatingCoupon || isCouponValid || !couponCode.trim() || isProcessing}
-                                                variant="outline"
-                                                className={`h-12 px-6 rounded-xl font-bold border-2 transition-all ${isCouponValid ? "border-green-500 text-green-600 bg-green-50" : "border-indigo-100 text-indigo-600 hover:bg-indigo-50"}`}
-                                            >
-                                                {isValidatingCoupon ? "..." : isCouponValid ? "Valid" : "Apply"}
-                                            </Button>
-                                        </div>
-
-                                        {isCouponValid && (
-                                            <Button
-                                                onClick={handleRedeemCoupon}
+                                {/* Coupon Section */}
+                                <div className="space-y-3">
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Input
+                                                placeholder="Enter coupon code"
+                                                value={couponCode}
+                                                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setIsCouponValid(false); }}
+                                                className={`h-11 pl-10 bg-white border-slate-200 rounded-lg uppercase ${isCouponValid ? "border-emerald-500 bg-emerald-50/30" : ""}`}
                                                 disabled={isProcessing}
-                                                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg shadow-green-100 font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                            >
-                                                {isProcessing ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                        Processing...
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2">
-                                                        <Ticket className="w-4 h-4" />
-                                                        Skip Payment & Submit Idea
-                                                        <ArrowRight className="w-4 h-4 ml-1" />
-                                                    </div>
-                                                )}
-                                            </Button>
-                                        )}
+                                            />
+                                            {isCouponValid && (
+                                                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-600" />
+                                            )}
+                                        </div>
+                                        <Button
+                                            onClick={handleValidateCoupon}
+                                            disabled={isValidatingCoupon || isCouponValid || !couponCode.trim() || isProcessing}
+                                            variant="outline"
+                                            className={`h-11 px-5 rounded-lg font-semibold border-2 ${isCouponValid ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                                        >
+                                            {isValidatingCoupon ? "..." : isCouponValid ? "Valid" : "Apply"}
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -505,18 +333,14 @@ const Payment = () => {
                     </CardContent>
                 </Card>
 
-                <p className="text-center mt-8 text-slate-400 text-xs font-medium">
-                    By continuing, you agree to our Terms of Service and Refund Policy.
+                <p className="text-center mt-6 text-slate-400 text-xs font-medium">
+                    By continuing, you agree to our{" "}
+                    <a href="/terms" className="underline hover:text-slate-600">Terms of Service</a> and{" "}
+                    <a href="/refund" className="underline hover:text-slate-600">Refund Policy</a>.
                 </p>
             </div>
         </div>
     );
 };
-
-const Badge = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-    <span className={`px-2 py-1 rounded-full text-xs ${className}`}>
-        {children}
-    </span>
-);
 
 export default Payment;

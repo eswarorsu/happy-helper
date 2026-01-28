@@ -14,5 +14,24 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: [
+      'firebase/app',
+      'firebase/auth',
+      'firebase/database'
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/firebase/, /node_modules/],
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/database'],
+        }
+      }
+    }
+  }
 }));
 
