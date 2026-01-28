@@ -46,57 +46,76 @@ const Auth = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event, 'Session:', session);
+      console.log('Auth event:', event, 'Session:', session?.user?.id);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        // 🔥 CONNECT FIREBASE HERE
+        // 🔥 CONNECT FIREBASE (non-blocking)
         try {
           await connectFirebase();
         } catch (e) {
           console.error("Auto-connect Firebase failed:", e);
         }
 
-        // Check if user has a profile
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single();
-
-        if (!profile) {
-          const userType = session.user.user_metadata?.user_type || 'founder';
-          navigate(`/profile-setup?type=${userType}`);
-        } else {
-          checkProfileAndRedirect(session.user.id);
-        }
+        // Use the unified check function
+        checkProfileAndRedirect(session.user.id);
       }
     });
 
     // Check current session on mount
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        await connectFirebase(); // ✅ ADD THIS
+        console.log("🔄 Existing session found, checking profile...");
+        try {
+          await connectFirebase();
+        } catch (e) {
+          console.error("Firebase connect failed:", e);
+        }
         checkProfileAndRedirect(session.user.id);
       }
     });
 
-
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const checkProfileAndRedirect = async (userId: string) => {
-    const { data: profile } = await supabase
+    console.log("🔍 Checking profile for user:", userId);
+
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
 
+    console.log("📋 Profile query result:", { profile, error });
+
+    // Check if there was a query error (not "no rows found")
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = "No rows found" - that's expected if no profile
+      // Any other error means the query failed
+      console.error("❌ Profile query error:", error);
+      toast({
+        title: "Error checking profile",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (profile) {
-      if ((profile as any).is_admin) {
+      // ✅ Profile exists - go to appropriate dashboard
+      console.log("✅ Profile found, redirecting to dashboard");
+      if ((profile as { is_admin?: boolean }).is_admin) {
         navigate("/admin-innovestor");
       } else {
         navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
       }
+    } else {
+      // ❌ No profile found (PGRST116 error or null data)
+      console.log("⚠️ No profile found, redirecting to profile setup");
+      const { data: { session } } = await supabase.auth.getSession();
+      const userType = session?.user?.user_metadata?.user_type || 'founder';
+      navigate(`/profile-setup?type=${userType}`);
     }
   };
 

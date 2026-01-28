@@ -73,6 +73,39 @@ const ProfileSetup = () => {
         navigate("/auth?mode=register");
         return;
       }
+
+      console.log("🔍 ProfileSetup: Checking for existing profile...", session.user.id);
+
+      // ✅ CHECK IF PROFILE ALREADY EXISTS
+      const { data: existingProfile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .single();
+
+      console.log("📋 ProfileSetup: Query result:", { existingProfile, error });
+
+      // Check for actual query errors (not "no rows found")
+      if (error && error.code !== 'PGRST116') {
+        console.error("❌ ProfileSetup: Query error:", error);
+        toast({
+          title: "Error checking profile",
+          description: error.message,
+          variant: "destructive"
+        });
+        // Still allow form to load in case of error
+      }
+
+      if (existingProfile) {
+        // Profile exists - redirect to appropriate dashboard
+        console.log("✅ ProfileSetup: Profile found, redirecting...");
+        toast({ title: "Profile found!", description: "Redirecting to your dashboard..." });
+        navigate(existingProfile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
+        return;
+      }
+
+      console.log("⚠️ ProfileSetup: No profile found, showing form...");
+      // No profile exists - proceed with setup
       setUserId(session.user.id);
       const metadata = session.user.user_metadata;
       setFormData((prev) => ({
@@ -82,6 +115,7 @@ const ProfileSetup = () => {
       }));
     };
     getUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const handleInputChange = (field: string, value: string) => {
