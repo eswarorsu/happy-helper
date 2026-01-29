@@ -78,17 +78,50 @@ export const markMessageAsRead = async (chatId: string, messageId: string) => {
 
 export const getUnreadCount = async (chatId: string, currentUserId: string): Promise<number> => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
-  const unreadQuery = query(messagesRef, orderByChild('is_read'), equalTo(false));
-  const snapshot = await get(unreadQuery);
+  
+  try {
+    const snapshot = await get(messagesRef);
+    
+    if (!snapshot.exists()) return 0;
 
-  if (!snapshot.exists()) return 0;
+    let count = 0;
+    snapshot.forEach((child) => {
+      const msg = child.val();
+      // Count messages that are unread AND not sent by the current user
+      if (msg.is_read === false && msg.sender_id !== currentUserId) {
+        count++;
+      }
+    });
+    return count;
+  } catch (error) {
+    console.error("Error getting unread count:", error);
+    return 0;
+  }
+};
 
-  let count = 0;
-  snapshot.forEach((child) => {
-    const msg = child.val();
-    if (msg.sender_id !== currentUserId) {
-      count++;
+// Subscribe to unread message count changes in real-time
+export const subscribeToUnreadCount = (
+  chatId: string, 
+  currentUserId: string, 
+  callback: (count: number) => void
+) => {
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  
+  const listener = onValue(messagesRef, (snapshot: DataSnapshot) => {
+    if (!snapshot.exists()) {
+      callback(0);
+      return;
     }
+
+    let count = 0;
+    snapshot.forEach((child) => {
+      const msg = child.val();
+      if (msg.is_read === false && msg.sender_id !== currentUserId) {
+        count++;
+      }
+    });
+    callback(count);
   });
-  return count;
+
+  return () => off(messagesRef, 'value', listener);
 };

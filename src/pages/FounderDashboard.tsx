@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Rocket, Plus, LogOut, MessageSquare, DollarSign, Lightbulb,
   User, ExternalLink, Pin, Search, Bell, ChevronRight,
-  ArrowUpRight, Building2, Users, Target, CheckCircle2, X,
-  LucideIcon
+  ArrowUpRight, Building2, Users, Target, CheckCircle2, X, ChevronLeft,
+  Activity, LucideIcon
 } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
-import { getUnreadCount, connectFirebase } from "@/lib/firebase";
+import { getUnreadCount, connectFirebase, subscribeToUnreadCount } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -43,7 +43,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.4,
-      ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuad
+      ease: [0.25, 0.46, 0.45, 0.94] as const // easeOutQuad
     }
   }
 };
@@ -58,7 +58,7 @@ const cardHoverVariants = {
     boxShadow: "0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05)",
     transition: {
       duration: 0.3,
-      ease: "easeOut"
+      ease: "easeOut" as const
     }
   }
 };
@@ -68,12 +68,12 @@ const tabContentVariants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.3, ease: "easeOut" }
+    transition: { duration: 0.3, ease: "easeOut" as const }
   },
   exit: {
     opacity: 0,
     x: -10,
-    transition: { duration: 0.2, ease: "easeIn" }
+    transition: { duration: 0.2, ease: "easeIn" as const }
   }
 };
 
@@ -298,65 +298,82 @@ const ConnectionItem = ({
   chat,
   isSelected,
   onSelect,
-  onPin
+  onPin,
+  collapsed = false
 }: {
   chat: ChatRequest;
   isSelected: boolean;
   onSelect: () => void;
   onPin: (e: React.MouseEvent) => void;
+  collapsed?: boolean;
 }) => (
   <motion.div
     onClick={onSelect}
-    whileHover={{ scale: 1.01 }}
-    whileTap={{ scale: 0.99 }}
-    transition={{ duration: 0.15 }}
-    className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-200 border ${isSelected
-      ? "bg-slate-100/80 border-slate-300 shadow-sm"
-      : "border-transparent hover:bg-slate-50 hover:border-slate-200"
-      }`}
+    whileHover={{ scale: 1.02, backgroundColor: "rgba(241, 245, 249, 0.8)" }}
+    whileTap={{ scale: 0.98 }}
+    layout
+    className={`group relative rounded-xl cursor-pointer transition-all duration-300 border ${isSelected
+      ? "bg-white border-indigo-200 shadow-md shadow-indigo-100/50"
+      : "border-transparent hover:border-slate-200"
+      } ${collapsed ? 'py-3 px-1 flex justify-center' : 'p-3 mb-2'}`}
   >
-    <div className="flex items-center gap-3">
+    <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
       <div className="relative">
-        <Avatar className="w-10 h-10 border-2 border-white shadow-sm">
+        <Avatar className={`border-2 shadow-sm shrink-0 transition-all duration-300 ${isSelected ? "border-indigo-500 ring-2 ring-indigo-100" : "border-white"
+          } ${collapsed ? "w-10 h-10" : "w-10 h-10"}`}>
           <AvatarImage src={chat.investor?.avatar_url} />
-          <AvatarFallback className="bg-slate-200 text-slate-700 font-semibold text-sm">
-            {chat.investor?.name?.charAt(0)}
+          <AvatarFallback className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-sm">
+            {chat.investor?.name?.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         {chat.unread_count && chat.unread_count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 w-5 h-5 bg-slate-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
+            className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-lg shadow-red-500/50 z-10 animate-pulse"
           >
             {chat.unread_count}
           </motion.span>
         )}
+        {/* Online Status Dot (Simulated for generic "active") */}
+        <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm z-10" />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <p className={`text-sm font-semibold truncate ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
-            {chat.investor?.name}
+
+      {!collapsed && (
+        <motion.div
+          initial={{ opacity: 0, width: 0 }}
+          animate={{ opacity: 1, width: "auto" }}
+          className="flex-1 min-w-0"
+        >
+          <div className="flex items-center justify-between mb-0.5">
+            <p className={`text-sm font-bold truncate ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
+              {chat.investor?.name}
+            </p>
+            {chat.founder_pinned && (
+              <Pin className="w-3 h-3 text-indigo-500 fill-indigo-500 transform rotate-45" />
+            )}
+          </div>
+          <p className={`text-xs truncate transition-colors ${isSelected ? "text-indigo-600/80 font-medium" : "text-slate-500"
+            }`}>
+            {chat.idea?.title}
           </p>
-          {chat.founder_pinned && (
-            <Pin className="w-3 h-3 text-slate-500 fill-slate-500" />
-          )}
-        </div>
-        <p className="text-xs text-slate-500 truncate mt-0.5">{chat.idea?.title}</p>
-      </div>
+        </motion.div>
+      )}
     </div>
 
-    <motion.button
-      onClick={onPin}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      className={`absolute top-4 right-4 p-1.5 rounded-lg transition-all ${chat.founder_pinned
-        ? "text-slate-600 bg-slate-100"
-        : "text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600"
-        }`}
-    >
-      <Pin className={`w-3.5 h-3.5 ${chat.founder_pinned ? "fill-current" : ""}`} />
-    </motion.button>
+    {!collapsed && (
+      <motion.button
+        onClick={onPin}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className={`absolute top-2 right-2 p-1.5 rounded-full transition-all duration-200 ${chat.founder_pinned
+          ? "opacity-0" // Hide default pin if already pinned (shown in header)
+          : "opacity-0 group-hover:opacity-100 hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+          }`}
+      >
+        <Pin className="w-3.5 h-3.5" />
+      </motion.button>
+    )}
   </motion.div>
 );
 
@@ -375,6 +392,10 @@ const FounderDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingIdea, setViewingIdea] = useState<Idea | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [messageFilter, setMessageFilter] = useState<"all" | "unread">("all");
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const previousCountsRef = useRef<Map<string, number>>(new Map());
 
   // Investment Recording State
   const [recordInvestmentModal, setRecordInvestmentModal] = useState<{
@@ -393,27 +414,72 @@ const FounderDashboard = () => {
   // DATA FETCHING
   // ============================================================================
   useEffect(() => {
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) { navigate("/auth?mode=login"); return; }
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (!profileData || profileData.user_type !== "founder") {
-        navigate("/");
-        return;
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedChat(null);
+        setViewingIdea(null);
       }
-      setProfile(profileData);
-
-      try { await connectFirebase(); } catch (e) { console.error("Firebase init:", e); }
-
-      await fetchDashboardData(profileData.id);
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setIsSidebarOpen(prev => !prev);
+      }
     };
+
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) { 
+          navigate("/auth?mode=login"); 
+          return; 
+        }
+
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Profile fetch error:", profileError);
+          setIsLoading(false);
+          toast({ 
+            title: "Error loading profile", 
+            description: "Please refresh the page",
+            variant: "destructive" 
+          });
+          return;
+        }
+
+        if (!profileData || profileData.user_type !== "founder") {
+          navigate("/");
+          return;
+        }
+        setProfile(profileData);
+
+        try { 
+          await connectFirebase(); 
+        } catch (e) { 
+          console.error("Firebase init:", e); 
+        }
+
+        await fetchDashboardData(profileData.id);
+      } catch (error) {
+        console.error("Dashboard init error:", error);
+        setIsLoading(false);
+        toast({ 
+          title: "Error loading dashboard", 
+          description: "Please refresh the page",
+          variant: "destructive" 
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
     init();
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -429,35 +495,125 @@ const FounderDashboard = () => {
     return () => { channels.forEach(c => supabase.removeChannel(c)); };
   }, [profile]);
 
+  // Real-time subscription for unread message counts
+  useEffect(() => {
+    if (!profile || chatRequests.length === 0) return;
+
+    const unsubscribers: (() => void)[] = [];
+
+    // Initialize previous counts only for new chats
+    chatRequests.forEach(req => {
+      if (!previousCountsRef.current.has(req.id)) {
+        previousCountsRef.current.set(req.id, req.unread_count || 0);
+      }
+    });
+
+    // Subscribe to each active chat for real-time unread updates
+    const activeChats = chatRequests.filter(r => 
+      ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
+    );
+
+    activeChats.forEach(req => {
+      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
+        const prevCount = previousCountsRef.current.get(req.id) || 0;
+        
+        // Update the unread count in state
+        setChatRequests(prev => prev.map(p => 
+          p.id === req.id ? { ...p, unread_count: count } : p
+        ));
+
+        // Show notification if new messages arrived and chat is not currently open
+        if (count > prevCount && selectedChat?.id !== req.id) {
+          const newMessages = count - prevCount;
+          
+          // Play notification sound
+          if (soundEnabled) {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU=');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+          }
+
+          // Show toast notification
+          toast({
+            title: "💬 New Message",
+            description: `${req.investor?.name || 'An investor'} sent you ${newMessages} new message${newMessages > 1 ? 's' : ''}`,
+            duration: 5000,
+          });
+        }
+
+        // Update previous count for next comparison
+        previousCountsRef.current.set(req.id, count);
+      });
+      
+      unsubscribers.push(unsubscribe);
+    });
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }, [profile?.id, chatRequests.length, selectedChat?.id, soundEnabled]);
+
   const fetchDashboardData = async (userId: string) => {
     setIsLoading(true);
-    await Promise.all([fetchIdeas(userId), fetchChatRequests(userId)]);
-    setIsLoading(false);
+    try {
+      await Promise.all([fetchIdeas(userId), fetchChatRequests(userId)]);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const fetchIdeas = async (userId: string) => {
-    const { data } = await supabase
-      .from("ideas")
-      .select("*")
-      .eq("founder_id", userId)
-      .order("created_at", { ascending: false });
-    setIdeas(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("ideas")
+        .select("*")
+        .eq("founder_id", userId)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching ideas:", error);
+        return;
+      }
+      setIdeas(data || []);
+    } catch (error) {
+      console.error("Error in fetchIdeas:", error);
+    }
   };
 
   const fetchChatRequests = async (userId: string) => {
-    const { data: requests } = await supabase
-      .from("chat_requests")
-      .select(`*, investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url), idea:ideas!chat_requests_idea_id_fkey(title)`)
-      .eq("founder_id", userId);
+    try {
+      const { data: requests, error } = await supabase
+        .from("chat_requests")
+        .select(`*, investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url), idea:ideas!chat_requests_idea_id_fkey(title)`)
+        .eq("founder_id", userId);
 
-    if (requests) {
-      setChatRequests(requests);
-      requests.forEach(async (req) => {
-        try {
-          const count = await getUnreadCount(req.id, userId);
-          setChatRequests(prev => prev.map(p => p.id === req.id ? { ...p, unread_count: count } : p));
-        } catch (e) { /* silent */ }
-      });
+      if (error) {
+        console.error("Error fetching chat requests:", error);
+        return;
+      }
+
+      if (requests) {
+        // Preserve existing unread counts during refresh
+        const updatedRequests = requests.map(req => {
+          const existing = chatRequests.find(r => r.id === req.id);
+          return { ...req, unread_count: existing?.unread_count || 0 };
+        });
+        setChatRequests(updatedRequests);
+        
+        // Fetch initial unread counts (real-time subscription will handle updates)
+        for (const req of updatedRequests) {
+          try {
+            const count = await getUnreadCount(req.id, userId);
+            setChatRequests(prev => prev.map(p => p.id === req.id ? { ...p, unread_count: count } : p));
+          } catch (e) { 
+            console.error("Error fetching unread count:", e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error in fetchChatRequests:", error);
     }
   };
 
@@ -500,7 +656,7 @@ const FounderDashboard = () => {
     try {
       // First, try to insert into investment_records table (if it exists)
       const { error: recordError } = await supabase
-        .from("investment_records")
+        .from("investment_records" as any)
         .insert({
           idea_id: recordInvestmentModal.idea.id,
           investor_id: recordInvestmentModal.investorId || profile.id,
@@ -568,8 +724,8 @@ const FounderDashboard = () => {
   const activeConnections = chatRequests
     .filter(c => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(c.status))
     .filter(c =>
-      c.investor?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.idea?.title.toLowerCase().includes(searchTerm.toLowerCase())
+      (c.investor?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.idea?.title || '').toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => (b.founder_pinned === a.founder_pinned ? 0 : b.founder_pinned ? 1 : -1));
 
@@ -604,6 +760,22 @@ const FounderDashboard = () => {
             />
             <p className="text-sm text-slate-500 font-medium">Loading dashboard...</p>
           </motion.div>
+        </div>
+      </AnimatedGridBackground>
+    );
+  }
+
+  // Show empty state if profile failed to load
+  if (!profile) {
+    return (
+      <AnimatedGridBackground>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-slate-500 mb-4">Unable to load profile</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh Page
+            </Button>
+          </div>
         </div>
       </AnimatedGridBackground>
     );
@@ -659,10 +831,10 @@ const FounderDashboard = () => {
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-500 hover:text-red-600">
                 <LogOut className="w-4 h-4" />
               </Button>
-              <Avatar className="w-9 h-9 border-2 border-slate-100 shadow-sm">
+              <Avatar className="w-10 h-10 border-2 border-white ring-2 ring-indigo-500/20 shadow-md cursor-pointer hover:ring-indigo-500 transition-all duration-300">
                 <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback className="bg-slate-900 text-white font-semibold text-sm">
-                  {profile?.name?.charAt(0)}
+                <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white font-bold text-lg">
+                  {profile?.name?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -678,29 +850,98 @@ const FounderDashboard = () => {
           {/* LEFT SIDEBAR - Connections */}
           {/* ============================================================== */}
           <motion.aside
-            className="w-80 bg-white/70 backdrop-blur-md border-r border-slate-200/80 flex flex-col shrink-0 relative z-10"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+            className="bg-white/70 backdrop-blur-md border-r border-slate-200/80 flex flex-col shrink-0 relative z-10"
+            initial={{ width: 320 }}
+            animate={{ width: isSidebarOpen ? 320 : 80 }}
+            transition={{ duration: 0.4, ease: "easeOut" as const }}
           >
-            <div className="p-4 border-b border-slate-100">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">
-                  Connections
-                </h2>
-                <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-semibold">
-                  {activeConnections.length}
-                </Badge>
+            <div className={`p-4 border-b border-slate-100 ${!isSidebarOpen && "flex justify-center"}`}>
+              <div className={`flex items-center ${isSidebarOpen ? "justify-between" : "justify-center"} mb-3`}>
+                {isSidebarOpen && (
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider whitespace-nowrap">
+                      Connections
+                    </h2>
+                    {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-lg shadow-red-500/50"
+                      >
+                        {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)}
+                      </motion.span>
+                    )}
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-slate-200 rounded-full"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                >
+                  <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${!isSidebarOpen ? "rotate-180" : ""}`} />
+                </Button>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Search connections..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-9 bg-slate-50/80 border-slate-200 text-sm focus-visible:ring-slate-300"
-                />
-              </div>
+
+              {isSidebarOpen && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-9 bg-slate-50/80 border-slate-200 text-sm focus-visible:ring-slate-300"
+                  />
+                </div>
+              )}
+              
+              {isSidebarOpen && (
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    variant={messageFilter === "all" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setMessageFilter("all")}
+                    className="flex-1 h-7 text-xs rounded-lg"
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={messageFilter === "unread" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setMessageFilter("unread")}
+                    className="flex-1 h-7 text-xs rounded-lg"
+                  >
+                    Unread
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSoundEnabled(!soundEnabled)}
+                    className="h-7 w-7 rounded-lg"
+                    title={soundEnabled ? "Mute" : "Unmute"}
+                  >
+                    {soundEnabled ? (
+                      <Activity className="w-3 h-3 text-green-600" />
+                    ) : (
+                      <Activity className="w-3 h-3 text-slate-400" />
+                    )}
+                  </Button>
+                </div>
+              )}
+              
+              {isSidebarOpen && chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setChatRequests(prev => prev.map(r => ({ ...r, unread_count: 0 })));
+                    toast({ title: "All messages marked as read", duration: 2000 });
+                  }}
+                  className="mt-2 w-full text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                >
+                  Mark all as read
+                </Button>
+              )}
             </div>
 
             <ScrollArea className="flex-1">
@@ -711,13 +952,16 @@ const FounderDashboard = () => {
                 animate="visible"
               >
                 {activeConnections.length > 0 ? (
-                  activeConnections.map((chat, index) => (
+                  activeConnections
+                    .filter(chat => messageFilter === "all" || (messageFilter === "unread" && chat.unread_count && chat.unread_count > 0))
+                    .map((chat) => (
                     <motion.div key={chat.id} variants={itemVariants}>
                       <ConnectionItem
                         chat={chat}
                         isSelected={selectedChat?.id === chat.id}
                         onSelect={() => setSelectedChat(chat)}
                         onPin={(e) => handlePinChat(e, chat.id, !!chat.founder_pinned)}
+                        collapsed={!isSidebarOpen}
                       />
                     </motion.div>
                   ))
@@ -729,62 +973,68 @@ const FounderDashboard = () => {
                     transition={{ delay: 0.3 }}
                   >
                     <MessageSquare className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-500 font-medium">No active connections</p>
-                    <p className="text-xs text-slate-400 mt-1">Investors will appear here</p>
+                    {isSidebarOpen && (
+                      <>
+                        <p className="text-sm text-slate-500 font-medium">No active connections</p>
+                        <p className="text-xs text-slate-400 mt-1">Investors will appear here</p>
+                      </>
+                    )}
                   </motion.div>
                 )}
               </motion.div>
             </ScrollArea>
 
             {/* Pending Requests */}
-            <AnimatePresence>
-              {pendingRequests.length > 0 && (
-                <motion.div
-                  className="border-t border-slate-200 bg-slate-900 p-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Bell className="w-4 h-4 text-white" />
-                    <span className="text-sm font-semibold text-white">
-                      New Requests ({pendingRequests.length})
-                    </span>
-                  </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {pendingRequests.slice(0, 3).map((req) => (
-                      <motion.div
-                        key={req.id}
-                        className="bg-white/10 backdrop-blur rounded-lg p-3"
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <p className="text-sm font-semibold text-white truncate">{req.investor?.name}</p>
-                        <p className="text-xs text-white/60 truncate mb-2">{req.idea?.title}</p>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleChatRequestAction(req.id, "accepted")}
-                            className="flex-1 h-7 text-xs bg-white text-slate-900 hover:bg-slate-100"
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleChatRequestAction(req.id, "rejected")}
-                            className="flex-1 h-7 text-xs text-white/80 hover:text-white hover:bg-white/10"
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isSidebarOpen && (
+              <AnimatePresence>
+                {pendingRequests.length > 0 && (
+                  <motion.div
+                    className="border-t border-slate-200 bg-slate-900 p-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Bell className="w-4 h-4 text-white" />
+                      <span className="text-sm font-semibold text-white">
+                        New Requests ({pendingRequests.length})
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {pendingRequests.slice(0, 3).map((req) => (
+                        <motion.div
+                          key={req.id}
+                          className="bg-white/10 backdrop-blur rounded-lg p-3"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <p className="text-sm font-semibold text-white truncate">{req.investor?.name}</p>
+                          <p className="text-xs text-white/60 truncate mb-2">{req.idea?.title}</p>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleChatRequestAction(req.id, "accepted")}
+                              className="flex-1 h-7 text-xs bg-white text-slate-900 hover:bg-slate-100"
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleChatRequestAction(req.id, "rejected")}
+                              className="flex-1 h-7 text-xs text-white/80 hover:text-white hover:bg-white/10"
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
           </motion.aside>
 
           {/* ============================================================== */}
@@ -952,19 +1202,19 @@ const FounderDashboard = () => {
                   </Card>
                 </motion.div>
 
-                {/* Domain Distribution Chart - 3D Pie */}
+                {/* Submission Status Chart - 3D Pie */}
                 <motion.div variants={itemVariants}>
                   <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm shadow-sm h-full">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-semibold text-slate-900">Portfolio Mix</CardTitle>
-                      <CardDescription className="text-xs text-slate-500">Ventures by domain</CardDescription>
+                      <CardTitle className="text-base font-semibold text-slate-900">Submission Status</CardTitle>
+                      <CardDescription className="text-xs text-slate-500">Current status of your ventures</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-2">
                       {ideas.length > 0 ? (
-                        <>
+                        <div className="flex flex-col items-center">
                           {/* 3D Pie Chart Container */}
                           <div
-                            className="relative"
+                            className="relative w-full h-[180px]"
                             style={{
                               perspective: '800px',
                               perspectiveOrigin: '50% 50%'
@@ -974,31 +1224,37 @@ const FounderDashboard = () => {
                             <div
                               className="absolute inset-0 pointer-events-none"
                               style={{
-                                transform: 'rotateX(65deg) translateZ(-30px)',
-                                filter: 'blur(20px)',
-                                opacity: 0.2
+                                transform: 'rotateX(60deg) translateZ(-20px) translateY(10px)',
+                                filter: 'blur(15px)',
+                                opacity: 0.3
                               }}
                             >
-                              <ResponsiveContainer width="100%" height={160}>
+                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                   <Pie
                                     data={(() => {
-                                      const domainCounts = ideas.reduce((acc: Record<string, number>, idea) => {
-                                        acc[idea.domain] = (acc[idea.domain] || 0) + 1;
-                                        return acc;
-                                      }, {});
-                                      return Object.entries(domainCounts).map(([name, value]) => ({ name, value }));
+                                      const statusCounts: Record<string, number> = {
+                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
+                                      };
+                                      ideas.forEach(idea => {
+                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
+                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
+                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
+                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
+                                        else statusCounts["Under Review"]++;
+                                      });
+                                      return Object.entries(statusCounts)
+                                        .filter(([_, val]) => val > 0)
+                                        .map(([name, value]) => ({ name, value }));
                                     })()}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={35}
-                                    outerRadius={60}
-                                    paddingAngle={3}
+                                    innerRadius={40}
+                                    outerRadius={70}
                                     dataKey="value"
+                                    isAnimationActive={false}
                                   >
-                                    {ideas.map((_, index) => (
-                                      <Cell key={`shadow-${index}`} fill="#0f172a" />
-                                    ))}
+                                    <Cell fill="#000" />
                                   </Pie>
                                 </PieChart>
                               </ResponsiveContainer>
@@ -1006,55 +1262,73 @@ const FounderDashboard = () => {
 
                             {/* Main Pie - 3D tilted */}
                             <div
+                              className="w-full h-full"
                               style={{
-                                transform: 'rotateX(15deg)',
+                                transform: 'rotateX(25deg)',
                                 transformStyle: 'preserve-3d'
                               }}
                             >
-                              <ResponsiveContainer width="100%" height={160}>
+                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                  <defs>
-                                    {['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'].map((color, i) => (
-                                      <linearGradient key={`grad-${i}`} id={`pieGradient${i}`} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor={color} stopOpacity={1} />
-                                        <stop offset="100%" stopColor={color} stopOpacity={0.7} />
-                                      </linearGradient>
-                                    ))}
-                                  </defs>
                                   <Pie
                                     data={(() => {
-                                      const domainCounts = ideas.reduce((acc: Record<string, number>, idea) => {
-                                        acc[idea.domain] = (acc[idea.domain] || 0) + 1;
-                                        return acc;
-                                      }, {});
-                                      return Object.entries(domainCounts).map(([name, value]) => ({ name, value }));
+                                      const statusCounts: Record<string, number> = {
+                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
+                                      };
+                                      ideas.forEach(idea => {
+                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
+                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
+                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
+                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
+                                        else statusCounts["Under Review"]++;
+                                      });
+                                      return Object.entries(statusCounts)
+                                        .filter(([_, val]) => val > 0)
+                                        .map(([name, value]) => ({ name, value }));
                                     })()}
                                     cx="50%"
                                     cy="50%"
                                     innerRadius={40}
-                                    outerRadius={65}
-                                    paddingAngle={4}
+                                    outerRadius={70}
+                                    paddingAngle={5}
                                     dataKey="value"
-                                    stroke="#fff"
-                                    strokeWidth={2}
+                                    stroke="none"
                                   >
-                                    {ideas.map((_, index) => (
-                                      <Cell
-                                        key={`cell-${index}`}
-                                        fill={`url(#pieGradient${index % 5})`}
-                                        style={{
-                                          filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
-                                        }}
-                                      />
-                                    ))}
+                                    {(() => {
+                                      const statusCounts: Record<string, number> = {
+                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
+                                      };
+                                      ideas.forEach(idea => {
+                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
+                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
+                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
+                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
+                                        else statusCounts["Under Review"]++;
+                                      });
+                                      const data = Object.entries(statusCounts)
+                                        .filter(([_, val]) => val > 0)
+                                        .map(([name, value]) => ({ name, value }));
+
+                                      const COLORS: Record<string, string> = {
+                                        "Deal Done": "#3b82f6", // blue-500
+                                        "Funded": "#10b981",    // emerald-500
+                                        "Approved": "#8b5cf6",  // violet-500
+                                        "Under Review": "#f59e0b", // amber-500
+                                        "Rejected": "#ef4444"   // red-500
+                                      };
+
+                                      return data.map((entry, index) => (
+                                        <Cell
+                                          key={`cell-${index}`}
+                                          fill={COLORS[entry.name]}
+                                          style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.15))' }}
+                                        />
+                                      ));
+                                    })()}
                                   </Pie>
                                   <Tooltip
-                                    contentStyle={{
-                                      borderRadius: '10px',
-                                      border: '1px solid #e2e8f0',
-                                      fontSize: '12px',
-                                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
-                                    }}
+                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    itemStyle={{ fontSize: '12px', fontWeight: 600 }}
                                   />
                                 </PieChart>
                               </ResponsiveContainer>
@@ -1062,40 +1336,26 @@ const FounderDashboard = () => {
                           </div>
 
                           {/* Legend */}
-                          <div className="space-y-2 mt-3">
-                            {(() => {
-                              const domainCounts = ideas.reduce((acc: Record<string, number>, idea) => {
-                                acc[idea.domain] = (acc[idea.domain] || 0) + 1;
-                                return acc;
-                              }, {});
-                              return Object.entries(domainCounts).slice(0, 3).map(([domain, count], i) => (
-                                <motion.div
-                                  key={domain}
-                                  className="flex items-center justify-between text-xs p-2 rounded-lg hover:bg-slate-50 transition-colors"
-                                  whileHover={{ x: 4 }}
-                                  transition={{ duration: 0.15 }}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="w-3 h-3 rounded-full shadow-sm"
-                                      style={{
-                                        backgroundColor: ['#0f172a', '#334155', '#64748b'][i],
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
-                                      }}
-                                    />
-                                    <span className="text-slate-600 font-medium">{domain}</span>
-                                  </div>
-                                  <Badge variant="secondary" className="bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 text-xs">
-                                    {count}
-                                  </Badge>
-                                </motion.div>
-                              ));
-                            })()}
+                          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-2 w-full px-2">
+                            {[
+                              { label: "Deal Done", color: "bg-blue-500" },
+                              { label: "Funded", color: "bg-emerald-500" },
+                              { label: "Approved", color: "bg-violet-500" },
+                              { label: "Reviewing", color: "bg-amber-500" },
+                            ].map((item) => (
+                              <div key={item.label} className="flex items-center gap-1.5">
+                                <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-sm`} />
+                                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{item.label}</span>
+                              </div>
+                            ))}
                           </div>
-                        </>
+                        </div>
                       ) : (
-                        <div className="flex items-center justify-center h-40 text-slate-400 text-sm">
-                          No ventures yet
+                        <div className="flex items-center justify-center h-60 text-slate-400 text-sm">
+                          <div className="text-center">
+                            <Building2 className="w-10 h-10 mx-auto mb-3 text-slate-300" />
+                            <p>No ventures to display</p>
+                          </div>
                         </div>
                       )}
                     </CardContent>
@@ -1427,7 +1687,7 @@ const FounderDashboard = () => {
           )}
         </AnimatePresence>
       </div>
-    </AnimatedGridBackground>
+    </AnimatedGridBackground >
   );
 };
 

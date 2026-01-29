@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,70 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck } from "lucide-react";
+import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
-import { connectFirebase } from "@/lib/firebase";
+import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
+import AnimatedGridBackground from "@/components/AnimatedGridBackground";
+import { motion, AnimatePresence } from "framer-motion";
 
 const COLORS = ["#4338ca", "#6366f1", "#818cf8", "#a5b4fc"];
+
+// ============================================================================
+// ANIMATION VARIANTS - Premium Fintech Motion
+// ============================================================================
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94] as const
+    }
+  }
+};
+
+const cardHoverVariants = {
+  rest: {
+    scale: 1,
+    boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)"
+  },
+  hover: {
+    scale: 1.02,
+    boxShadow: "0 10px 25px -5px rgb(0 0 0 / 0.1)",
+    transition: {
+      duration: 0.3,
+      ease: "easeOut" as const
+    }
+  }
+};
+
+const ideaCardHoverVariants = {
+  rest: {
+    scale: 1,
+    y: 0
+  },
+  hover: {
+    scale: 1.05,
+    y: -8,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut" as const
+    }
+  }
+};
 
 const portfolioData = [
   { name: "FinTech", value: 400 },
@@ -59,6 +117,7 @@ interface ChatRequest {
   status: string;
   founder?: Profile;
   idea?: { title: string; investment_needed: number };
+  unread_count?: number;
 }
 
 const InvestorDashboard = () => {
@@ -73,8 +132,25 @@ const InvestorDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("all");
   const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [showChatList, setShowChatList] = useState(false);
+  const [messageFilter, setMessageFilter] = useState<"all" | "unread">("all");
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const previousCountsRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
+    // Keyboard shortcuts
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "m" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setShowChatList(prev => !prev);
+      }
+      if (e.key === "Escape") {
+        setShowChatList(false);
+        setSelectedChat(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
     fetchData();
 
     const channel = supabase
@@ -92,9 +168,68 @@ const InvestorDashboard = () => {
       .subscribe();
 
     return () => {
+      window.removeEventListener("keydown", handleKeyPress);
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Real-time subscription for unread message counts
+  useEffect(() => {
+    if (!profile || chatRequests.length === 0) return;
+
+    const unsubscribers: (() => void)[] = [];
+
+    // Initialize previous counts only for new chats
+    chatRequests.forEach(req => {
+      if (!previousCountsRef.current.has(req.id)) {
+        previousCountsRef.current.set(req.id, req.unread_count || 0);
+      }
+    });
+
+    // Subscribe to each active chat for real-time unread updates
+    const activeChats = chatRequests.filter(r => 
+      ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
+    );
+
+    activeChats.forEach(req => {
+      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
+        const prevCount = previousCountsRef.current.get(req.id) || 0;
+        
+        // Update the unread count in state
+        setChatRequests(prev => prev.map(p => 
+          p.id === req.id ? { ...p, unread_count: count } : p
+        ));
+
+        // Show notification if new messages arrived and chat is not currently open
+        if (count > prevCount && selectedChat?.id !== req.id) {
+          const newMessages = count - prevCount;
+          
+          // Play notification sound
+          if (soundEnabled) {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU=');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+          }
+
+          // Show toast notification
+          toast({
+            title: "💬 New Message",
+            description: `${req.founder?.name || 'A founder'} sent you ${newMessages} new message${newMessages > 1 ? 's' : ''}`,
+            duration: 5000,
+          });
+        }
+
+        // Update previous count for next comparison
+        previousCountsRef.current.set(req.id, count);
+      });
+      
+      unsubscribers.push(unsubscribe);
+    });
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }, [profile?.id, chatRequests.length, selectedChat?.id, soundEnabled]);
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -143,12 +278,29 @@ const InvestorDashboard = () => {
       .from("chat_requests")
       .select(`
         *,
-        founder:profiles!chat_requests_founder_id_fkey(id, name, user_type),
+        founder:profiles!chat_requests_founder_id_fkey(id, name, avatar_url, user_type),
         idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .eq("investor_id", profileData.id);
 
     setChatRequests(requestsData || []);
+    
+    // Fetch initial unread counts (real-time subscription will handle updates)
+    if (requestsData && requestsData.length > 0) {
+      const activeChats = requestsData.filter(r => 
+        ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
+      );
+      
+      for (const req of activeChats) {
+        try {
+          const count = await getUnreadCount(req.id, profileData.id);
+          setChatRequests(prev => prev.map(p => p.id === req.id ? { ...p, unread_count: count } : p));
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      }
+    }
+    
     setIsLoading(false);
   };
 
@@ -246,13 +398,15 @@ const InvestorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 font-sans relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none opacity-40">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[120px] -mr-64 -mt-64" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -ml-64 -mb-64" />
-      </div>
+    <AnimatedGridBackground className="bg-slate-50">
+      <div className="min-h-screen text-slate-900 font-sans relative">
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 flex justify-between items-center">
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-4 px-6 md:px-12 flex justify-between items-center"
+      >
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
@@ -269,42 +423,77 @@ const InvestorDashboard = () => {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+          <div className="relative">
+            <Button 
+              variant={showChatList ? "default" : "outline"} 
+              size="sm" 
+              onClick={() => setShowChatList(!showChatList)} 
+              className="rounded-full font-bold relative"
+            >
+              <MessageSquare className="w-4 h-4 mr-2" /> Messages
+              {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                <>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/50">
+                    {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)}
+                  </span>
+                  <span className="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full animate-ping opacity-75"></span>
+                </>
+              )}
+            </Button>
+          </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full font-bold">
             <LogOut className="w-4 h-4 mr-2" /> Logout
           </Button>
         </div>
-      </header>
+      </motion.header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10"
+        >
           {[
             { label: "Total Deployed", value: "$3.8M", icon: DollarSign, color: "text-indigo-600", trend: "+12.5%", positive: true },
             { label: "Active Deals", value: chatRequests.filter(r => r.status === 'deal_done').length, icon: Activity, color: "text-slate-900", trend: "Stable", positive: true },
             { label: "Avg. RoI", value: "24.8%", icon: TrendingUp, color: "text-green-600", trend: "+2.1%", positive: true },
             { label: "Market Status", value: "Verified", icon: Zap, color: "text-amber-500", trend: "High", positive: true },
           ].map((stat, i) => (
-            <Card key={i} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group rounded-2xl overflow-hidden">
-              <div className="h-1 w-full bg-slate-50 group-hover:bg-indigo-600 transition-colors" />
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-2.5 rounded-xl bg-slate-50 ${stat.color} group-hover:scale-110 transition-transform`}>
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  <div className={`text-[10px] font-bold px-2 py-1 rounded-full ${stat.positive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                    {stat.trend}
-                  </div>
-                </div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                <p className="text-2xl font-black text-slate-900">{stat.value}</p>
-              </CardContent>
-            </Card>
+            <motion.div key={i} variants={itemVariants}>
+              <motion.div
+                initial="rest"
+                whileHover="hover"
+                variants={cardHoverVariants}
+              >
+                <Card className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-2.5 rounded-lg bg-slate-50 ${stat.color}`}>
+                        <stat.icon className="w-5 h-5" />
+                      </div>
+                      <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${stat.positive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                        {stat.trend}
+                      </div>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-2xl font-black text-slate-900">{stat.value}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-10">
-          <Card className="lg:col-span-2 bg-white border-0 shadow-lg rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold">Portfolio Growth & Strategy</CardTitle>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="grid lg:grid-cols-3 gap-8 mb-10"
+        >
+          <Card className="lg:col-span-2 bg-white border border-slate-200 shadow-sm rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/30">
+              <CardTitle className="text-lg font-bold text-slate-900">Portfolio Growth & Strategy</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -327,9 +516,9 @@ const InvestorDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-0 shadow-lg rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold">Hot Domains</CardTitle>
+          <Card className="bg-white border border-slate-200 shadow-sm rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/30">
+              <CardTitle className="text-lg font-bold text-slate-900">Hot Domains</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -359,20 +548,25 @@ const InvestorDashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex flex-col md:flex-row gap-4 mb-8"
+        >
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               placeholder="Filter by domain, tech, or title..."
-              className="pl-12 h-12 bg-white border-0 shadow-lg rounded-2xl font-medium focus:ring-indigo-600 transition-all"
+              className="pl-12 h-12 bg-white border border-slate-200 shadow-sm rounded-xl font-medium focus:ring-2 focus:ring-slate-900 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex gap-4">
-            <div className="flex items-center gap-3 bg-white px-4 rounded-2xl border-0 shadow-lg">
+            <div className="flex items-center gap-3 bg-white px-4 rounded-xl border border-slate-200 shadow-sm">
               <Filter className="w-4 h-4 text-slate-400" />
               <select
                 className="bg-transparent h-12 text-sm font-bold text-slate-600 focus:outline-none min-w-[120px]"
@@ -387,43 +581,56 @@ const InvestorDashboard = () => {
               </select>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {filteredIdeas.map((idea) => {
             const isWatchlisted = watchlist.includes(idea.id);
             const status = getRequestStatus(idea.id);
 
             return (
-              <Card key={idea.id} className="bg-white border-0 shadow-lg hover:shadow-2xl transition-all group overflow-hidden rounded-2xl flex flex-col relative">
-                <div className={`h-1 w-full ${status === 'deal_done' ? 'bg-indigo-600' : 'bg-slate-50'} group-hover:bg-indigo-600 transition-colors`} />
-
-                <button
-                  onClick={() => toggleWatchlist(idea.id)}
-                  className={`absolute top-4 right-4 p-2 rounded-xl transition-all duration-300 z-20 ${isWatchlisted ? 'bg-red-50 text-red-500 scale-110 shadow-sm' : 'bg-slate-50 text-slate-300 hover:text-red-400 hover:bg-red-50'}`}
+              <motion.div key={idea.id} variants={itemVariants}>
+                <motion.div
+                  initial="rest"
+                  whileHover="hover"
+                  variants={ideaCardHoverVariants}
+                  className="h-full"
                 >
-                  <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
-                </button>
+                  <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:ring-2 hover:ring-indigo-500/20 transition-all group overflow-hidden rounded-xl flex flex-col relative h-full">
+
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => toggleWatchlist(idea.id)}
+                      className={`absolute top-4 right-4 p-2 rounded-lg transition-all duration-300 z-20 ${isWatchlisted ? 'bg-red-50 text-red-500 shadow-sm' : 'bg-slate-50 text-slate-400 hover:text-red-400 hover:bg-red-50'}`}
+                    >
+                      <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
+                    </motion.button>
 
                 <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between mr-8">
-                    <div>
-                      <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {idea.title} {status === "deal_done" && "🤝"}
-                      </CardTitle>
-                      <CardDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-600 mt-1">
-                        {idea.domain}
-                      </CardDescription>
+                    <div className="flex items-start justify-between mr-8">
+                      <div>
+                        <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          {idea.title} {status === "deal_done" && "🤝"}
+                        </CardTitle>
+                        <CardDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mt-1">
+                          {idea.domain}
+                        </CardDescription>
+                      </div>
                     </div>
-                  </div>
                 </CardHeader>
 
                 <CardContent className="flex-1 pb-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Badge variant="outline" className="rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-50/50 border-slate-100">
-                      By {idea.founder?.name}
-                    </Badge>
-                  </div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="outline" className="rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-50 border-slate-200 text-slate-600">
+                        By {idea.founder?.name}
+                      </Badge>
+                    </div>
 
                   <p className="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed">
                     {idea.description}
@@ -470,39 +677,216 @@ const InvestorDashboard = () => {
                     </div>
                   </div>
 
-                  <Button
-                    className={`w-full h-12 rounded-xl font-bold transition-all shadow-lg ${status === 'deal_done' || status === 'accepted' || status === 'communicating'
-                      ? 'bg-indigo-600 text-white shadow-indigo-100'
-                      : 'bg-slate-900 text-white hover:bg-slate-800'
-                      }`}
-                    onClick={() => handleReachOut(idea)}
-                  >
-                    {status === "accepted" || status === "communicating" || status === "deal_done" ? (
-                      <>
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Enter Private Portal
-                      </>
-                    ) : status === "pending" ? (
-                      "Connection Pending"
-                    ) : (
-                      "Reach Out to Founder"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+                    <Button
+                      className={`w-full h-12 rounded-lg font-bold transition-all ${status === 'deal_done' || status === 'accepted' || status === 'communicating'
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-slate-900 text-white hover:bg-slate-800'
+                        }`}
+                      onClick={() => handleReachOut(idea)}
+                    >
+                      {status === "accepted" || status === "communicating" || status === "deal_done" ? (
+                        <>
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Enter Private Portal
+                        </>
+                      ) : status === "pending" ? (
+                        "Connection Pending"
+                      ) : (
+                        "Reach Out to Founder"
+                      )}
+                    </Button>
+                  </CardContent>
+                  </Card>
+                </motion.div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </main>
 
-      {selectedChat && profile && (
-        <ChatBox
-          chatRequest={selectedChat}
-          currentUserId={profile.id}
-          onClose={() => setSelectedChat(null)}
-        />
-      )}
-    </div>
+      {/* ============================================================== */}
+      {/* CHAT LIST PANEL - LinkedIn Style */}
+      {/* ============================================================== */}
+      <AnimatePresence>
+        {showChatList && (
+          <motion.aside
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed right-0 top-[73px] bottom-0 w-96 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-50"
+          >
+            <div className="h-full flex flex-col">
+              <div className="p-4 border-b border-slate-200 bg-slate-50/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-900">Messages</h2>
+                    {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      >
+                        {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)} new
+                      </motion.span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      className="h-8 w-8 rounded-full hover:bg-slate-200"
+                      title={soundEnabled ? "Mute notifications" : "Unmute notifications"}
+                    >
+                      {soundEnabled ? (
+                        <Activity className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Activity className="w-4 h-4 text-slate-400" />
+                      )}
+                    </Button>
+                    {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setChatRequests(prev => prev.map(r => ({ ...r, unread_count: 0 })));
+                          toast({ title: "All messages marked as read" });
+                        }}
+                        className="text-xs text-slate-600 hover:text-slate-900 h-8"
+                      >
+                        Mark all read
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowChatList(false)}
+                      className="h-8 w-8 rounded-full hover:bg-slate-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Filter Tabs */}
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    variant={messageFilter === "all" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setMessageFilter("all")}
+                    className="flex-1 h-8 text-xs rounded-lg"
+                  >
+                    All ({chatRequests.filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)).length})
+                  </Button>
+                  <Button
+                    variant={messageFilter === "unread" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setMessageFilter("unread")}
+                    className="flex-1 h-8 text-xs rounded-lg"
+                  >
+                    Unread ({chatRequests.filter(r => r.unread_count && r.unread_count > 0).length})
+                  </Button>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-2">Tip: Press Ctrl+M to toggle messages</p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {chatRequests.filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full px-4 text-center">
+                    <MessageSquare className="w-12 h-12 text-slate-300 mb-3" />
+                    <p className="text-sm font-medium text-slate-500">No active conversations</p>
+                    <p className="text-xs text-slate-400 mt-1">Connect with founders to start chatting</p>
+                  </div>
+                ) : (
+                  <div className="p-2 space-y-1">
+                    {chatRequests
+                      .filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status))                      .filter(r => messageFilter === "all" || (messageFilter === "unread" && r.unread_count && r.unread_count > 0))                      .map((chat) => (
+                        <motion.button
+                          key={chat.id}
+                          onClick={() => {
+                            setSelectedChat(chat);
+                            setShowChatList(false);
+                            setChatRequests(prev => prev.map(x => x.id === chat.id ? { ...x, unread_count: 0 } : x));
+                          }}
+                          className={`w-full p-3 rounded-lg text-left transition-all relative ${
+                            selectedChat?.id === chat.id 
+                              ? 'bg-indigo-50 border border-indigo-200' 
+                              : chat.unread_count && chat.unread_count > 0
+                                ? 'bg-blue-50/50 border border-blue-200 hover:bg-blue-50'
+                                : 'hover:bg-slate-50 border border-transparent'
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          {chat.unread_count && chat.unread_count > 0 && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-l-lg"></div>
+                          )}
+                          <div className="flex items-start justify-between mb-1">
+                            <p className={`text-sm truncate flex-1 ${
+                              chat.unread_count && chat.unread_count > 0 ? 'font-extrabold text-slate-900' : 'font-bold text-slate-700'
+                            }`}>
+                              {chat.founder?.name || "Founder"}
+                            </p>
+                            {chat.unread_count && chat.unread_count > 0 && (
+                              <motion.span 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="ml-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse shadow-lg shadow-indigo-500/50"
+                              >
+                                {chat.unread_count}
+                              </motion.span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 truncate mb-1">
+                            {chat.idea?.title || "Investment Opportunity"}
+                          </p>
+                          <p className="text-[11px] text-slate-400 truncate mb-2 italic">
+                            {chat.unread_count && chat.unread_count > 0 ? `${chat.unread_count} new message${chat.unread_count > 1 ? 's' : ''}` : 'No new messages'}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Badge className="text-[9px] font-bold bg-slate-100 text-slate-600 border-slate-200">
+                              {chat.status === "deal_done" ? "Deal Closed" : "Active"}
+                            </Badge>
+                            <span className="text-[9px] text-slate-400">• Just now</span>
+                          </div>
+                        </motion.button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================================== */}
+      {/* RIGHT PANEL - Chat */}
+      {/* ============================================================== */}
+      <AnimatePresence>
+        {selectedChat && profile && !showChatList && (
+          <motion.aside
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed right-0 top-[73px] bottom-0 w-96 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-40"
+          >
+            <ChatBox
+              chatRequest={selectedChat}
+              currentUserId={profile.id}
+              onClose={() => setSelectedChat(null)}
+              onMessagesRead={() => {
+                setChatRequests(prev => prev.map(x => x.id === selectedChat.id ? { ...x, unread_count: 0 } : x));
+              }}
+              variant="embedded"
+              className="h-full"
+            />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+      </div>
+    </AnimatedGridBackground>
   );
 };
 
