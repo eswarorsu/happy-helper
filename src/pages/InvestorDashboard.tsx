@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X } from "lucide-react";
+import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
 import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
@@ -136,6 +136,12 @@ const InvestorDashboard = () => {
   const [messageFilter, setMessageFilter] = useState<"all" | "unread">("all");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const previousCountsRef = useRef<Map<string, number>>(new Map());
+  const unsubscribersRef = useRef<(() => void)[]>([]);
+  const [firebaseReady, setFirebaseReady] = useState(false);
+  
+  // Investor metrics
+  const [totalInvested, setTotalInvested] = useState(0);
+  const [trustScore, setTrustScore] = useState({ total: 0, positive: 0, percentage: 0 });
 
   useEffect(() => {
     // Keyboard shortcuts
@@ -173,32 +179,65 @@ const InvestorDashboard = () => {
     };
   }, []);
 
+  // Initialize Firebase on mount
+  useEffect(() => {
+    connectFirebase()
+      .then(() => {
+        console.log("[INVESTOR] Firebase connected successfully");
+        setFirebaseReady(true);
+      })
+      .catch(e => console.error("[INVESTOR] Firebase connection failed:", e));
+  }, []);
+
   // Real-time subscription for unread message counts
   useEffect(() => {
-    if (!profile || chatRequests.length === 0) return;
+    if (!profile || chatRequests.length === 0 || !firebaseReady) {
+      console.log("[INVESTOR] Skipping subscription setup:", { 
+        hasProfile: !!profile, 
+        chatCount: chatRequests.length,
+        firebaseReady 
+      });
+      return;
+    }
 
-    const unsubscribers: (() => void)[] = [];
-
-    // Initialize previous counts only for new chats
-    chatRequests.forEach(req => {
-      if (!previousCountsRef.current.has(req.id)) {
-        previousCountsRef.current.set(req.id, req.unread_count || 0);
-      }
-    });
+    // Cleanup previous subscriptions
+    unsubscribersRef.current.forEach(unsub => unsub());
+    unsubscribersRef.current = [];
 
     // Subscribe to each active chat for real-time unread updates
     const activeChats = chatRequests.filter(r => 
       ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
     );
 
+    console.log(`[INVESTOR] Setting up subscriptions for ${activeChats.length} active chats`);
+
     activeChats.forEach(req => {
+      // Initialize previous count ONLY if it doesn't exist yet
+      if (!previousCountsRef.current.has(req.id)) {
+        previousCountsRef.current.set(req.id, req.unread_count || 0);
+        console.log(`[INVESTOR] Initialized prevCount for chat ${req.id} to ${req.unread_count || 0}`);
+      }
+
       const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
         const prevCount = previousCountsRef.current.get(req.id) || 0;
         
-        // Update the unread count in state
-        setChatRequests(prev => prev.map(p => 
-          p.id === req.id ? { ...p, unread_count: count } : p
-        ));
+        console.log(`[INVESTOR] Unread count update for chat ${req.id}:`, {
+          chatId: req.id,
+          founderName: req.founder?.name,
+          newCount: count,
+          prevCount: prevCount,
+          selectedChatId: selectedChat?.id,
+          willShowNotification: count > prevCount && selectedChat?.id !== req.id
+        });
+        
+        // Update the unread count in state - use functional update to avoid stale closure
+        setChatRequests(prev => {
+          const updated = prev.map(p => 
+            p.id === req.id ? { ...p, unread_count: count } : p
+          );
+          console.log(`[INVESTOR] State updated - chat ${req.id} now has unread_count: ${count}`);
+          return updated;
+        });
 
         // Show notification if new messages arrived and chat is not currently open
         if (count > prevCount && selectedChat?.id !== req.id) {
@@ -223,25 +262,28 @@ const InvestorDashboard = () => {
         previousCountsRef.current.set(req.id, count);
       });
       
-      unsubscribers.push(unsubscribe);
+      unsubscribersRef.current.push(unsubscribe);
     });
 
+    // Cleanup on unmount or dependency change
     return () => {
-      unsubscribers.forEach(unsub => unsub());
+      console.log("[INVESTOR] Cleaning up subscriptions");
+      unsubscribersRef.current.forEach(unsub => unsub());
+      unsubscribersRef.current = [];
     };
-  }, [profile?.id, chatRequests.length, selectedChat?.id, soundEnabled]);
+  }, [profile?.id, chatRequests.length, firebaseReady]);
+
+  // Separate effect for notification logic that depends on selectedChat
+  const selectedChatIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    selectedChatIdRef.current = selectedChat?.id || null;
+  }, [selectedChat?.id]);
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
       navigate("/auth?mode=login");
       return;
-    }
-
-    try {
-      await connectFirebase();
-    } catch (e) {
-      console.error("Failed to connect to Firebase:", e);
     }
 
     const { data: profileData, error: profileError } = await supabase
@@ -284,6 +326,35 @@ const InvestorDashboard = () => {
       .eq("investor_id", profileData.id);
 
     setChatRequests(requestsData || []);
+    
+    // Fetch investor metrics
+    // 1. Total Invested Amount
+    const { data: investmentData } = await supabase
+      .from("investment_records")
+      .select("amount")
+      .eq("investor_id", profileData.id)
+      .eq("status", "confirmed");
+    
+    if (investmentData) {
+      const total = investmentData.reduce((sum, inv) => sum + Number(inv.amount), 0);
+      setTotalInvested(total);
+    }
+    
+    // 2. Trust Score (from founder ratings)
+    const { data: ratingsData } = await supabase
+      .from("investor_ratings")
+      .select("rating")
+      .eq("investor_id", profileData.id);
+    
+    if (ratingsData && ratingsData.length > 0) {
+      const positiveCount = ratingsData.filter(r => r.rating === true).length;
+      const percentage = Math.round((positiveCount / ratingsData.length) * 100);
+      setTrustScore({
+        total: ratingsData.length,
+        positive: positiveCount,
+        percentage
+      });
+    }
     
     // Fetch initial unread counts (real-time subscription will handle updates)
     if (requestsData && requestsData.length > 0) {
@@ -455,10 +526,42 @@ const InvestorDashboard = () => {
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10"
         >
           {[
-            { label: "Total Deployed", value: "$3.8M", icon: DollarSign, color: "text-indigo-600", trend: "+12.5%", positive: true },
-            { label: "Active Deals", value: chatRequests.filter(r => r.status === 'deal_done').length, icon: Activity, color: "text-slate-900", trend: "Stable", positive: true },
-            { label: "Avg. RoI", value: "24.8%", icon: TrendingUp, color: "text-green-600", trend: "+2.1%", positive: true },
-            { label: "Market Status", value: "Verified", icon: Zap, color: "text-amber-500", trend: "High", positive: true },
+            { 
+              label: "Total Invested", 
+              value: totalInvested > 0 ? `₹${(totalInvested / 100000).toFixed(1)}L` : "₹0", 
+              icon: DollarSign, 
+              color: "text-indigo-600", 
+              bgColor: "bg-indigo-50",
+              trend: totalInvested > 0 ? "Active" : "Start investing", 
+              positive: totalInvested > 0 
+            },
+            { 
+              label: "Active Deals", 
+              value: chatRequests.filter(r => r.status === 'deal_done').length, 
+              icon: Handshake, 
+              color: "text-emerald-600", 
+              bgColor: "bg-emerald-50",
+              trend: chatRequests.filter(r => r.status === 'deal_done').length > 0 ? "Ongoing" : "No deals yet", 
+              positive: chatRequests.filter(r => r.status === 'deal_done').length > 0 
+            },
+            { 
+              label: "Connections", 
+              value: chatRequests.filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)).length, 
+              icon: Users, 
+              color: "text-blue-600", 
+              bgColor: "bg-blue-50",
+              trend: `${chatRequests.filter(r => r.status === "pending").length} pending`, 
+              positive: true 
+            },
+            { 
+              label: "Trust Score", 
+              value: trustScore.total > 0 ? `${trustScore.percentage}%` : "New", 
+              icon: ThumbsUp, 
+              color: trustScore.percentage >= 70 ? "text-green-600" : trustScore.percentage >= 40 ? "text-amber-600" : "text-slate-600", 
+              bgColor: trustScore.percentage >= 70 ? "bg-green-50" : trustScore.percentage >= 40 ? "bg-amber-50" : "bg-slate-50",
+              trend: trustScore.total > 0 ? `${trustScore.positive}/${trustScore.total} ratings` : "No ratings yet", 
+              positive: trustScore.percentage >= 50 
+            },
           ].map((stat, i) => (
             <motion.div key={i} variants={itemVariants}>
               <motion.div
@@ -469,10 +572,10 @@ const InvestorDashboard = () => {
                 <Card className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`p-2.5 rounded-lg bg-slate-50 ${stat.color}`}>
+                      <div className={`p-2.5 rounded-lg ${stat.bgColor} ${stat.color}`}>
                         <stat.icon className="w-5 h-5" />
                       </div>
-                      <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${stat.positive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                      <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${stat.positive ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-500'}`}>
                         {stat.trend}
                       </div>
                     </div>

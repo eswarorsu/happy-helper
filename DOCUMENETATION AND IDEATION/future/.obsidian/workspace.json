@@ -1,0 +1,221 @@
+{
+  "main": {
+    "id": "d13b5585d86d052f",
+    "type": "split",
+    "children": [
+      {
+        "id": "6501650f624000f6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "70aeb68e59f9c27f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "01 - Architecture Overview.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "01 - Architecture Overview"
+            }
+          },
+          {
+            "id": "a667d2e67afc6e03",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8233743b4b219d33",
+    "type": "split",
+    "children": [
+      {
+        "id": "67ddefd104296b08",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7bf0d2d85590adc8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a62dd2889986b2d5",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "889f60d25ecee192",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a763c94bceee1f3a",
+    "type": "split",
+    "children": [
+      {
+        "id": "557bae4d4d6e9001",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a577feae47bd6cf4",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "45761e79d8403eec",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "f889667bea44608f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "6e2077270a09123e",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "5ddf441c3cea6f5a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "a667d2e67afc6e03",
+  "lastOpenFiles": [
+    "Welcome.md",
+    "Investors/01 - Getting Started as Investor.md",
+    "Founders/01 - Getting Started as Founder.md",
+    "Meeting Notes.md",
+    "01 - Architecture Overview.md",
+    "Ideas Backlog.md",
+    "Roadmap.md",
+    "Changelog.md",
+    "Legal/00 - Legal Overview.md",
+    "Legal",
+    "Development/02 - API Reference.md",
+    "Development/01 - Component Library.md",
+    "00 - Overview.md",
+    "Development/00 - Dev Setup.md",
+    "Development",
+    "Admin/00 - Admin Hub.md",
+    "Admin",
+    "Investors/00 - Investor Hub.md",
+    "Investors",
+    "Founders/00 - Founder Hub.md",
+    "Founders",
+    "04 - Features.md",
+    "03 - User Flows.md",
+    "02 - Database Schema.md"
+  ]
+}

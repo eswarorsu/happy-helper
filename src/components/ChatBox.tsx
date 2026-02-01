@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as FirebaseMessage } from "@/lib/firebase";
+import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as FirebaseMessage, connectFirebase } from "@/lib/firebase";
 import {
   Send, Handshake, CheckCircle2, Paperclip, Image as ImageIcon,
   FileText, Download, File as FileIcon, X, Check, CheckCheck
@@ -52,26 +52,39 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
 
   useEffect(() => {
     const chatId = chatRequest.id;
-    const unsubscribe = subscribeToChat(chatId, (msgs) => {
-      const formattedMessages = msgs.map(msg => ({
-        ...msg,
-        id: msg.id || 'temp-id',
-        created_at: typeof msg.created_at === 'number'
-          ? new Date(msg.created_at).toISOString()
-          : new Date().toISOString()
-      }));
-      setMessages(formattedMessages);
+    let unsubscribe: (() => void) | null = null;
 
-      msgs.forEach(msg => {
-        if (!msg.is_read && msg.sender_id !== currentUserId && msg.id) {
-          markMessageAsRead(chatId, msg.id).catch(console.error);
-        }
-      });
+    const initChat = async () => {
+      try {
+        // Ensure Firebase is connected before subscribing
+        await connectFirebase();
+        
+        unsubscribe = subscribeToChat(chatId, (msgs) => {
+          const formattedMessages = msgs.map(msg => ({
+            ...msg,
+            id: msg.id || 'temp-id',
+            created_at: typeof msg.created_at === 'number'
+              ? new Date(msg.created_at).toISOString()
+              : new Date().toISOString()
+          }));
+          setMessages(formattedMessages);
 
-      if (msgs.some(m => !m.is_read && m.sender_id !== currentUserId)) {
-        onMessagesRead?.();
+          msgs.forEach(msg => {
+            if (!msg.is_read && msg.sender_id !== currentUserId && msg.id) {
+              markMessageAsRead(chatId, msg.id).catch(console.error);
+            }
+          });
+
+          if (msgs.some(m => !m.is_read && m.sender_id !== currentUserId)) {
+            onMessagesRead?.();
+          }
+        });
+      } catch (error) {
+        console.error("Failed to initialize chat:", error);
       }
-    });
+    };
+
+    initChat();
 
     const channel = supabase
       .channel(`chat-status:${chatRequest.id}`)
@@ -81,7 +94,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
       .subscribe();
 
     return () => {
-      unsubscribe();
+      if (unsubscribe) unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [chatRequest.id, currentUserId, onMessagesRead]);
@@ -96,6 +109,9 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
 
     setIsLoading(true);
     try {
+      // Ensure Firebase is connected before sending
+      await connectFirebase();
+      
       await sendMessage(chatRequest.id, {
         sender_id: currentUserId,
         content: newMessage,
@@ -104,6 +120,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
       setNewMessage("");
       inputRef.current?.focus();
     } catch (err) {
+      console.error("Send message error:", err);
       toast({ title: "Error", description: "Failed to send message", variant: "destructive" });
     } finally {
       setIsLoading(false);

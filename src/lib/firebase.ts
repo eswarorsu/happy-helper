@@ -19,8 +19,14 @@ export const auth = getAuth(app);
 export const db = getDatabase(app);
 
 export const connectFirebase = async (): Promise<void> => {
-  if (!auth.currentUser) {
-    await signInAnonymously(auth);
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+      console.log("Firebase: Signed in anonymously");
+    }
+  } catch (error) {
+    console.error("Firebase: Auth error", error);
+    throw error;
   }
 };
 
@@ -37,18 +43,26 @@ export interface Message {
 }
 
 export const sendMessage = async (chatId: string, message: Omit<Message, 'id' | 'created_at' | 'is_read'>) => {
-  const messagesRef = ref(db, `chats/${chatId}/messages`);
-  const newMessageRef = push(messagesRef);
-  await set(newMessageRef, {
-    ...message,
-    created_at: serverTimestamp(),
-    is_read: false
-  });
-  return newMessageRef.key;
+  try {
+    const messagesRef = ref(db, `chats/${chatId}/messages`);
+    const newMessageRef = push(messagesRef);
+    await set(newMessageRef, {
+      ...message,
+      created_at: serverTimestamp(),
+      is_read: false
+    });
+    console.log("Firebase: Message sent successfully", newMessageRef.key);
+    return newMessageRef.key;
+  } catch (error) {
+    console.error("Firebase: Error sending message", error);
+    throw error;
+  }
 };
 
 export const subscribeToChat = (chatId: string, callback: (messages: Message[]) => void) => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
+  console.log("Firebase: Subscribing to chat", chatId);
+  
   const listener = onValue(messagesRef, (snapshot: DataSnapshot) => {
     const data = snapshot.val();
     const messages: Message[] = [];
@@ -66,9 +80,16 @@ export const subscribeToChat = (chatId: string, callback: (messages: Message[]) 
       const timeB = typeof b.created_at === 'number' ? b.created_at : 0;
       return timeA - timeB;
     });
+    console.log("Firebase: Received", messages.length, "messages for chat", chatId);
     callback(messages);
+  }, (error) => {
+    console.error("Firebase: Subscription error for chat", chatId, error);
   });
-  return () => off(messagesRef, 'value', listener);
+  
+  return () => {
+    console.log("Firebase: Unsubscribing from chat", chatId);
+    off(messagesRef, 'value', listener);
+  };
 };
 
 export const markMessageAsRead = async (chatId: string, messageId: string) => {
@@ -107,21 +128,42 @@ export const subscribeToUnreadCount = (
 ) => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
   
+  console.log(`[Firebase] Setting up unread count subscription for chat ${chatId}, userId: ${currentUserId}`);
+  
   const listener = onValue(messagesRef, (snapshot: DataSnapshot) => {
     if (!snapshot.exists()) {
+      console.log(`[Firebase] No messages in chat ${chatId}`);
       callback(0);
       return;
     }
 
     let count = 0;
+    const allMessages: any[] = [];
     snapshot.forEach((child) => {
       const msg = child.val();
+      allMessages.push({ id: child.key, ...msg });
       if (msg.is_read === false && msg.sender_id !== currentUserId) {
         count++;
       }
     });
+    
+    console.log(`[Firebase] Unread count for chat ${chatId}:`, {
+      totalMessages: allMessages.length,
+      unreadCount: count,
+      currentUserId,
+      messages: allMessages.map(m => ({
+        id: m.id,
+        sender: m.sender_id,
+        isRead: m.is_read,
+        content: m.content?.substring(0, 20)
+      }))
+    });
+    
     callback(count);
   });
 
-  return () => off(messagesRef, 'value', listener);
+  return () => {
+    console.log(`[Firebase] Unsubscribing from chat ${chatId}`);
+    off(messagesRef, 'value', listener);
+  };
 };
