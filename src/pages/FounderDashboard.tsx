@@ -361,7 +361,7 @@ const ConnectionItem = ({
             }`}>
             {chat.idea?.title}
           </p>
-          
+
           {/* Rating Buttons - Thumbs Up/Down */}
           {onRate && (
             <div className="flex items-center gap-1 mt-2">
@@ -369,11 +369,10 @@ const ConnectionItem = ({
                 onClick={(e) => { e.stopPropagation(); onRate(true); }}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
-                className={`p-1.5 rounded-lg transition-all duration-200 ${
-                  currentRating === true 
-                    ? "bg-green-100 text-green-600" 
+                className={`p-1.5 rounded-lg transition-all duration-200 ${currentRating === true
+                    ? "bg-green-100 text-green-600"
                     : "bg-slate-50 text-slate-400 hover:bg-green-50 hover:text-green-500"
-                }`}
+                  }`}
                 title="Thumbs up - Rate this investor positively"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
@@ -382,11 +381,10 @@ const ConnectionItem = ({
                 onClick={(e) => { e.stopPropagation(); onRate(false); }}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
-                className={`p-1.5 rounded-lg transition-all duration-200 ${
-                  currentRating === false 
-                    ? "bg-red-100 text-red-600" 
+                className={`p-1.5 rounded-lg transition-all duration-200 ${currentRating === false
+                    ? "bg-red-100 text-red-600"
                     : "bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500"
-                }`}
+                  }`}
                 title="Thumbs down - Rate this investor negatively"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
@@ -470,9 +468,9 @@ const FounderDashboard = () => {
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) { 
-          navigate("/auth?mode=login"); 
-          return; 
+        if (!session?.user) {
+          navigate("/auth?mode=login");
+          return;
         }
 
         const { data: profileData, error: profileError } = await supabase
@@ -484,10 +482,10 @@ const FounderDashboard = () => {
         if (profileError) {
           console.error("Profile fetch error:", profileError);
           setIsLoading(false);
-          toast({ 
-            title: "Error loading profile", 
+          toast({
+            title: "Error loading profile",
             description: "Please refresh the page",
-            variant: "destructive" 
+            variant: "destructive"
           });
           return;
         }
@@ -498,20 +496,20 @@ const FounderDashboard = () => {
         }
         setProfile(profileData);
 
-        try { 
-          await connectFirebase(); 
-        } catch (e) { 
-          console.error("Firebase init:", e); 
+        try {
+          await connectFirebase();
+        } catch (e) {
+          console.error("Firebase init:", e);
         }
 
         await fetchDashboardData(profileData.id);
       } catch (error) {
         console.error("Dashboard init error:", error);
         setIsLoading(false);
-        toast({ 
-          title: "Error loading dashboard", 
+        toast({
+          title: "Error loading dashboard",
           description: "Please refresh the page",
-          variant: "destructive" 
+          variant: "destructive"
         });
       }
     };
@@ -550,10 +548,10 @@ const FounderDashboard = () => {
   // Real-time subscription for unread message counts
   useEffect(() => {
     if (!profile || chatRequests.length === 0 || !firebaseReady) {
-      console.log("[FOUNDER] Skipping subscription setup:", { 
-        hasProfile: !!profile, 
+      console.log("[FOUNDER] Skipping subscription setup:", {
+        hasProfile: !!profile,
         chatCount: chatRequests.length,
-        firebaseReady 
+        firebaseReady
       });
       return;
     }
@@ -563,7 +561,7 @@ const FounderDashboard = () => {
     unsubscribersRef.current = [];
 
     // Subscribe to each active chat for real-time unread updates
-    const activeChats = chatRequests.filter(r => 
+    const activeChats = chatRequests.filter(r =>
       ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
     );
 
@@ -578,7 +576,7 @@ const FounderDashboard = () => {
 
       const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
         const prevCount = previousCountsRef.current.get(req.id) || 0;
-        
+
         console.log(`[FOUNDER] Unread count update for chat ${req.id}:`, {
           chatId: req.id,
           investorName: req.investor?.name,
@@ -587,10 +585,10 @@ const FounderDashboard = () => {
           selectedChatId: selectedChat?.id,
           willShowNotification: count > prevCount && selectedChat?.id !== req.id
         });
-        
+
         // Update the unread count in state - use functional update to avoid stale closure
         setChatRequests(prev => {
-          const updated = prev.map(p => 
+          const updated = prev.map(p =>
             p.id === req.id ? { ...p, unread_count: count } : p
           );
           console.log(`[FOUNDER] State updated - chat ${req.id} now has unread_count: ${count}`);
@@ -600,12 +598,12 @@ const FounderDashboard = () => {
         // Show notification if new messages arrived and chat is not currently open
         if (count > prevCount && selectedChat?.id !== req.id) {
           const newMessages = count - prevCount;
-          
+
           // Play notification sound
           if (soundEnabled) {
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU=');
             audio.volume = 0.3;
-            audio.play().catch(() => {});
+            audio.play().catch(() => { });
           }
 
           // Show toast notification
@@ -619,7 +617,7 @@ const FounderDashboard = () => {
         // Update previous count for next comparison
         previousCountsRef.current.set(req.id, count);
       });
-      
+
       unsubscribersRef.current.push(unsubscribe);
     });
 
@@ -655,7 +653,7 @@ const FounderDashboard = () => {
         .select("*")
         .eq("founder_id", userId)
         .order("created_at", { ascending: false });
-      
+
       if (error) {
         console.error("Error fetching ideas:", error);
         return;
@@ -685,13 +683,13 @@ const FounderDashboard = () => {
           return { ...req, unread_count: existing?.unread_count || 0 };
         });
         setChatRequests(updatedRequests);
-        
+
         // Fetch initial unread counts (real-time subscription will handle updates)
         for (const req of updatedRequests) {
           try {
             const count = await getUnreadCount(req.id, userId);
             setChatRequests(prev => prev.map(p => p.id === req.id ? { ...p, unread_count: count } : p));
-          } catch (e) { 
+          } catch (e) {
             console.error("Error fetching unread count:", e);
           }
         }
@@ -707,7 +705,6 @@ const FounderDashboard = () => {
   const handlePinChat = async (e: React.MouseEvent, requestId: string, currentStatus: boolean) => {
     e.stopPropagation();
     setChatRequests(prev => prev.map(c => c.id === requestId ? { ...c, founder_pinned: !currentStatus } : c));
-    // @ts-expect-error - founder_pinned column exists after migration
     await supabase.from("chat_requests").update({ founder_pinned: !currentStatus }).eq("id", requestId);
   };
 
@@ -732,7 +729,7 @@ const FounderDashboard = () => {
     try {
       // Check if rating already exists
       const { data: existingRating } = await supabase
-        .from("investor_ratings" as any)
+        .from("investor_ratings")
         .select("id, rating")
         .eq("investor_id", investorId)
         .eq("founder_id", profile.id)
@@ -744,33 +741,33 @@ const FounderDashboard = () => {
         if (existingRating.rating === rating) {
           // Same rating clicked - remove it
           await supabase
-            .from("investor_ratings" as any)
+            .from("investor_ratings")
             .delete()
             .eq("id", existingRating.id);
-          
+
           setInvestorRatings(prev => ({ ...prev, [chatRequestId]: null }));
           toast({ title: "Rating removed" });
         } else {
           // Different rating - update it
           await supabase
-            .from("investor_ratings" as any)
+            .from("investor_ratings")
             .update({ rating, updated_at: new Date().toISOString() })
             .eq("id", existingRating.id);
-          
+
           setInvestorRatings(prev => ({ ...prev, [chatRequestId]: rating }));
           toast({ title: rating ? "👍 Rated positively!" : "👎 Rated negatively" });
         }
       } else {
         // Insert new rating
         await supabase
-          .from("investor_ratings" as any)
+          .from("investor_ratings")
           .insert({
             investor_id: investorId,
             founder_id: profile.id,
             chat_request_id: chatRequestId,
             rating
           });
-        
+
         setInvestorRatings(prev => ({ ...prev, [chatRequestId]: rating }));
         toast({ title: rating ? "👍 Rated positively!" : "👎 Rated negatively" });
       }
@@ -783,13 +780,13 @@ const FounderDashboard = () => {
   // Fetch existing ratings
   const fetchInvestorRatings = async () => {
     if (!profile) return;
-    
+
     try {
       const { data: ratings } = await supabase
-        .from("investor_ratings" as any)
+        .from("investor_ratings")
         .select("chat_request_id, rating")
         .eq("founder_id", profile.id);
-      
+
       if (ratings) {
         const ratingsMap: Record<string, boolean> = {};
         ratings.forEach((r: any) => {
@@ -826,7 +823,7 @@ const FounderDashboard = () => {
     try {
       // First, try to insert into investment_records table (if it exists)
       const { error: recordError } = await supabase
-        .from("investment_records" as any)
+        .from("investment_records")
         .insert({
           idea_id: recordInvestmentModal.idea.id,
           investor_id: recordInvestmentModal.investorId || profile.id,
@@ -1033,7 +1030,7 @@ const FounderDashboard = () => {
                       Connections
                     </h2>
                     {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
-                      <motion.span 
+                      <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-lg shadow-red-500/50"
@@ -1064,7 +1061,7 @@ const FounderDashboard = () => {
                   />
                 </div>
               )}
-              
+
               {isSidebarOpen && (
                 <div className="flex gap-2 mt-3">
                   <Button
@@ -1098,7 +1095,7 @@ const FounderDashboard = () => {
                   </Button>
                 </div>
               )}
-              
+
               {isSidebarOpen && chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
                 <Button
                   variant="ghost"
@@ -1125,18 +1122,18 @@ const FounderDashboard = () => {
                   activeConnections
                     .filter(chat => messageFilter === "all" || (messageFilter === "unread" && chat.unread_count && chat.unread_count > 0))
                     .map((chat) => (
-                    <motion.div key={chat.id} variants={itemVariants}>
-                      <ConnectionItem
-                        chat={chat}
-                        isSelected={selectedChat?.id === chat.id}
-                        onSelect={() => setSelectedChat(chat)}
-                        onPin={(e) => handlePinChat(e, chat.id, !!chat.founder_pinned)}
-                        onRate={(rating) => handleRateInvestor(chat.id, chat.investor_id!, rating)}
-                        currentRating={investorRatings[chat.id]}
-                        collapsed={!isSidebarOpen}
-                      />
-                    </motion.div>
-                  ))
+                      <motion.div key={chat.id} variants={itemVariants}>
+                        <ConnectionItem
+                          chat={chat}
+                          isSelected={selectedChat?.id === chat.id}
+                          onSelect={() => setSelectedChat(chat)}
+                          onPin={(e) => handlePinChat(e, chat.id, !!chat.founder_pinned)}
+                          onRate={(rating) => handleRateInvestor(chat.id, chat.investor_id!, rating)}
+                          currentRating={investorRatings[chat.id]}
+                          collapsed={!isSidebarOpen}
+                        />
+                      </motion.div>
+                    ))
                 ) : (
                   <motion.div
                     className="text-center py-12 px-4"

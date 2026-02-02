@@ -16,6 +16,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import AdminPortal from "./pages/AdminPortal";
 import Profile from "./pages/Profile";
+import IdeaDetailPage from "./pages/IdeaDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/admin-innovestor" element={<AdminPortal />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/idea/:id" element={<IdeaDetailPage />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

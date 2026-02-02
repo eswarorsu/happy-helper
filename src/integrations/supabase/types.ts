@@ -17,6 +17,7 @@ export type Database = {
           idea_id: string
           investor_id: string
           status: string | null
+          founder_pinned: boolean | null
         }
         Insert: {
           created_at?: string
@@ -25,6 +26,7 @@ export type Database = {
           idea_id: string
           investor_id: string
           status?: string | null
+          founder_pinned?: boolean | null
         }
         Update: {
           created_at?: string
@@ -33,6 +35,7 @@ export type Database = {
           idea_id?: string
           investor_id?: string
           status?: string | null
+          founder_pinned?: boolean | null
         }
         Relationships: [
           {
@@ -122,6 +125,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      investment_records: {
+        Row: {
+          amount: number
+          chat_request_id: string | null
+          created_at: string
+          founder_id: string
+          id: string
+          idea_id: string
+          investor_id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          chat_request_id?: string | null
+          created_at?: string
+          founder_id: string
+          id?: string
+          idea_id: string
+          investor_id: string
+          notes?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          chat_request_id?: string | null
+          created_at?: string
+          founder_id?: string
+          id?: string
+          idea_id?: string
+          investor_id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      investor_ratings: {
+        Row: {
+          chat_request_id: string
+          created_at: string
+          founder_id: string
+          id: string
+          investor_id: string
+          rating: boolean
+          updated_at: string
+        }
+        Insert: {
+          chat_request_id: string
+          created_at?: string
+          founder_id: string
+          id?: string
+          investor_id: string
+          rating: boolean
+          updated_at?: string
+        }
+        Update: {
+          chat_request_id?: string
+          created_at?: string
+          founder_id?: string
+          id?: string
+          investor_id?: string
+          rating?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
