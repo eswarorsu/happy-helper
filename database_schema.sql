@@ -185,41 +185,51 @@ ALTER TABLE public.investor_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
 -- 1. Profiles
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" 
     ON public.profiles FOR SELECT USING (true);
     
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" 
     ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
     
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" 
     ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
 
 -- 2. Ideas
+DROP POLICY IF EXISTS "Ideas are viewable by everyone" ON public.ideas;
 CREATE POLICY "Ideas are viewable by everyone" 
     ON public.ideas FOR SELECT USING (true);
     
+DROP POLICY IF EXISTS "Founders can insert ideas" ON public.ideas;
 CREATE POLICY "Founders can insert ideas" 
     ON public.ideas FOR INSERT 
     WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id));
     
+DROP POLICY IF EXISTS "Founders can update own ideas" ON public.ideas;
 CREATE POLICY "Founders can update own ideas" 
     ON public.ideas FOR UPDATE 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id));
 
 -- 3. Chat Requests & Connections
+DROP POLICY IF EXISTS "Users can view their own chat requests" ON public.chat_requests;
 CREATE POLICY "Users can view their own chat requests" 
     ON public.chat_requests FOR SELECT 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
     
+DROP POLICY IF EXISTS "Users can insert chat requests" ON public.chat_requests;
 CREATE POLICY "Users can insert chat requests" 
     ON public.chat_requests FOR INSERT 
     WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
     
+DROP POLICY IF EXISTS "Users can update their own chat requests" ON public.chat_requests;
 CREATE POLICY "Users can update their own chat requests" 
     ON public.chat_requests FOR UPDATE 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
 
 -- 4. Messages (If used)
+DROP POLICY IF EXISTS "Users can view messages in their chats" ON public.messages;
 CREATE POLICY "Users can view messages in their chats" 
     ON public.messages FOR SELECT 
     USING (EXISTS (
@@ -228,26 +238,32 @@ CREATE POLICY "Users can view messages in their chats"
         AND auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = cr.founder_id OR id = cr.investor_id)
     ));
     
+DROP POLICY IF EXISTS "Users can send messages to their chats" ON public.messages;
 CREATE POLICY "Users can send messages to their chats" 
     ON public.messages FOR INSERT 
     WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = sender_id));
 
 -- 5. Payments
+DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
 CREATE POLICY "Users can view own payments" 
     ON public.payments FOR SELECT USING (auth.uid() = user_id);
     
+DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
 CREATE POLICY "Users can insert own payments" 
     ON public.payments FOR INSERT WITH CHECK (auth.uid() = user_id);
     
+DROP POLICY IF EXISTS "Users can update own payments" ON public.payments;
 CREATE POLICY "Users can update own payments" 
     ON public.payments FOR UPDATE USING (auth.uid() = user_id);
 
 -- 6. Investment Records
+DROP POLICY IF EXISTS "Users can view own investments" ON public.investment_records;
 CREATE POLICY "Users can view own investments" 
     ON public.investment_records FOR SELECT 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
 
 -- 7. Ratings
+DROP POLICY IF EXISTS "Users can manage ratings" ON public.investor_ratings;
 CREATE POLICY "Users can manage ratings" 
     ON public.investor_ratings FOR ALL 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
