@@ -1,12 +1,9 @@
 -- ==========================================
--- HAPPY-HELPER DATABASE RECONSTRUCTION SCRIPT
+-- HAPPY-HELPER DATABASE RECONSTRUCTION SCRIPT (FINAL ROBUST)
 -- ==========================================
--- This script reconstructs the database schema (tables, types, RLS, triggers)
--- excluding the 'messages' table as requested, but ensuring the 'handle_new_user' trigger exists.
-
--- 1. EXTENSIONS & ENUMS
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- Kept for compatibility, but we use uuid-ossp mostly
 
 DO $$ 
 BEGIN
@@ -28,27 +25,18 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  RETURN EXISTS (
-    SELECT 1 
-    FROM public.profiles 
-    WHERE user_id = auth.uid() 
-    AND is_admin = true
-  );
-END;
-$$;
+-- 3. ADMIN LIST (Recursion Fix)
+CREATE TABLE IF NOT EXISTS public.admin_list (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+ALTER TABLE public.admin_list ENABLE ROW LEVEL SECURITY;
 
--- 3. TABLES & COLUMNS (Safe Reconstruction)
+-- 4. TABLES & COLUMNS (Safe Reconstruction)
 
 -- Profiles Table
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
   user_type user_type NOT NULL,
   name TEXT NOT NULL,
@@ -74,7 +62,7 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT
 
 -- Ideas Table
 CREATE TABLE IF NOT EXISTS public.ideas (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   founder_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -86,7 +74,6 @@ CREATE TABLE IF NOT EXISTS public.ideas (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Safely add potentially missing columns to ideas
 ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS media_url TEXT;
 ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS team_size TEXT DEFAULT 'Solopreneur';
 ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS market_size TEXT;
@@ -96,7 +83,7 @@ ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS website_url TEXT;
 
 -- Chat Requests Table
 CREATE TABLE IF NOT EXISTS public.chat_requests (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   idea_id UUID REFERENCES public.ideas(id) ON DELETE CASCADE NOT NULL,
   investor_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   founder_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
@@ -104,15 +91,14 @@ CREATE TABLE IF NOT EXISTS public.chat_requests (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Safely add potentially missing columns to chat_requests
 ALTER TABLE public.chat_requests ADD COLUMN IF NOT EXISTS investor_name TEXT;
 ALTER TABLE public.chat_requests ADD COLUMN IF NOT EXISTS founder_name TEXT;
 ALTER TABLE public.chat_requests ADD COLUMN IF NOT EXISTS founder_pinned BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.chat_requests ADD COLUMN IF NOT EXISTS investor_pinned BOOLEAN DEFAULT FALSE;
 
--- Payments Table (Razorpay)
+-- Payments Table
 CREATE TABLE IF NOT EXISTS public.payments (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   razorpay_order_id TEXT NOT NULL,
   amount NUMERIC NOT NULL,
@@ -121,7 +107,6 @@ CREATE TABLE IF NOT EXISTS public.payments (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Safely add potentially missing columns to payments
 ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE;
 ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS razorpay_payment_id TEXT;
 ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS razorpay_signature TEXT;
@@ -130,7 +115,7 @@ ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP WITH 
 
 -- Investment Records Table
 CREATE TABLE IF NOT EXISTS public.investment_records (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   idea_id UUID REFERENCES ideas(id) ON DELETE CASCADE NOT NULL,
   investor_id UUID REFERENCES profiles(id) NOT NULL,
   founder_id UUID REFERENCES profiles(id) NOT NULL,
@@ -144,8 +129,52 @@ CREATE TABLE IF NOT EXISTS public.investment_records (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. CRITICAL: USER REGISTRATION TRIGGER (Preserved from Fix)
--- Ensure the function exists and is up to date
+-- 5. FUNCTION: SYNC ADMIN STATUS (Recursion Fix)
+CREATE OR REPLACE FUNCTION public.sync_admin_status()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    IF NEW.is_admin = true THEN
+        INSERT INTO public.admin_list (user_id)
+        VALUES (NEW.user_id)
+        ON CONFLICT (user_id) DO NOTHING;
+    ELSE
+        DELETE FROM public.admin_list WHERE user_id = NEW.user_id;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+-- Trigger for syncing admin status
+DROP TRIGGER IF EXISTS trg_sync_admin_status ON public.profiles;
+CREATE TRIGGER trg_sync_admin_status
+    AFTER INSERT OR UPDATE OF is_admin
+    ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION public.sync_admin_status();
+
+-- Initial Population of Admin List
+INSERT INTO public.admin_list (user_id)
+SELECT user_id FROM public.profiles WHERE is_admin = true
+ON CONFLICT (user_id) DO NOTHING;
+
+-- 6. FUNCTION: IS_ADMIN() (Safe Check)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.admin_list WHERE user_id = auth.uid()
+    );
+END;
+$$;
+
+-- 7. FUNCTION: HANDLE NEW USER (Registration Fix)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -154,7 +183,6 @@ AS $$
 DECLARE
   new_user_type user_type;
 BEGIN
-  -- Determine user type (default to 'founder' if not specified or invalid)
   BEGIN
     new_user_type := (new.raw_user_meta_data->>'user_type')::user_type;
   EXCEPTION WHEN OTHERS THEN
@@ -184,15 +212,12 @@ BEGIN
 END;
 $$;
 
--- Ensure trigger exists
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
-
--- 5. FUNCTION TRG & CALCULATIONS
--- Update investment_received when record is added/updated/deleted
+-- 8. INVESTMENT CALCULATION
 CREATE OR REPLACE FUNCTION update_idea_investment_total()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -213,22 +238,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Set up triggers
 DO $$ 
 BEGIN
-    -- profiles updated_at
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_profiles_updated_at') THEN
         CREATE TRIGGER update_profiles_updated_at
           BEFORE UPDATE ON public.profiles
           FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
     END IF;
-    -- ideas updated_at
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_ideas_updated_at') THEN
         CREATE TRIGGER update_ideas_updated_at
           BEFORE UPDATE ON public.ideas
           FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
     END IF;
-    -- investment synchronization
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_update_idea_investment') THEN
         CREATE TRIGGER trg_update_idea_investment
           AFTER INSERT OR UPDATE OR DELETE ON investment_records
@@ -236,36 +257,30 @@ BEGIN
     END IF;
 END $$;
 
-
--- 6. ROW LEVEL SECURITY (RLS) policies
--- Re-enable RLS on all tables to be sure
+-- 9. RLS POLICIES (Recursive Safe)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ideas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.investment_records ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policies
+-- Profiles
 DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
 CREATE POLICY "Users can view their own profile" ON public.profiles FOR SELECT USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Authenticated users can view basic profile info" ON public.profiles;
 CREATE POLICY "Authenticated users can view basic profile info" ON public.profiles FOR SELECT TO authenticated USING (true);
 
--- Note: INSERT is handled by the trigger (Security Definer), but if we want manual inserts:
 DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 
--- Admin Policy (Allows admins to manage all profiles)
 DROP POLICY IF EXISTS "Admins can manage all profiles" ON public.profiles;
-CREATE POLICY "Admins can manage all profiles" ON public.profiles FOR ALL TO authenticated USING (
-  public.is_admin()
-);
+CREATE POLICY "Admins can manage all profiles" ON public.profiles FOR ALL TO authenticated USING (public.is_admin());
 
--- Ideas Policies
+-- Ideas
 DROP POLICY IF EXISTS "Founders can manage their own ideas" ON public.ideas;
 CREATE POLICY "Founders can manage their own ideas" ON public.ideas FOR ALL USING (founder_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid()));
 
@@ -273,11 +288,9 @@ DROP POLICY IF EXISTS "Investors can view all ideas" ON public.ideas;
 CREATE POLICY "Investors can view all ideas" ON public.ideas FOR SELECT TO authenticated USING (true);
 
 DROP POLICY IF EXISTS "Admins can manage all ideas" ON public.ideas;
-CREATE POLICY "Admins can manage all ideas" ON public.ideas FOR ALL TO authenticated USING (
-  public.is_admin()
-);
+CREATE POLICY "Admins can manage all ideas" ON public.ideas FOR ALL TO authenticated USING (public.is_admin());
 
--- Chat Requests Policies
+-- Chat Requests
 DROP POLICY IF EXISTS "Users can view their own chat requests" ON public.chat_requests;
 CREATE POLICY "Users can view their own chat requests" ON public.chat_requests FOR SELECT TO authenticated USING (investor_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid()) OR founder_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid()));
 
@@ -287,7 +300,7 @@ CREATE POLICY "Investors can create chat requests" ON public.chat_requests FOR I
 DROP POLICY IF EXISTS "Founders can update chat request status" ON public.chat_requests;
 CREATE POLICY "Founders can update chat request status" ON public.chat_requests FOR UPDATE TO authenticated USING (founder_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid()));
 
--- Payments Policies
+-- Payments
 DROP POLICY IF EXISTS "Users can view their own payments" ON public.payments;
 CREATE POLICY "Users can view their own payments" ON public.payments FOR SELECT USING (auth.uid() = user_id);
 
@@ -297,7 +310,7 @@ CREATE POLICY "Users can insert their own payments" ON public.payments FOR INSER
 DROP POLICY IF EXISTS "Users can update their own payments" ON public.payments;
 CREATE POLICY "Users can update their own payments" ON public.payments FOR UPDATE USING (auth.uid() = user_id);
 
--- Investment Records Policies
+-- Investment Records
 DROP POLICY IF EXISTS "Founders can view investments in their ideas" ON investment_records;
 CREATE POLICY "Founders can view investments in their ideas" ON investment_records FOR SELECT USING (auth.uid() IN (SELECT user_id FROM profiles WHERE id = founder_id));
 
@@ -310,7 +323,7 @@ CREATE POLICY "Founders can record investments" ON investment_records FOR INSERT
 DROP POLICY IF EXISTS "Founders can update investments" ON investment_records;
 CREATE POLICY "Founders can update investments" ON investment_records FOR UPDATE USING (auth.uid() IN (SELECT user_id FROM profiles WHERE id = founder_id));
 
--- 7. INDEXES
+-- Indexes
 CREATE INDEX IF NOT EXISTS idx_investment_records_idea ON investment_records(idea_id);
 CREATE INDEX IF NOT EXISTS idx_investment_records_investor ON investment_records(investor_id);
 CREATE INDEX IF NOT EXISTS idx_investment_records_founder ON investment_records(founder_id);
