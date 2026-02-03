@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     experience TEXT,
     domain TEXT,
     linkedin_profile TEXT,
+    website_url TEXT,
     
     -- Investor Specific
     investment_capital NUMERIC, -- Total capital available
