@@ -184,12 +184,14 @@ DECLARE
   new_user_type user_type;
 BEGIN
   BEGIN
-    new_user_type := (new.raw_user_meta_data->>'user_type')::user_type;
+    -- FIX: Force Lowercase
+    new_user_type := LOWER(COALESCE(new.raw_user_meta_data->>'user_type', 'founder'))::user_type;
   EXCEPTION WHEN OTHERS THEN
     new_user_type := 'founder'::user_type;
   END;
 
   INSERT INTO public.profiles (
+    id,
     user_id,
     email,
     name,
@@ -199,6 +201,7 @@ BEGIN
     updated_at
   )
   VALUES (
+    uuid_generate_v4(), -- Explicit generation
     new.id,
     new.email,
     COALESCE(new.raw_user_meta_data->>'name', 'New User'),
