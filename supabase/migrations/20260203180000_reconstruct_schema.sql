@@ -5,6 +5,7 @@
 -- excluding the 'messages' table as requested, but ensuring the 'handle_new_user' trigger exists.
 
 -- 1. EXTENSIONS & ENUMS
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DO $$ 
