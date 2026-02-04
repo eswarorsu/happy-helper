@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
     User, Mail, Phone, Briefcase, GraduationCap, Linkedin,
-    ArrowLeft, ShieldCheck, Globe, Building2, Target, Rocket
+    ArrowLeft, ShieldCheck, Globe, Building2, Target, Rocket, DollarSign
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -75,7 +75,7 @@ const Profile = () => {
                         onClick={() => navigate(isFounder ? "/founder-dashboard" : "/investor-dashboard")}
                         className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
                     </Button>
                 </div>
             </header>
@@ -229,18 +229,37 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Investment Capacity (Investors Only) */}
-                                {!isFounder && profile.investment_capital && (
-                                    <div className="pt-4 border-t border-slate-100 space-y-3">
-                                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                                            <Target className="w-4 h-4" /> Investment Capacity
-                                        </div>
-                                        <div className="p-6 bg-emerald-50 rounded-xl border border-emerald-100">
-                                            <p className="text-3xl font-bold text-emerald-700">
-                                                ${profile.investment_capital.toLocaleString()}
-                                            </p>
-                                            <p className="text-sm text-emerald-600 mt-1">Available for investment</p>
-                                        </div>
+                                {/* Investment Details (Investors Only) */}
+                                {!isFounder && (
+                                    <div className="pt-4 border-t border-slate-100 space-y-6">
+                                        {profile.interested_domains && profile.interested_domains.length > 0 && (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                                    <Target className="w-4 h-4" /> Interested Sectors
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {profile.interested_domains.map((domain: string) => (
+                                                        <Badge key={domain} variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-none px-3 py-1 font-semibold rounded-lg">
+                                                            {domain}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {profile.investment_capital && (
+                                            <div className="space-y-3 pt-4 border-t border-slate-50">
+                                                <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                                    <DollarSign className="w-4 h-4" /> Investment Capacity
+                                                </div>
+                                                <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 shadow-sm">
+                                                    <p className="text-3xl font-black text-emerald-700">
+                                                        ₹{profile.investment_capital.toLocaleString()}
+                                                    </p>
+                                                    <p className="text-sm text-emerald-600 font-medium mt-1">Ready to deploy capital</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </CardContent>

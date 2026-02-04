@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake, Store, Receipt } from "lucide-react";
+import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake, Store, Receipt, User } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
 import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
@@ -571,6 +571,15 @@ const InvestorDashboard = () => {
           <div className="flex items-center gap-4">
             <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
             <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/profile')}
+              className="rounded-full w-9 h-9 border border-slate-200 hover:bg-slate-100 transition-all text-slate-700"
+              title="View Profile"
+            >
+              <User size={18} />
+            </Button>
+            <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/marketplace')}
@@ -807,8 +816,8 @@ const InvestorDashboard = () => {
                     >
                       <Card
                         className={`transition-all duration-300 group overflow-hidden rounded-[20px] flex flex-col relative h-full ${isInvested
-                            ? 'border-emerald-200 bg-[#F0FDF8] shadow-sm'
-                            : 'border-slate-100 bg-white shadow-lg'
+                          ? 'border-emerald-200 bg-[#F0FDF8] shadow-sm'
+                          : 'border-slate-100 bg-white shadow-lg'
                           } border-[1.5px]`}
                       >
                         <CardHeader className="pb-3 pt-5">
@@ -840,8 +849,8 @@ const InvestorDashboard = () => {
 
                             <Button
                               className={`w-full h-11 rounded-xl font-bold transition-all ${isInvested
-                                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                                : 'bg-slate-900 hover:bg-slate-800 text-white'
                                 } border-none shadow-none`}
                               onClick={() => setSelectedChat(request)}
                             >
