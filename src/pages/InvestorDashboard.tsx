@@ -772,192 +772,108 @@ const InvestorDashboard = () => {
             </Card>
           </motion.div>
 
-          {/* ============ YOUR INVESTMENTS SECTION ============ */}
-          {investedIdeaIds.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              className="mb-8"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">Your Investments</h2>
-                  <p className="text-sm text-slate-500">Ideas you've invested in</p>
-                </div>
-                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                  {investedIdeaIds.length} Investment{investedIdeaIds.length !== 1 ? 's' : ''}
-                </Badge>
+          {/* ============ MY PORTFOLIO SECTION ============ */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Your Portfolio</h2>
+                <p className="text-sm text-slate-500 font-medium mt-1">Founders you've connected with or invested in</p>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {investedIdeas
-                  .map((idea) => (
+              <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 px-4 py-1.5 rounded-full font-bold flex gap-2">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                {chatRequests.filter(r => ['accepted', 'communicating', 'deal_pending_investor', 'deal_done'].includes(r.status)).length} Active Connections
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {chatRequests
+                .filter(r => ['accepted', 'communicating', 'deal_pending_investor', 'deal_done'].includes(r.status))
+                .map((request) => {
+                  const idea = ideas.find(i => i.id === request.idea_id);
+                  if (!idea) return null;
+
+                  const isInvested = request.status === 'deal_done';
+
+                  return (
                     <motion.div
                       key={idea.id}
-                      whileHover={{ scale: 1.02, y: -4 }}
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/idea/${idea.id}`)}
+                      whileHover={{ y: -5 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      <Card className="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-200 shadow-sm hover:shadow-lg transition-all overflow-hidden rounded-xl">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <Badge className="bg-emerald-500 text-white text-[10px]">
-                              ✓ Invested
+                      <Card
+                        className={`border-2 transition-all duration-300 group overflow-hidden rounded-3xl flex flex-col relative h-full ${isInvested
+                            ? 'border-emerald-100 bg-emerald-50/20 hover:border-emerald-200 shadow-lg shadow-emerald-100/50'
+                            : 'border-slate-100 bg-white hover:border-indigo-100 shadow-lg'
+                          }`}
+                      >
+                        <div className={`h-1.5 w-full ${isInvested ? 'bg-emerald-500' : 'bg-indigo-600'}`} />
+
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <Badge className={`${isInvested ? 'bg-emerald-500' : 'bg-indigo-600'} text-white border-none gap-1.5 px-3 py-1 text-[10px] font-bold rounded-full`}>
+                              {isInvested ? <ShieldCheck size={12} /> : <Activity size={12} />}
+                              {isInvested ? 'Invested' : 'Connected'}
                             </Badge>
-                            <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider">
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${isInvested ? 'text-emerald-600' : 'text-indigo-600'}`}>
                               {idea.domain}
                             </span>
                           </div>
-                          <CardTitle className="text-base font-bold text-slate-900 mt-2">
+                          <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                             {idea.title}
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="text-sm text-slate-600 line-clamp-2 mb-3">
-                            {idea.description}
-                          </p>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500">By {idea.founder?.name}</span>
-                            <span className="font-bold text-emerald-600">
-                              ₹{(idea.investment_received || 0).toLocaleString()} raised
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-              </div>
-            </motion.div>
-          )}
 
-          {/* ============ MARKETPLACE BROWSE SECTION ============ */}
-
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {filteredIdeas.map((idea) => {
-              const isWatchlisted = watchlist.includes(idea.id);
-              const status = getRequestStatus(idea.id);
-
-              return (
-                <motion.div key={idea.id} variants={itemVariants}>
-                  <motion.div
-                    initial="rest"
-                    whileHover="hover"
-                    variants={ideaCardHoverVariants}
-                    className="h-full"
-                  >
-                    <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:ring-2 hover:ring-indigo-500/20 transition-all group overflow-hidden rounded-xl flex flex-col relative h-full">
-
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleWatchlist(idea.id);
-                        }}
-                        className={`absolute top-4 right-4 p-2 rounded-lg transition-all duration-300 z-20 ${isWatchlisted ? 'bg-red-50 text-red-500 shadow-sm' : 'bg-slate-50 text-slate-400 hover:text-red-400 hover:bg-red-50'}`}
-                      >
-                        <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
-                      </motion.button>
-
-                      {/* Clickable card area → navigates to detail page */}
-                      <div
-                        className="cursor-pointer flex-1 flex flex-col"
-                        onClick={() => navigate(`/idea/${idea.id}`)}
-                      >
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between mr-8">
-                            <div>
-                              <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                {idea.title} {status === "deal_done" && "🤝"}
-                              </CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mt-1">
-                                {idea.domain}
-                              </CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-
-                        <CardContent className="flex-1 pb-4">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-50 border-slate-200 text-slate-600">
-                              By {idea.founder?.name}
-                            </Badge>
-                          </div>
-
-                          <p className="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed">
+                        <CardContent className="flex-1 flex flex-col">
+                          <p className="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed font-medium">
                             {idea.description}
                           </p>
 
                           <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-100 group-hover:bg-white transition-colors">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Capital</p>
-                              <p className="text-sm font-black text-slate-900">${idea.investment_needed.toLocaleString()}</p>
+                            <div className={`p-3 rounded-2xl ${isInvested ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'} border`}>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target</p>
+                              <p className="text-sm font-black text-slate-900">₹{idea.investment_needed.toLocaleString()}</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-indigo-50/30 border border-indigo-100 group-hover:bg-white transition-colors">
-                              <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Raised</p>
-                              <p className="text-sm font-black text-indigo-600">${(idea.investment_received || 0).toLocaleString()}</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-4 mb-6">
-                            <div>
-                              <div className="flex justify-between text-[11px] font-bold mb-2">
-                                <span className="text-slate-400 uppercase tracking-tighter">Funding Progress</span>
-                                <span className="text-slate-900">{Math.round(((idea.investment_received || 0) / idea.investment_needed) * 100)}%</span>
-                              </div>
-                              <div className="w-full bg-slate-50 rounded-full h-1.5 overflow-hidden">
-                                <div
-                                  className="bg-indigo-600 h-full transition-all duration-1000"
-                                  style={{
-                                    width: `${Math.min(((idea.investment_received || 0) / idea.investment_needed) * 100, 100)}%`,
-                                  }}
-                                />
-                              </div>
+                            <div className={`p-3 rounded-2xl ${isInvested ? 'bg-white border-emerald-100' : 'bg-indigo-50/30 border-indigo-100'} border`}>
+                              <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isInvested ? 'text-emerald-500' : 'text-indigo-500'}`}>Raised</p>
+                              <p className={`text-sm font-black ${isInvested ? 'text-emerald-600' : 'text-indigo-600'}`}>₹{(idea.investment_received || 0).toLocaleString()}</p>
                             </div>
                           </div>
 
-                          {/* Tap to view details hint */}
-                          <p className="text-[10px] text-slate-400 text-center mb-4">
-                            Tap to view full details →
-                          </p>
-                        </CardContent>
-                      </div>
-
-                      {/* Separate action button - doesn't navigate, handles chat */}
-                      <div className="px-6 pb-6">
-                        <Button
-                          className={`w-full h-12 rounded-lg font-bold transition-all ${status === 'deal_done' || status === 'accepted' || status === 'communicating'
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                            : 'bg-slate-900 text-white hover:bg-slate-800'
-                            }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReachOut(idea);
-                          }}
-                        >
-                          {status === "accepted" || status === "communicating" || status === "deal_done" ? (
-                            <>
+                          <div className="mt-auto pt-4 border-t border-slate-100">
+                            <Button
+                              className={`w-full h-12 rounded-2xl font-bold transition-all shadow-lg ${isInvested
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-100'
+                                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                                }`}
+                              onClick={() => setSelectedChat(request)}
+                            >
                               <MessageSquare className="w-4 h-4 mr-2" />
                               Enter Private Portal
-                            </>
-                          ) : status === "pending" ? (
-                            "Connection Pending"
-                          ) : (
-                            "Reach Out to Founder"
-                          )}
-                        </Button>
-                      </div>
-                    </Card>
-                  </motion.div>
-                </motion.div>
-              );
-            })}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+            </div>
+
+            {chatRequests.filter(r => ['accepted', 'communicating', 'deal_pending_investor', 'deal_done'].includes(r.status)).length === 0 && (
+              <div className="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
+                  <Lightbulb className="w-8 h-8 text-slate-300" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Your portfolio is waiting</h3>
+                <p className="text-sm text-slate-500 max-w-xs mx-auto mt-2">
+                  Once you reach out to founders and they accept your connection, your investments will appear here.
+                </p>
+              </div>
+            )}
           </motion.div>
         </main>
 
