@@ -18,6 +18,8 @@ export type Database = {
           investor_id: string
           status: string | null
           founder_pinned: boolean | null
+          proposed_amount: number | null
+          deal_status: string | null
         }
         Insert: {
           created_at?: string
@@ -27,6 +29,8 @@ export type Database = {
           investor_id: string
           status?: string | null
           founder_pinned?: boolean | null
+          proposed_amount?: number | null
+          deal_status?: string | null
         }
         Update: {
           created_at?: string
@@ -36,6 +40,8 @@ export type Database = {
           investor_id?: string
           status?: string | null
           founder_pinned?: boolean | null
+          proposed_amount?: number | null
+          deal_status?: string | null
         }
         Relationships: [
           {
@@ -79,6 +85,9 @@ export type Database = {
           traction?: string | null
           linkedin_url?: string | null
           website_url?: string | null
+          founder_city?: string | null
+          founder_phone?: string | null
+          work_mode?: string | null
         }
         Insert: {
           created_at?: string
@@ -97,6 +106,9 @@ export type Database = {
           traction?: string | null
           linkedin_url?: string | null
           website_url?: string | null
+          founder_city?: string | null
+          founder_phone?: string | null
+          work_mode?: string | null
         }
         Update: {
           created_at?: string
@@ -115,6 +127,9 @@ export type Database = {
           traction?: string | null
           linkedin_url?: string | null
           website_url?: string | null
+          founder_city?: string | null
+          founder_phone?: string | null
+          work_mode?: string | null
         }
         Relationships: [
           {
@@ -136,7 +151,10 @@ export type Database = {
           idea_id: string
           investor_id: string
           notes: string | null
+          payment_method: string | null
           status: string
+          transaction_date: string | null
+          updated_at: string | null
         }
         Insert: {
           amount: number
@@ -147,7 +165,10 @@ export type Database = {
           idea_id: string
           investor_id: string
           notes?: string | null
+          payment_method?: string | null
           status?: string
+          transaction_date?: string | null
+          updated_at?: string | null
         }
         Update: {
           amount?: number
@@ -158,7 +179,10 @@ export type Database = {
           idea_id?: string
           investor_id?: string
           notes?: string | null
+          payment_method?: string | null
           status?: string
+          transaction_date?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake } from "lucide-react";
+import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake, Store, Receipt } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
 import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
@@ -494,6 +494,22 @@ const InvestorDashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm font-bold text-slate-900">Welcome, {profile?.name}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/marketplace')}
+              className="rounded-full font-bold bg-indigo-50 border-indigo-200 hover:bg-indigo-100 text-indigo-700"
+            >
+              <Store className="w-4 h-4 mr-2" /> Marketplace
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/transactions')}
+              className="rounded-full font-bold bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-700"
+            >
+              <Receipt className="w-4 h-4 mr-2" /> Transactions
+            </Button>
             <div className="relative">
               <Button
                 variant={showChatList ? "default" : "outline"}
@@ -920,10 +936,10 @@ const InvestorDashboard = () => {
                               setChatRequests(prev => prev.map(x => x.id === chat.id ? { ...x, unread_count: 0 } : x));
                             }}
                             className={`w-full p-3 rounded-lg text-left transition-all relative ${selectedChat?.id === chat.id
-                                ? 'bg-indigo-50 border border-indigo-200'
-                                : chat.unread_count && chat.unread_count > 0
-                                  ? 'bg-blue-50/50 border border-blue-200 hover:bg-blue-50'
-                                  : 'hover:bg-slate-50 border border-transparent'
+                              ? 'bg-indigo-50 border border-indigo-200'
+                              : chat.unread_count && chat.unread_count > 0
+                                ? 'bg-blue-50/50 border border-blue-200 hover:bg-blue-50'
+                                : 'hover:bg-slate-50 border border-transparent'
                               }`}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}

@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     Rocket, ArrowLeft, ArrowRight, CheckCircle2, Check, DollarSign,
-    Users, TrendingUp, Lightbulb, Globe, Linkedin, ShieldCheck, LogOut
+    Users, TrendingUp, Lightbulb, Globe, Linkedin, ShieldCheck, LogOut,
+    MapPin, Phone, Briefcase
 } from "lucide-react";
 
 const DOMAINS = [
@@ -47,7 +48,10 @@ const SubmitIdea = () => {
         market_size: "",
         traction: "",
         linkedin_url: "",
-        website_url: ""
+        website_url: "",
+        founder_city: "",
+        founder_phone: "",
+        work_mode: ""
     });
 
     useEffect(() => {
@@ -165,6 +169,9 @@ const SubmitIdea = () => {
                     traction: formData.traction || null,
                     linkedin_url: formData.linkedin_url || null,
                     website_url: formData.website_url || null,
+                    founder_city: formData.founder_city || null,
+                    founder_phone: formData.founder_phone || null,
+                    work_mode: formData.work_mode || null,
                     status: "pending"
                 })
                 .select()
@@ -262,10 +269,10 @@ const SubmitIdea = () => {
                                             onClick={() => setCurrentStep(step.id)}
                                         >
                                             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${currentStep === step.id
-                                                    ? 'bg-slate-900 text-white'
-                                                    : currentStep > step.id
-                                                        ? 'bg-emerald-100 text-emerald-600'
-                                                        : 'border-2 border-slate-200 text-slate-400'
+                                                ? 'bg-slate-900 text-white'
+                                                : currentStep > step.id
+                                                    ? 'bg-emerald-100 text-emerald-600'
+                                                    : 'border-2 border-slate-200 text-slate-400'
                                                 }`}>
                                                 {currentStep > step.id ? <Check className="w-4 h-4" /> : step.id}
                                             </div>
@@ -405,6 +412,59 @@ const SubmitIdea = () => {
                                                 onChange={(e) => setFormData({ ...formData, market_size: e.target.value })}
                                                 className="h-11 bg-white border-slate-200 rounded-lg"
                                             />
+                                        </div>
+
+                                        {/* NEW: Location & Work Mode Fields */}
+                                        <div className="border-t border-slate-100 pt-6 mt-4">
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Contact & Location</p>
+
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                                        <MapPin className="w-4 h-4 text-slate-500" />
+                                                        City / Location
+                                                    </Label>
+                                                    <Input
+                                                        placeholder="e.g., Hyderabad, India"
+                                                        value={formData.founder_city}
+                                                        onChange={(e) => setFormData({ ...formData, founder_city: e.target.value })}
+                                                        className="h-11 bg-white border-slate-200 rounded-lg"
+                                                    />
+                                                    <p className="text-[10px] text-slate-400">Helps investors filter by proximity</p>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                                        <Briefcase className="w-4 h-4 text-slate-500" />
+                                                        Work Mode
+                                                    </Label>
+                                                    <Select value={formData.work_mode} onValueChange={(v) => setFormData({ ...formData, work_mode: v })}>
+                                                        <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg">
+                                                            <SelectValue placeholder="Select work mode" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="online">Online / Remote</SelectItem>
+                                                            <SelectItem value="offline">Offline / In-Person</SelectItem>
+                                                            <SelectItem value="hybrid">Hybrid</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2 mt-4">
+                                                <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                                    <Phone className="w-4 h-4 text-slate-500" />
+                                                    Phone Number <span className="text-xs font-normal text-slate-400">(Private - not shared with investors)</span>
+                                                </Label>
+                                                <Input
+                                                    type="tel"
+                                                    placeholder="+91 98765 43210"
+                                                    value={formData.founder_phone}
+                                                    onChange={(e) => setFormData({ ...formData, founder_phone: e.target.value })}
+                                                    className="h-11 bg-white border-slate-200 rounded-lg"
+                                                />
+                                                <p className="text-[10px] text-slate-400">For admin support only. Never shared with investors.</p>
+                                            </div>
                                         </div>
                                     </>
                                 )}

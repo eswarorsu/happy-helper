@@ -17,6 +17,8 @@ import RefundPolicy from "./pages/RefundPolicy";
 import AdminPortal from "./pages/AdminPortal";
 import Profile from "./pages/Profile";
 import IdeaDetailPage from "./pages/IdeaDetailPage";
+import Marketplace from "./pages/Marketplace";
+import Transactions from "./pages/Transactions";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
           <Route path="/admin-innovestor" element={<AdminPortal />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/idea/:id" element={<IdeaDetailPage />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/transactions" element={<Transactions />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -14,7 +14,7 @@ import {
   Rocket, Plus, LogOut, MessageSquare, DollarSign, Lightbulb,
   User, ExternalLink, Pin, Search, Bell, ChevronRight,
   ArrowUpRight, Building2, Users, Target, CheckCircle2, X, ChevronLeft,
-  Activity, LucideIcon, ThumbsUp, ThumbsDown
+  Activity, LucideIcon, ThumbsUp, ThumbsDown, Receipt
 } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
@@ -370,8 +370,8 @@ const ConnectionItem = ({
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className={`p-1.5 rounded-lg transition-all duration-200 ${currentRating === true
-                    ? "bg-green-100 text-green-600"
-                    : "bg-slate-50 text-slate-400 hover:bg-green-50 hover:text-green-500"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-slate-50 text-slate-400 hover:bg-green-50 hover:text-green-500"
                   }`}
                 title="Thumbs up - Rate this investor positively"
               >
@@ -382,8 +382,8 @@ const ConnectionItem = ({
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className={`p-1.5 rounded-lg transition-all duration-200 ${currentRating === false
-                    ? "bg-red-100 text-red-600"
-                    : "bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                  ? "bg-red-100 text-red-600"
+                  : "bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500"
                   }`}
                 title="Thumbs down - Rate this investor negatively"
               >
@@ -1228,20 +1228,31 @@ const FounderDashboard = () => {
                   </h1>
                   <p className="text-slate-500 mt-1">Here's an overview of your venture portfolio</p>
                 </div>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    onClick={() => {
-                      if (!profile?.is_approved) {
-                        toast({ title: "Verification Required", description: "Your profile must be verified first.", variant: "destructive" });
-                        return;
-                      }
-                      navigate("/payment");
-                    }}
-                    className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> New Venture
-                  </Button>
-                </motion.div>
+                <div className="flex items-center gap-3">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      onClick={() => navigate("/transactions")}
+                      variant="outline"
+                      className="bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-700"
+                    >
+                      <Receipt className="w-4 h-4 mr-2" /> Transactions
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      onClick={() => {
+                        if (!profile?.is_approved) {
+                          toast({ title: "Verification Required", description: "Your profile must be verified first.", variant: "destructive" });
+                          return;
+                        }
+                        navigate("/payment");
+                      }}
+                      className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm"
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> New Venture
+                    </Button>
+                  </motion.div>
+                </div>
               </motion.div>
 
               {/* Metrics Grid */}
@@ -1371,155 +1382,114 @@ const FounderDashboard = () => {
                   </Card>
                 </motion.div>
 
-                {/* Submission Status Chart - 3D Pie */}
+                {/* Submission Status Chart - Modern Donut */}
                 <motion.div variants={itemVariants}>
-                  <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm shadow-sm h-full">
+                  <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm shadow-sm h-full overflow-hidden">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-semibold text-slate-900">Submission Status</CardTitle>
                       <CardDescription className="text-xs text-slate-500">Current status of your ventures</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-2">
-                      {ideas.length > 0 ? (
-                        <div className="flex flex-col items-center">
-                          {/* 3D Pie Chart Container */}
-                          <div
-                            className="relative w-full h-[180px]"
-                            style={{
-                              perspective: '800px',
-                              perspectiveOrigin: '50% 50%'
-                            }}
-                          >
-                            {/* Shadow Layer - creates 3D depth effect */}
-                            <div
-                              className="absolute inset-0 pointer-events-none"
-                              style={{
-                                transform: 'rotateX(60deg) translateZ(-20px) translateY(10px)',
-                                filter: 'blur(15px)',
-                                opacity: 0.3
-                              }}
-                            >
-                              <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                  <Pie
-                                    data={(() => {
-                                      const statusCounts: Record<string, number> = {
-                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
-                                      };
-                                      ideas.forEach(idea => {
-                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
-                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
-                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
-                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
-                                        else statusCounts["Under Review"]++;
-                                      });
-                                      return Object.entries(statusCounts)
-                                        .filter(([_, val]) => val > 0)
-                                        .map(([name, value]) => ({ name, value }));
-                                    })()}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={40}
-                                    outerRadius={70}
-                                    dataKey="value"
-                                    isAnimationActive={false}
-                                  >
-                                    <Cell fill="#000" />
-                                  </Pie>
-                                </PieChart>
-                              </ResponsiveContainer>
-                            </div>
+                      {ideas.length > 0 ? (() => {
+                        // Calculate status counts once
+                        const statusCounts: Record<string, number> = {
+                          "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0
+                        };
+                        ideas.forEach(idea => {
+                          if (idea.status === 'completed') statusCounts["Deal Done"]++;
+                          else if (idea.status === 'funded') statusCounts["Funded"]++;
+                          else if (idea.status === 'in_progress') statusCounts["Approved"]++;
+                          else statusCounts["Under Review"]++;
+                        });
 
-                            {/* Main Pie - 3D tilted */}
-                            <div
-                              className="w-full h-full"
-                              style={{
-                                transform: 'rotateX(25deg)',
-                                transformStyle: 'preserve-3d'
-                              }}
-                            >
+                        const COLORS: Record<string, string> = {
+                          "Deal Done": "#3b82f6",
+                          "Funded": "#10b981",
+                          "Approved": "#8b5cf6",
+                          "Under Review": "#f59e0b"
+                        };
+
+                        const chartData = Object.entries(statusCounts)
+                          .filter(([_, val]) => val > 0)
+                          .map(([name, value]) => ({ name, value, color: COLORS[name] }));
+
+                        const totalVentures = ideas.length;
+
+                        return (
+                          <div className="flex flex-col items-center gap-4">
+                            {/* Donut Chart */}
+                            <div className="relative w-full h-[200px]">
                               <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                   <Pie
-                                    data={(() => {
-                                      const statusCounts: Record<string, number> = {
-                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
-                                      };
-                                      ideas.forEach(idea => {
-                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
-                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
-                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
-                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
-                                        else statusCounts["Under Review"]++;
-                                      });
-                                      return Object.entries(statusCounts)
-                                        .filter(([_, val]) => val > 0)
-                                        .map(([name, value]) => ({ name, value }));
-                                    })()}
+                                    data={chartData}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={40}
-                                    outerRadius={70}
-                                    paddingAngle={5}
+                                    innerRadius={55}
+                                    outerRadius={80}
+                                    paddingAngle={3}
                                     dataKey="value"
                                     stroke="none"
+                                    animationBegin={0}
+                                    animationDuration={800}
                                   >
-                                    {(() => {
-                                      const statusCounts: Record<string, number> = {
-                                        "Deal Done": 0, "Funded": 0, "Approved": 0, "Under Review": 0, "Rejected": 0
-                                      };
-                                      ideas.forEach(idea => {
-                                        if (idea.status === 'completed') statusCounts["Deal Done"]++;
-                                        else if (idea.status === 'funded') statusCounts["Funded"]++;
-                                        else if (idea.status === 'in_progress') statusCounts["Approved"]++;
-                                        else if (idea.status === 'rejected') statusCounts["Rejected"]++;
-                                        else statusCounts["Under Review"]++;
-                                      });
-                                      const data = Object.entries(statusCounts)
-                                        .filter(([_, val]) => val > 0)
-                                        .map(([name, value]) => ({ name, value }));
-
-                                      const COLORS: Record<string, string> = {
-                                        "Deal Done": "#3b82f6", // blue-500
-                                        "Funded": "#10b981",    // emerald-500
-                                        "Approved": "#8b5cf6",  // violet-500
-                                        "Under Review": "#f59e0b", // amber-500
-                                        "Rejected": "#ef4444"   // red-500
-                                      };
-
-                                      return data.map((entry, index) => (
-                                        <Cell
-                                          key={`cell-${index}`}
-                                          fill={COLORS[entry.name]}
-                                          style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.15))' }}
-                                        />
-                                      ));
-                                    })()}
+                                    {chartData.map((entry, index) => (
+                                      <Cell
+                                        key={`cell-${index}`}
+                                        fill={entry.color}
+                                        style={{
+                                          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))',
+                                          cursor: 'pointer'
+                                        }}
+                                      />
+                                    ))}
                                   </Pie>
                                   <Tooltip
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                    itemStyle={{ fontSize: '12px', fontWeight: 600 }}
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-lg text-xs">
+                                            <p className="font-semibold">{data.name}</p>
+                                            <p className="text-slate-300">{data.value} venture{data.value !== 1 ? 's' : ''}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
                                   />
                                 </PieChart>
                               </ResponsiveContainer>
+                              {/* Center Text */}
+                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span className="text-3xl font-bold text-slate-900">{totalVentures}</span>
+                                <span className="text-xs text-slate-500 font-medium">Ventures</span>
+                              </div>
+                            </div>
+
+                            {/* Legend with Counts */}
+                            <div className="grid grid-cols-2 gap-3 w-full px-2">
+                              {[
+                                { label: "Deal Done", key: "Deal Done", color: "bg-blue-500", ring: "ring-blue-100" },
+                                { label: "Funded", key: "Funded", color: "bg-emerald-500", ring: "ring-emerald-100" },
+                                { label: "Approved", key: "Approved", color: "bg-violet-500", ring: "ring-violet-100" },
+                                { label: "Reviewing", key: "Under Review", color: "bg-amber-500", ring: "ring-amber-100" },
+                              ].map((item) => (
+                                <div
+                                  key={item.label}
+                                  className={`flex items-center gap-2 p-2 rounded-lg bg-slate-50/80 border border-slate-100 ${statusCounts[item.key] > 0 ? 'ring-2 ' + item.ring : ''}`}
+                                >
+                                  <div className={`w-3 h-3 rounded-full ${item.color} shadow-sm shrink-0`} />
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide block truncate">{item.label}</span>
+                                  </div>
+                                  <span className="text-sm font-bold text-slate-700">{statusCounts[item.key]}</span>
+                                </div>
+                              ))}
                             </div>
                           </div>
-
-                          {/* Legend */}
-                          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-2 w-full px-2">
-                            {[
-                              { label: "Deal Done", color: "bg-blue-500" },
-                              { label: "Funded", color: "bg-emerald-500" },
-                              { label: "Approved", color: "bg-violet-500" },
-                              { label: "Reviewing", color: "bg-amber-500" },
-                            ].map((item) => (
-                              <div key={item.label} className="flex items-center gap-1.5">
-                                <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-sm`} />
-                                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{item.label}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
+                        );
+                      })() : (
                         <div className="flex items-center justify-center h-60 text-slate-400 text-sm">
                           <div className="text-center">
                             <Building2 className="w-10 h-10 mx-auto mb-3 text-slate-300" />

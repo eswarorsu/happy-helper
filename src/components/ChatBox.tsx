@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as FirebaseMessage, connectFirebase } from "@/lib/firebase";
 import {
   Send, Handshake, CheckCircle2, Paperclip, Image as ImageIcon,
-  FileText, Download, File as FileIcon, X, Check, CheckCheck
+  FileText, Download, File as FileIcon, X, Check, CheckCheck, DollarSign, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,6 +34,10 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
   const [requestStatus, setRequestStatus] = useState(chatRequest.status);
   const [fundingAmount, setFundingAmount] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [proposedAmount, setProposedAmount] = useState(chatRequest.proposed_amount || "");
+  const [showProposalInput, setShowProposalInput] = useState(false);
+  const [showRequestInput, setShowRequestInput] = useState(false);
+  const [dealStatus, setDealStatus] = useState(chatRequest.deal_status || "none");
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +62,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
       try {
         // Ensure Firebase is connected before subscribing
         await connectFirebase();
-        
+
         unsubscribe = subscribeToChat(chatId, (msgs) => {
           const formattedMessages = msgs.map(msg => ({
             ...msg,
@@ -89,7 +93,11 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
     const channel = supabase
       .channel(`chat-status:${chatRequest.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_requests", filter: `id=eq.${chatRequest.id}` },
-        (payload) => setRequestStatus(payload.new.status)
+        (payload) => {
+          setRequestStatus(payload.new.status);
+          setDealStatus(payload.new.deal_status || "none");
+          setProposedAmount(payload.new.proposed_amount || "");
+        }
       )
       .subscribe();
 
@@ -111,7 +119,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
     try {
       // Ensure Firebase is connected before sending
       await connectFirebase();
-      
+
       await sendMessage(chatRequest.id, {
         sender_id: currentUserId,
         content: newMessage,
@@ -208,6 +216,262 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
     return <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>;
   };
 
+  // Handle deal proposal (investor) or acceptance (founder)
+  const handleDealProposal = async () => {
+    if (!isFounder) {
+      // Investor proposing a deal
+      if (!showProposalInput) {
+        setShowProposalInput(true);
+        return;
+      }
+
+      const amount = parseFloat(proposedAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({ title: "Invalid Amount", description: "Enter a valid investment amount", variant: "destructive" });
+        return;
+      }
+
+      const { error } = await supabase
+        .from("chat_requests")
+        .update({
+          proposed_amount: amount,
+          deal_status: "proposed",
+          status: "deal_pending_investor"
+        })
+        .eq("id", chatRequest.id);
+
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Proposal Sent! 💰", description: `₹${amount.toLocaleString()} proposal sent to founder` });
+        setShowProposalInput(false);
+
+        // Send a system message
+        await sendMessage(chatRequest.id, {
+          sender_id: currentUserId,
+          content: `💰 Deal Proposed: ₹${amount.toLocaleString()}`,
+          type: 'text'
+        });
+      }
+    }
+  };
+
+  // Founder accepts deal
+  const handleAcceptDeal = async () => {
+    if (!isFounder || dealStatus !== "proposed") return;
+
+    const { error } = await supabase
+      .from("chat_requests")
+      .update({
+        deal_status: "accepted",
+        status: "deal_done"
+      })
+      .eq("id", chatRequest.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    // Update idea status - use 'completed' which is valid in DB constraint
+    const { error: ideaError } = await supabase
+      .from("ideas")
+      .update({ status: "completed" })
+      .eq("id", chatRequest.idea_id);
+
+    if (ideaError) {
+      console.error("Error updating idea status:", ideaError);
+    }
+
+    // Also record the investment in investment_records
+    const investmentAmount = Number(proposedAmount);
+    if (investmentAmount > 0) {
+      console.log("Attempting to save investment:", {
+        idea_id: chatRequest.idea_id,
+        investor_id: chatRequest.investor_id,
+        founder_id: chatRequest.founder_id,
+        chat_request_id: chatRequest.id,
+        amount: investmentAmount
+      });
+
+      const { data: investmentData, error: investmentError } = await supabase
+        .from("investment_records")
+        .insert({
+          idea_id: chatRequest.idea_id,
+          investor_id: chatRequest.investor_id,
+          founder_id: chatRequest.founder_id,
+          chat_request_id: chatRequest.id,
+          amount: investmentAmount,
+          status: "confirmed"
+        })
+        .select()
+        .single();
+
+      if (investmentError) {
+        console.error("Error saving investment record:", investmentError);
+        toast({
+          title: "Warning",
+          description: `Deal accepted but investment record failed: ${investmentError.message}`,
+          variant: "destructive"
+        });
+      } else {
+        console.log("Investment record saved successfully:", investmentData);
+      }
+    }
+
+    toast({ title: "Deal Accepted! 🤝", description: `₹${investmentAmount.toLocaleString()} investment confirmed!` });
+
+    // Send system message
+    await sendMessage(chatRequest.id, {
+      sender_id: currentUserId,
+      content: `✅ Deal Accepted: ₹${investmentAmount.toLocaleString()}`,
+      type: 'text'
+    });
+  };
+
+  // Founder rejects deal
+  const handleRejectDeal = async () => {
+    if (!isFounder || dealStatus !== "proposed") return;
+
+    const { error } = await supabase
+      .from("chat_requests")
+      .update({
+        deal_status: "rejected",
+        proposed_amount: null
+      })
+      .eq("id", chatRequest.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Deal Declined", description: "You can continue negotiating" });
+
+      await sendMessage(chatRequest.id, {
+        sender_id: currentUserId,
+        content: `❌ Deal proposal declined. Let's discuss further.`,
+        type: 'text'
+      });
+    }
+  };
+
+  // ============================================================================
+  // FOUNDER REINVESTMENT REQUEST FLOW
+  // ============================================================================
+
+  // Founder requests reinvestment from investor
+  const handleFounderRequest = async () => {
+    if (!isFounder) return;
+
+    if (!showRequestInput) {
+      setShowRequestInput(true);
+      return;
+    }
+
+    const amount = parseFloat(proposedAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: "Invalid Amount", description: "Enter a valid investment amount", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("chat_requests")
+      .update({
+        proposed_amount: amount,
+        deal_status: "requested"
+      })
+      .eq("id", chatRequest.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Request Sent! 📩", description: `₹${amount.toLocaleString()} request sent to investor` });
+      setShowRequestInput(false);
+
+      await sendMessage(chatRequest.id, {
+        sender_id: currentUserId,
+        content: `📩 Reinvestment Request: ₹${amount.toLocaleString()}`,
+        type: 'text'
+      });
+    }
+  };
+
+  // Investor accepts founder's reinvestment request
+  const handleInvestorAcceptRequest = async () => {
+    if (isFounder || dealStatus !== "requested") return;
+
+    const investmentAmount = Number(proposedAmount);
+
+    const { error } = await supabase
+      .from("chat_requests")
+      .update({
+        deal_status: "accepted",
+        status: "deal_done"
+      })
+      .eq("id", chatRequest.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    // Update idea status
+    await supabase.from("ideas").update({ status: "completed" }).eq("id", chatRequest.idea_id);
+
+    // Record investment
+    if (investmentAmount > 0) {
+      const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+      const { error: investmentError } = await supabase
+        .from("investment_records")
+        .insert({
+          idea_id: chatRequest.idea_id,
+          investor_id: chatRequest.investor_id,
+          founder_id: chatRequest.founder_id,
+          chat_request_id: chatRequest.id,
+          amount: investmentAmount,
+          status: "confirmed",
+          notes: `Invoice: ${invoiceNumber}`
+        });
+
+      if (investmentError) {
+        console.error("Investment record error:", investmentError);
+      }
+    }
+
+    toast({ title: "Request Accepted! 🤝", description: `₹${investmentAmount.toLocaleString()} investment confirmed!` });
+
+    await sendMessage(chatRequest.id, {
+      sender_id: currentUserId,
+      content: `✅ Investment Request Accepted: ₹${investmentAmount.toLocaleString()}`,
+      type: 'text'
+    });
+  };
+
+  // Investor rejects founder's reinvestment request
+  const handleInvestorRejectRequest = async () => {
+    if (isFounder || dealStatus !== "requested") return;
+
+    const { error } = await supabase
+      .from("chat_requests")
+      .update({
+        deal_status: "rejected",
+        proposed_amount: null
+      })
+      .eq("id", chatRequest.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Request Declined", description: "You declined the request" });
+
+      await sendMessage(chatRequest.id, {
+        sender_id: currentUserId,
+        content: `❌ Investment request declined.`,
+        type: 'text'
+      });
+    }
+  };
+
   const handleDealDone = async () => {
     let nextStatus = "";
     if (isFounder) {
@@ -230,7 +494,8 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       if (nextStatus === "deal_done") {
-        await supabase.from("ideas").update({ status: "deal_done" }).eq("id", chatRequest.idea_id);
+        // Use 'completed' which is valid in DB constraint
+        await supabase.from("ideas").update({ status: "completed" }).eq("id", chatRequest.idea_id);
       }
       toast({ title: "Status Updated", description: isFounder ? "Deal confirmed! 🤝" : "Deal acceptance sent to Founder." });
     }
@@ -251,7 +516,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Success", description: `Investment of $${amount.toLocaleString()} recorded!` });
+      toast({ title: "Success", description: `Investment of ₹${amount.toLocaleString()} recorded!` });
       setFundingAmount("");
     }
   };
@@ -284,23 +549,70 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {requestStatus === "deal_done" ? (
+          {/* Deal Status Display */}
+          {dealStatus === "accepted" || requestStatus === "deal_done" ? (
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span className="text-xs font-semibold">Completed</span>
+              <span className="text-xs font-semibold">
+                {proposedAmount ? `₹${Number(proposedAmount).toLocaleString()}` : "Completed"}
+              </span>
             </div>
+          ) : dealStatus === "proposed" && isFounder ? (
+            /* Founder sees proposal with accept/reject */
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">
+                <DollarSign className="w-3 h-3" />
+                <span className="text-xs font-bold">₹{Number(proposedAmount).toLocaleString()}</span>
+              </div>
+              <Button size="sm" onClick={handleAcceptDeal} className="h-7 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
+                Accept
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleRejectDeal} className="h-7 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50">
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          ) : dealStatus === "proposed" && !isFounder ? (
+            /* Investor sees pending status */
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span className="text-xs font-semibold">Pending ₹{Number(proposedAmount).toLocaleString()}</span>
+            </div>
+          ) : !isFounder ? (
+            /* Investor can propose deal */
+            showProposalInput ? (
+              <div className="flex items-center gap-1">
+                <div className="relative">
+                  <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+                  <Input
+                    type="number"
+                    placeholder="Amount"
+                    value={proposedAmount}
+                    onChange={(e) => setProposedAmount(e.target.value)}
+                    className="h-7 w-24 pl-6 text-xs"
+                    autoFocus
+                  />
+                </div>
+                <Button size="sm" onClick={handleDealProposal} className="h-7 px-2 bg-slate-900 hover:bg-slate-800 text-white text-xs">
+                  Send
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setShowProposalInput(false)} className="h-7 w-7 p-0">
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleDealProposal}
+                size="sm"
+                className="h-8 px-4 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white"
+              >
+                <DollarSign className="w-3.5 h-3.5 mr-1" /> Propose Deal
+              </Button>
+            )
           ) : (
-            <Button
-              onClick={handleDealDone}
-              size="sm"
-              className={`h-8 px-4 rounded-lg text-xs font-semibold ${isFounder
-                  ? (requestStatus === "deal_pending_investor" ? "bg-slate-900 hover:bg-slate-800 text-white" : "bg-slate-100 text-slate-400 cursor-not-allowed")
-                  : "bg-slate-900 hover:bg-slate-800 text-white"
-                }`}
-              disabled={isFounder && requestStatus !== "deal_pending_investor"}
-            >
-              {isFounder ? (requestStatus === "deal_pending_investor" ? "Confirm Deal" : "Awaiting") : "Accept Deal"}
-            </Button>
+            /* Founder waiting for proposal */
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-500 rounded-full">
+              <span className="text-xs font-medium">Awaiting proposal</span>
+            </div>
           )}
           {variant === 'embedded' && (
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={onClose}>
@@ -365,18 +677,13 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
 
       {/* Input Area - Slate Theme */}
       <div className="p-4 border-t border-slate-200 bg-white space-y-3 shrink-0">
-        {/* Funding Input for completed deals */}
-        {requestStatus === "deal_done" && isFounder && (
-          <div className="flex gap-2 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-            <Input
-              placeholder="$ Investment amount"
-              value={fundingAmount}
-              onChange={e => setFundingAmount(e.target.value)}
-              className="h-9 bg-white border-slate-200"
-            />
-            <Button size="sm" onClick={handleFundingSubmit} className="h-9 bg-slate-900 hover:bg-slate-800 text-white">
-              Record
-            </Button>
+        {/* Deal completed badge - no more recording needed */}
+        {requestStatus === "deal_done" && dealStatus === "accepted" && (
+          <div className="flex items-center justify-center gap-2 py-2 px-4 bg-emerald-50 rounded-lg border border-emerald-100">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span className="text-sm font-medium text-emerald-700">
+              Deal completed • ₹{Number(proposedAmount).toLocaleString()} invested
+            </span>
           </div>
         )}
 
