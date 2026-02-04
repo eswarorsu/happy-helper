@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
     User, Mail, Phone, Briefcase, GraduationCap, Linkedin,
-    ArrowLeft, ShieldCheck, Globe, Building2, Target, Rocket, DollarSign
+    ArrowLeft, ShieldCheck, Globe, Building2, Target, Rocket, DollarSign, ThumbsUp
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -16,6 +16,7 @@ const Profile = () => {
     const { toast } = useToast();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [trustScore, setTrustScore] = useState({ total: 0, positive: 0, percentage: 0 });
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -37,6 +38,25 @@ const Profile = () => {
             }
 
             setProfile(data);
+
+            // Fetch Trust Score for Investors
+            if (data.user_type === "investor") {
+                const { data: ratingsData } = await supabase
+                    .from("investor_ratings")
+                    .select("rating")
+                    .eq("investor_id", data.id);
+
+                if (ratingsData && ratingsData.length > 0) {
+                    const positiveCount = ratingsData.filter(r => r.rating === true).length;
+                    const percentage = Math.round((positiveCount / ratingsData.length) * 100);
+                    setTrustScore({
+                        total: ratingsData.length,
+                        positive: positiveCount,
+                        percentage
+                    });
+                }
+            }
+
             setLoading(false);
         };
 
@@ -113,6 +133,21 @@ const Profile = () => {
                                             {isFounder ? "Founder" : "Investor"}
                                         </Badge>
                                     </div>
+
+                                    {!isFounder && (
+                                        <div className="pt-4 flex flex-col items-center">
+                                            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${trustScore.percentage >= 70 ? 'bg-green-50 text-green-600' :
+                                                trustScore.percentage >= 40 ? 'bg-amber-50 text-amber-600' :
+                                                    'bg-slate-50 text-slate-500'
+                                                }`}>
+                                                <ThumbsUp size={12} />
+                                                <span>Trust Score: {trustScore.total > 0 ? `${trustScore.percentage}%` : "New"}</span>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 mt-1">
+                                                {trustScore.total > 0 ? `${trustScore.positive}/${trustScore.total} positive ratings` : "No ratings yet"}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Social Links */}
