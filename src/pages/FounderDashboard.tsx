@@ -529,7 +529,9 @@ const FounderDashboard = () => {
       supabase.channel('ideas-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => fetchIdeas(profile.id)),
       supabase.channel('requests-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_requests' }, () => fetchChatRequests(profile.id))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_requests' }, () => fetchChatRequests(profile.id)),
+      supabase.channel('investment-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'investment_records' }, () => fetchIdeas(profile.id))
     ];
     channels.forEach(c => c.subscribe());
     return () => { channels.forEach(c => supabase.removeChannel(c)); };

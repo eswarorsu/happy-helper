@@ -73,21 +73,16 @@ const ideaCardHoverVariants = {
   }
 };
 
-const portfolioData = [
-  { name: "FinTech", value: 400 },
-  { name: "HealthTech", value: 300 },
-  { name: "EdTech", value: 300 },
-  { name: "SaaS", value: 200 },
-];
+// Chart data types
+interface GrowthDataPoint {
+  month: string;
+  capital: number;
+}
 
-const growthData = [
-  { month: "Jan", capital: 100000, profit: 5000 },
-  { month: "Feb", capital: 120000, profit: 8000 },
-  { month: "Mar", capital: 150000, profit: 12000 },
-  { month: "Apr", capital: 200000, profit: 18000 },
-  { month: "May", capital: 250000, profit: 25000 },
-  { month: "Jun", capital: 320000, profit: 35000 },
-];
+interface PortfolioDataPoint {
+  name: string;
+  value: number;
+}
 
 interface Profile {
   id: string;
@@ -141,7 +136,15 @@ const InvestorDashboard = () => {
 
   // Investor metrics
   const [totalInvested, setTotalInvested] = useState(0);
+
+  // Chart data - dynamically computed from real investments
+  const [growthData, setGrowthData] = useState<GrowthDataPoint[]>([]);
+  const [portfolioData, setPortfolioData] = useState<PortfolioDataPoint[]>([]);
   const [trustScore, setTrustScore] = useState({ total: 0, positive: 0, percentage: 0 });
+
+  // Invested ideas - ideas this investor has invested in
+  const [investedIdeaIds, setInvestedIdeaIds] = useState<string[]>([]);
+  const [investedIdeas, setInvestedIdeas] = useState<Idea[]>([]);
 
   useEffect(() => {
     // Keyboard shortcuts
@@ -169,6 +172,11 @@ const InvestorDashboard = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'ideas' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'investment_records' },
         () => fetchData()
       )
       .subscribe();
@@ -304,14 +312,14 @@ const InvestorDashboard = () => {
 
     setProfile(profileData);
 
-    // CRITICAL: Filter for Approved / Live Ideas Only
+    // CRITICAL: Fetch ideas for Hot Domains chart - include all visible statuses
     const { data: ideasData } = await supabase
       .from("ideas")
       .select(`
         *,
         founder:profiles!ideas_founder_id_fkey(name)
       `)
-      .in("status", ["approved", "in_progress", "funded", "deal_done"])
+      .in("status", ["pending", "approved", "in_progress", "funded", "deal_done"])
       .order("created_at", { ascending: false });
 
     setIdeas(ideasData || []);
@@ -328,16 +336,84 @@ const InvestorDashboard = () => {
     setChatRequests(requestsData || []);
 
     // Fetch investor metrics
-    // 1. Total Invested Amount
+    // 1. Total Invested Amount & Chart Data
     const { data: investmentData } = await supabase
       .from("investment_records")
-      .select("amount")
+      .select(`
+        amount,
+        created_at,
+        idea_id,
+        idea:ideas!investment_records_idea_id_fkey(
+          id,
+          title,
+          description,
+          domain,
+          investment_needed,
+          investment_received,
+          status,
+          created_at,
+          founder_id,
+          founder:profiles!ideas_founder_id_fkey(name)
+        )
+      `)
       .eq("investor_id", profileData.id)
-      .eq("status", "confirmed");
+      .eq("status", "confirmed")
+      .order("created_at", { ascending: true });
 
-    if (investmentData) {
+    if (investmentData && investmentData.length > 0) {
       const total = investmentData.reduce((sum, inv) => sum + Number(inv.amount), 0);
       setTotalInvested(total);
+
+      // Extract unique invested idea IDs and full Idea objects
+      const uniqueIdeaIds = [...new Set(investmentData.map(inv => inv.idea_id))];
+      setInvestedIdeaIds(uniqueIdeaIds);
+
+      // Deduplicate ideas for the UI list
+      const uniqueIdeasMap = new Map<string, Idea>();
+      investmentData.forEach(inv => {
+        // @ts-ignore - Supabase join returns the object, manually casting to Idea structure
+        if (inv.idea && !uniqueIdeasMap.has(inv.idea_id)) {
+          // @ts-ignore
+          uniqueIdeasMap.set(inv.idea_id, inv.idea as Idea);
+        }
+      });
+      setInvestedIdeas(Array.from(uniqueIdeasMap.values()));
+
+      // Compute growth data - cumulative investments by month
+      const monthlyData: Record<string, number> = {};
+      let cumulative = 0;
+
+      investmentData.forEach(inv => {
+        const date = new Date(inv.created_at);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        cumulative += Number(inv.amount);
+        monthlyData[monthKey] = cumulative;
+      });
+
+      const chartData = Object.entries(monthlyData).map(([month, capital]) => ({
+        month,
+        capital
+      }));
+      setGrowthData(chartData);
+
+      // Compute portfolio distribution by domain
+      const domainTotals: Record<string, number> = {};
+      investmentData.forEach(inv => {
+        const domain = (inv.idea as { domain?: string })?.domain || 'Other';
+        domainTotals[domain] = (domainTotals[domain] || 0) + Number(inv.amount);
+      });
+
+      const portfolioChartData = Object.entries(domainTotals)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+      setPortfolioData(portfolioChartData);
+    } else {
+      // New user with no investments
+      setTotalInvested(0);
+      setGrowthData([]);
+      setPortfolioData([]);
+      setInvestedIdeaIds([]);
+      setInvestedIdeas([]);
     }
 
     // 2. Trust Score (from founder ratings)
@@ -615,92 +691,147 @@ const InvestorDashboard = () => {
                 <CardTitle className="text-lg font-bold text-slate-900">Portfolio Growth & Strategy</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={growthData}>
-                    <defs>
-                      <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4338ca" stopOpacity={0.1} />
-                        <stop offset="95%" stopColor="#4338ca" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
-                    <Tooltip
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Area type="monotone" dataKey="capital" stroke="#4338ca" fillOpacity={1} fill="url(#colorCapital)" strokeWidth={3} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {growthData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={growthData}>
+                      <defs>
+                        <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#4338ca" stopOpacity={0.1} />
+                          <stop offset="95%" stopColor="#4338ca" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Total Invested']}
+                      />
+                      <Area type="monotone" dataKey="capital" stroke="#4338ca" fillOpacity={1} fill="url(#colorCapital)" strokeWidth={3} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+                      <TrendingUp className="w-8 h-8 text-indigo-400" />
+                    </div>
+                    <p className="text-slate-600 font-semibold mb-1">No Investment History Yet</p>
+                    <p className="text-sm text-slate-400 max-w-xs">
+                      Your portfolio growth will appear here once you start investing in startups.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             <Card className="bg-white border border-slate-200 shadow-sm rounded-xl">
               <CardHeader className="border-b border-slate-100 bg-slate-50/30">
-                <CardTitle className="text-lg font-bold text-slate-900">Hot Domains</CardTitle>
+                <CardTitle className="text-lg font-bold text-slate-900">Your Investment Domains</CardTitle>
+                <CardDescription className="text-xs text-slate-500">Domains you've invested in</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={marketTrends} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
-                    <XAxis type="number" hide />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      axisLine={false}
-                      tickLine={false}
-                      width={80}
-                      tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }}
-                    />
-                    <Tooltip
-                      cursor={{ fill: '#f8fafc' }}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Bar dataKey="value" fill="#4338ca" radius={[0, 4, 4, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
-                <div className="mt-4 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
-                  <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1">Growth Insight</p>
-                  <p className="text-[11px] text-indigo-900 font-medium">
-                    {marketTrends[0] ? `${marketTrends[0].name} is currently the top-moving sector.` : "Calculating market flows..."}
-                  </p>
-                </div>
+                {portfolioData.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={portfolioData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                        <XAxis type="number" hide />
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          axisLine={false}
+                          tickLine={false}
+                          width={80}
+                          tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }}
+                        />
+                        <Tooltip
+                          cursor={{ fill: '#f8fafc' }}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Invested']}
+                        />
+                        <Bar dataKey="value" fill="#4338ca" radius={[0, 4, 4, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <div className="mt-4 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
+                      <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1">Top Investment</p>
+                      <p className="text-[11px] text-indigo-900 font-medium">
+                        {portfolioData[0].name} is your top sector with ₹{portfolioData[0].value.toLocaleString()} invested.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-[300px] flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+                      <DollarSign className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-slate-600 font-semibold mb-1">No Investments Yet</p>
+                    <p className="text-xs text-slate-400">Your investment domains will appear here after you complete deals</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col md:flex-row gap-4 mb-8"
-          >
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                placeholder="Filter by domain, tech, or title..."
-                className="pl-12 h-12 bg-white border border-slate-200 shadow-sm rounded-xl font-medium focus:ring-2 focus:ring-slate-900 transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-3 bg-white px-4 rounded-xl border border-slate-200 shadow-sm">
-                <Filter className="w-4 h-4 text-slate-400" />
-                <select
-                  className="bg-transparent h-12 text-sm font-bold text-slate-600 focus:outline-none min-w-[120px]"
-                  value={selectedDomain}
-                  onChange={(e) => setSelectedDomain(e.target.value)}
-                >
-                  {domains.map((domain) => (
-                    <option key={domain} value={domain}>
-                      {domain === "all" ? "All Domains" : domain.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
+          {/* ============ YOUR INVESTMENTS SECTION ============ */}
+          {investedIdeaIds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="mb-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Your Investments</h2>
+                  <p className="text-sm text-slate-500">Ideas you've invested in</p>
+                </div>
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                  {investedIdeaIds.length} Investment{investedIdeaIds.length !== 1 ? 's' : ''}
+                </Badge>
               </div>
-            </div>
-          </motion.div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {investedIdeas
+                  .map((idea) => (
+                    <motion.div
+                      key={idea.id}
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/idea/${idea.id}`)}
+                    >
+                      <Card className="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-200 shadow-sm hover:shadow-lg transition-all overflow-hidden rounded-xl">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <Badge className="bg-emerald-500 text-white text-[10px]">
+                              ✓ Invested
+                            </Badge>
+                            <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider">
+                              {idea.domain}
+                            </span>
+                          </div>
+                          <CardTitle className="text-base font-bold text-slate-900 mt-2">
+                            {idea.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-sm text-slate-600 line-clamp-2 mb-3">
+                            {idea.description}
+                          </p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-500">By {idea.founder?.name}</span>
+                            <span className="font-bold text-emerald-600">
+                              ₹{(idea.investment_received || 0).toLocaleString()} raised
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ============ MARKETPLACE BROWSE SECTION ============ */}
+
 
           <motion.div
             variants={containerVariants}
