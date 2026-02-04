@@ -194,14 +194,7 @@ const ProfileSetup = () => {
         profileData.experience = formData.experience;
         profileData.domain = formData.domain;
         profileData.linkedin_profile = formData.linkedinProfile;
-        profileData.website_url = formData.website || null; // Ensure column exists or map appropriately
-        // Note: website_url might not be in DB profile schema based on previous checks, likely strictly 'website_url' in ideas table?
-        // Checking types.ts previously: profiles has 'linkedin_profile', but NOT 'website_url'.
-        // Wait, I should stick to schema. 'website' link might need to be dropped or added. 
-        // I will omit website for now or check if I missed it.
-        // Re-reading types.ts: profiles has `linkedin_profile`, `domain`, `current_job`. No `website_url`.
-        // I will SKIP website_url for profiles to avoid error, or just not save it. User asked for LinkedIn (mandatory). Website helps but if no column...
-        // I'll skip saving website for now.
+        profileData.website_url = formData.website || null;
       } else {
         profileData.investment_capital = parseFloat(formData.investmentCapital);
         profileData.interested_domains = formData.interestedDomains.split(",").map((d) => d.trim());
