@@ -806,20 +806,17 @@ const InvestorDashboard = () => {
                       transition={{ duration: 0.2 }}
                     >
                       <Card
-                        className={`border-2 transition-all duration-300 group overflow-hidden rounded-3xl flex flex-col relative h-full ${isInvested
-                            ? 'border-emerald-100 bg-emerald-50/20 hover:border-emerald-200 shadow-lg shadow-emerald-100/50'
-                            : 'border-slate-100 bg-white hover:border-indigo-100 shadow-lg'
-                          }`}
+                        className={`transition-all duration-300 group overflow-hidden rounded-[20px] flex flex-col relative h-full ${isInvested
+                            ? 'border-emerald-200 bg-[#F0FDF8] shadow-sm'
+                            : 'border-slate-100 bg-white shadow-lg'
+                          } border-[1.5px]`}
                       >
-                        <div className={`h-1.5 w-full ${isInvested ? 'bg-emerald-500' : 'bg-indigo-600'}`} />
-
-                        <CardHeader className="pb-4">
+                        <CardHeader className="pb-3 pt-5">
                           <div className="flex items-center justify-between mb-4">
-                            <Badge className={`${isInvested ? 'bg-emerald-500' : 'bg-indigo-600'} text-white border-none gap-1.5 px-3 py-1 text-[10px] font-bold rounded-full`}>
-                              {isInvested ? <ShieldCheck size={12} /> : <Activity size={12} />}
-                              {isInvested ? 'Invested' : 'Connected'}
+                            <Badge className={`${isInvested ? 'bg-[#10B981]' : 'bg-indigo-600'} text-white border-none gap-1 px-3 py-1 text-[10px] font-bold rounded-full`}>
+                              {isInvested ? '✓' : <Activity size={12} />} {isInvested ? 'Invested' : 'Connected'}
                             </Badge>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${isInvested ? 'text-emerald-600' : 'text-indigo-600'}`}>
+                            <span className={`text-[11px] font-black uppercase tracking-wider ${isInvested ? 'text-[#10B981]' : 'text-indigo-600'}`}>
                               {idea.domain}
                             </span>
                           </div>
@@ -828,28 +825,24 @@ const InvestorDashboard = () => {
                           </CardTitle>
                         </CardHeader>
 
-                        <CardContent className="flex-1 flex flex-col">
-                          <p className="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed font-medium">
+                        <CardContent className="flex-1 flex flex-col pt-0">
+                          <p className="text-[13px] text-slate-600/80 mb-6 line-clamp-2 leading-relaxed font-medium">
                             {idea.description}
                           </p>
 
-                          <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className={`p-3 rounded-2xl ${isInvested ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'} border`}>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target</p>
-                              <p className="text-sm font-black text-slate-900">₹{idea.investment_needed.toLocaleString()}</p>
+                          <div className="mt-auto">
+                            <div className="flex items-center justify-between text-[13px] font-medium text-slate-500 mb-6">
+                              <span>By {request.founder?.name || 'Loading...'}</span>
+                              <span className={`font-bold ${isInvested ? 'text-[#10B981]' : 'text-indigo-600'}`}>
+                                ₹{(idea.investment_received || 0).toLocaleString()} raised
+                              </span>
                             </div>
-                            <div className={`p-3 rounded-2xl ${isInvested ? 'bg-white border-emerald-100' : 'bg-indigo-50/30 border-indigo-100'} border`}>
-                              <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isInvested ? 'text-emerald-500' : 'text-indigo-500'}`}>Raised</p>
-                              <p className={`text-sm font-black ${isInvested ? 'text-emerald-600' : 'text-indigo-600'}`}>₹{(idea.investment_received || 0).toLocaleString()}</p>
-                            </div>
-                          </div>
 
-                          <div className="mt-auto pt-4 border-t border-slate-100">
                             <Button
-                              className={`w-full h-12 rounded-2xl font-bold transition-all shadow-lg ${isInvested
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-100'
+                              className={`w-full h-11 rounded-xl font-bold transition-all ${isInvested
+                                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
                                   : 'bg-slate-900 hover:bg-slate-800 text-white'
-                                }`}
+                                } border-none shadow-none`}
                               onClick={() => setSelectedChat(request)}
                             >
                               <MessageSquare className="w-4 h-4 mr-2" />
