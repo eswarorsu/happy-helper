@@ -103,7 +103,18 @@ const AdminPortal = () => {
   const combinedEvents = [
     ...users.filter(u => u.created_at).map(u => ({ id: u.id, type: 'user', title: 'New Registration', detail: `${u.name || 'Anonymous'} joined as ${u.user_type}`, time: new Date(u.created_at), color: 'indigo', icon: Users })),
     ...ideas.filter(i => i.created_at).map(i => ({ id: i.id, type: 'idea', title: 'Idea Submission', detail: `${i.title} by ${i.founder?.name || 'Unknown'}`, time: new Date(i.created_at), color: 'amber', icon: Lightbulb })),
-    ...payments.filter(p => p.created_at).map(p => ({ id: p.id, type: 'payment', title: 'Payment Secured', detail: `₹${p.amount?.toLocaleString()} from ${p.profiles?.name || 'User'} (${p.status})`, time: new Date(p.created_at), color: 'emerald', icon: DollarSign }))
+    ...payments.filter(p => p.created_at).map(p => {
+      const payer = users.find(u => u.id === p.profile_id || u.user_id === p.user_id) || p.profiles;
+      return {
+        id: p.id,
+        type: 'payment',
+        title: 'Payment Secured',
+        detail: `₹${p.amount?.toLocaleString()} from ${payer?.name || 'Unknown User'} (${p.status})`,
+        time: new Date(p.created_at),
+        color: 'emerald',
+        icon: DollarSign
+      };
+    })
   ].sort((a, b) => {
     const timeA = a.time instanceof Date && !isNaN(a.time.getTime()) ? a.time.getTime() : 0;
     const timeB = b.time instanceof Date && !isNaN(b.time.getTime()) ? b.time.getTime() : 0;
@@ -522,8 +533,15 @@ const AdminPortal = () => {
                                 {p.razorpay_payment_id || p.razorpay_order_id?.substring(0, 16)}
                               </td>
                               <td className="py-5 px-8">
-                                <p className="text-xs font-bold text-slate-200">{p.profiles?.name}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">{p.profiles?.email}</p>
+                                {(() => {
+                                  const payer = users.find(u => u.id === p.profile_id || u.user_id === p.user_id) || p.profiles;
+                                  return (
+                                    <>
+                                      <p className="text-xs font-bold text-slate-200">{payer?.name || 'Unknown User'}</p>
+                                      <p className="text-[10px] text-slate-500 font-medium">{payer?.email || 'No Email'}</p>
+                                    </>
+                                  );
+                                })()}
                               </td>
                               <td className="py-5 px-8 font-black text-white text-sm">₹{p.amount?.toLocaleString()}</td>
                               <td className="py-5 px-8 text-xs text-slate-500 font-medium">{format(new Date(p.created_at), 'dd MMM, HH:mm')}</td>
