@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Profile = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { id: profileId } = useParams();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [trustScore, setTrustScore] = useState({ total: 0, positive: 0, percentage: 0 });
+    const [isAdminViewport, setIsAdminViewport] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -26,10 +28,28 @@ const Profile = () => {
                 return;
             }
 
+            // If we have a profile ID in the URL, check if current user is admin
+            let targetUserId = profileId || session.user.id;
+
+            if (profileId && profileId !== session.user.id) {
+                const { data: currentUserProfile } = await supabase
+                    .from("profiles")
+                    .select("is_admin")
+                    .eq("user_id", session.user.id)
+                    .single();
+
+                if (!currentUserProfile?.is_admin) {
+                    toast({ title: "Access Denied", description: "You don't have permission to view this profile", variant: "destructive" });
+                    navigate("/");
+                    return;
+                }
+                setIsAdminViewport(true);
+            }
+
             const { data, error } = await supabase
                 .from("profiles")
                 .select("*")
-                .eq("user_id", session.user.id)
+                .eq(profileId ? "id" : "user_id", targetUserId)
                 .single();
 
             if (error) {
@@ -92,10 +112,10 @@ const Profile = () => {
                     </div>
                     <Button
                         variant="ghost"
-                        onClick={() => navigate(isFounder ? "/founder-dashboard" : "/investor-dashboard")}
+                        onClick={() => isAdminViewport ? navigate("/admin-innovestor") : navigate(isFounder ? "/founder-dashboard" : "/investor-dashboard")}
                         className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to {isAdminViewport ? "Admin Portal" : "Dashboard"}
                     </Button>
                 </div>
             </header>
