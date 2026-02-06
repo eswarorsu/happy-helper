@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Lightbulb, CheckCircle2, ShieldCheck, AlertCircle, LayoutDashboard, LogOut, Search, Check, XCircle, ChevronRight, DollarSign, Globe, TrendingUp, CreditCard, Activity, Calendar, Shield, Zap, Bell, Hammer, Database, Settings, Filter, Download, ArrowUpRight, Clock, Info, Mail } from "lucide-react";
+import { Users, Lightbulb, CheckCircle2, ShieldCheck, AlertCircle, LayoutDashboard, LogOut, Search, Check, XCircle, ChevronRight, DollarSign, Globe, TrendingUp, CreditCard, Activity, Calendar, Shield, Zap, Bell, Hammer, Database, Settings, Filter, Download, ArrowUpRight, Clock, Info, Mail, Phone, Linkedin, FileText, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
                   { label: "Elite Investors", value: users.filter(u => u.user_type === 'investor').length, icon: TrendingUp, trend: "+3 this week", color: "emerald" },
                   { label: "Idea Pipeline", value: ideas.length, icon: Lightbulb, trend: "8 new", color: "amber" },
                   { label: "Success Rate", value: `${Math.round((ideas.filter(i => i.status === 'deal_done').length / (ideas.length || 1)) * 100)}%`, icon: Zap, trend: "Top 5%", color: "purple" }
-                ].map((stat, i) => (
+                ].map(({ icon: Icon, ...stat }, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
@@ -194,7 +194,7 @@ const AdminDashboard = () => {
                         <div className={`absolute -right-6 -bottom-6 w-32 h-32 bg-${stat.color}-500/10 rounded-full rotate-12 transition-transform group-hover:scale-110 pointer-events-none`} />
                         <div className="flex items-center justify-between mb-4">
                           <div className={`p-3 rounded-2xl bg-${stat.color}-500/10 text-${stat.color}-400`}>
-                            <stat.icon size={22} />
+                            <Icon size={22} />
                           </div>
                           <span className={`text-[10px] font-black text-${stat.color}-400 bg-${stat.color}-500/10 px-2 py-1 rounded-md`}>
                             {stat.trend}
@@ -469,12 +469,12 @@ const AdminDashboard = () => {
                         { title: "Audit Logs", desc: "Detailed trace of all administrative steps", icon: Activity, btn: "View Full Log", color: "slate" },
                         { title: "Platform Settings", desc: "Configure global investment thresholds", icon: Settings, btn: "Config Panel", color: "purple" },
                         { title: "Support Inbox", desc: "Manage escalated user inquiries", icon: Mail, btn: "Open Tickets", color: "rose" }
-                      ].map((tool, i) => (
+                      ].map(({ icon: Icon, ...tool }, i) => (
                         <motion.div key={i} whileHover={{ y: -5 }}>
                           <Card className="bg-[#151921] border-white/5 shadow-2xl rounded-3xl p-6 h-full flex flex-col justify-between group">
                             <div className="space-y-4">
                               <div className={`w-12 h-12 rounded-2xl bg-${tool.color}-500/10 text-${tool.color}-400 flex items-center justify-center transition-colors group-hover:bg-${tool.color}-500 group-hover:text-white`}>
-                                <tool.icon size={24} />
+                                <Icon size={24} />
                               </div>
                               <div>
                                 <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors">{tool.title}</h3>
@@ -738,9 +738,9 @@ const AdminDashboard = () => {
                         { label: "Market Size", val: selectedIdea?.market_size || "Undetermined", icon: Globe, color: "blue" },
                         { label: "Current Traction", val: selectedIdea?.traction || "Early Stage", icon: TrendingUp, color: "amber" },
                         { label: "Internal Team", val: `${selectedIdea?.team_size || '1'} Members`, icon: Users, color: "purple" }
-                      ].map((m, i) => (
+                      ].map(({ icon: Icon, ...m }, i) => (
                         <div key={i} className="bg-white/5 p-5 rounded-3xl border border-white/5 text-center group hover:bg-white/10 transition-all">
-                          <div className={`w-10 h-10 rounded-2xl bg-${m.color}-500/10 text-${m.color}-400 flex items-center justify-center mx-auto mb-3`}><m.icon size={20} /></div>
+                          <div className={`w-10 h-10 rounded-2xl bg-${m.color}-500/10 text-${m.color}-400 flex items-center justify-center mx-auto mb-3`}><Icon size={20} /></div>
                           <p className="text-[9px] font-black text-slate-600 uppercase mb-1 tracking-widest">{m.label}</p>
                           <p className="text-xs font-black text-slate-200">{m.val}</p>
                         </div>
