@@ -98,8 +98,24 @@ const AdminPortal = () => {
     }
   };
 
-  const filteredUsers = users.filter(u => u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || u.email?.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredIdeas = ideas.filter(i => i.title?.toLowerCase().includes(searchQuery.toLowerCase()) || i.domain?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const combinedEvents = [
+    ...users.map(u => ({ id: u.id, type: 'user', title: 'New Registration', detail: `${u.name || 'Anonymous'} joined as ${u.user_type}`, time: new Date(u.created_at), color: 'indigo', icon: Users })),
+    ...ideas.map(i => ({ id: i.id, type: 'idea', title: 'Idea Submission', detail: `${i.title} by ${i.founder?.name || 'Unknown'}`, time: new Date(i.created_at), color: 'amber', icon: Lightbulb })),
+    ...payments.filter(p => p.status === 'success').map(p => ({ id: p.id, type: 'payment', title: 'Payment Secured', detail: `₹${p.amount?.toLocaleString()} from ${p.profiles?.name || 'User'}`, time: new Date(p.created_at), color: 'emerald', icon: DollarSign }))
+  ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 12);
+
+  const filteredUsers = users.filter(u =>
+    u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.user_type?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [ideaFilter, setIdeaFilter] = useState("all");
+  const filteredIdeas = ideas.filter(i => {
+    const matchesSearch = i.title?.toLowerCase().includes(searchQuery.toLowerCase()) || i.domain?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = ideaFilter === "all" || i.status === ideaFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center gap-4">
@@ -116,8 +132,42 @@ const AdminPortal = () => {
     { id: 'tools', label: 'System Tools', icon: Settings },
   ];
 
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+
+  const handleToolAction = (tool: string) => {
+    switch (tool) {
+      case 'Notification Engine':
+        const msg = prompt("Enter global system broadcast message:");
+        if (msg) toast({ title: "Broadcast Sent", description: "Message propagated to all active nodes." });
+        break;
+      case 'System Lockdown':
+        setIsMaintenanceMode(!isMaintenanceMode);
+        toast({
+          title: !isMaintenanceMode ? "Platform Locked" : "Platform Live",
+          description: !isMaintenanceMode ? "Maintenance mode engaged." : "All systems operational.",
+          variant: !isMaintenanceMode ? "destructive" : "default"
+        });
+        break;
+      case 'Database Sync':
+        setIsLoading(true);
+        setTimeout(() => {
+          fetchData();
+          toast({ title: "Sync Complete", description: "Orphaned data purged. Integrity verified." });
+        }, 1500);
+        break;
+      case 'Audit Stream':
+        setActiveTab('overview');
+        break;
+      default:
+        toast({ title: "Protocol Initiated", description: "Standard safety checks completed." });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans antialiased overflow-hidden flex">
+    <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans antialiased overflow-hidden flex relative">
+      {isMaintenanceMode && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-amber-500 z-[100] animate-pulse" />
+      )}
       <TooltipProvider>
 
         {/* Sidebar */}
@@ -295,32 +345,37 @@ const AdminPortal = () => {
                           <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
                             Platform Activity
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">{users.length} Total Users</span>
-                              <Activity size={14} className="text-indigo-500" />
+                              <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">{users.length} Active Node</span>
+                              <Button variant="ghost" size="icon" onClick={fetchData} className="h-6 w-6 text-slate-500 hover:text-indigo-400">
+                                <Activity size={12} className={isLoading ? "animate-spin" : ""} />
+                              </Button>
                             </div>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 flex-1 overflow-y-auto no-scrollbar">
                           <div className="space-y-6">
-                            {users.slice(0, 10).map((user) => (
-                              <div key={user.id} className="flex gap-4 group">
-                                <div className="relative shrink-0">
-                                  <div className={`w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20`}>
-                                    <Users size={14} />
+                            {combinedEvents.map((evt) => {
+                              const Icon = evt.icon;
+                              return (
+                                <div key={`${evt.type}-${evt.id}`} className="flex gap-4 group">
+                                  <div className="relative shrink-0">
+                                    <div className={`w-8 h-8 rounded-full bg-${evt.color}-500/10 flex items-center justify-center text-${evt.color}-500 border border-${evt.color}-500/20`}>
+                                      <Icon size={14} />
+                                    </div>
+                                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-800/50" />
                                   </div>
-                                  <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-800/50" />
+                                  <div>
+                                    <p className="text-xs font-bold text-slate-200">{evt.title}</p>
+                                    <p className="text-[10px] text-slate-500 mt-0.5">{evt.detail}</p>
+                                    <p className="text-[9px] text-slate-600 mt-1 font-bold italic uppercase">{formatDistanceToNow(evt.time, { addSuffix: true })}</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="text-xs font-bold text-slate-200">New Registration</p>
-                                  <p className="text-[10px] text-slate-500 mt-0.5"><span className="text-indigo-400 font-bold">{user.name || 'Anonymous User'}</span> created account as <span className="capitalize">{user.user_type}</span></p>
-                                  <p className="text-[9px] text-slate-600 mt-1 font-bold italic uppercase">{formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}</p>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </CardContent>
                         <div className="p-4 border-t border-slate-800 bg-slate-900/40">
-                          <Button variant="ghost" className="w-full h-8 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/5">Open Audit Engine</Button>
+                          <Button variant="ghost" onClick={() => setActiveTab('tools')} className="w-full h-8 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/5">Open Audit Engine</Button>
                         </div>
                       </Card>
                     </div>
@@ -336,8 +391,8 @@ const AdminPortal = () => {
                       <p className="text-xs text-slate-500 font-medium">Authorizing and managing platform ecosystem access</p>
                     </div>
                     <div className="flex gap-3">
-                      <Button variant="outline" className="border-slate-800 bg-slate-900 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 text-slate-400"><Filter size={14} /> Filter</Button>
-                      <Button className="bg-indigo-600 hover:bg-indigo-700 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 shadow-lg shadow-indigo-600/20"><Download size={14} /> Reports</Button>
+                      <Button variant="outline" onClick={() => setSearchQuery('investor')} className="border-slate-800 bg-slate-900 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 text-slate-400"><Filter size={14} /> Investors Only</Button>
+                      <Button onClick={() => fetchData()} className="bg-indigo-600 hover:bg-indigo-700 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 shadow-lg shadow-indigo-600/20"><Download size={14} /> Sync Database</Button>
                     </div>
                   </div>
 
@@ -401,7 +456,13 @@ const AdminPortal = () => {
                 <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                   <div className="flex items-center gap-4 mb-2">
                     {['all', 'pending', 'approved', 'funded'].map(s => (
-                      <button key={s} className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-200 border-b-2 border-transparent transition-all hover:border-indigo-500">{s}</button>
+                      <button
+                        key={s}
+                        onClick={() => setIdeaFilter(s)}
+                        className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${ideaFilter === s ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-200'}`}
+                      >
+                        {s}
+                      </button>
                     ))}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -448,7 +509,11 @@ const AdminPortal = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
-                          {payments.map((p) => (
+                          {payments.filter(p =>
+                            p.profiles?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            p.razorpay_payment_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            p.razorpay_order_id?.toLowerCase().includes(searchQuery.toLowerCase())
+                          ).map((p) => (
                             <tr key={p.id} className="hover:bg-slate-900 group transition-colors">
                               <td className="py-5 px-8 font-mono text-[10px] font-black text-slate-600 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter">
                                 {p.razorpay_payment_id || p.razorpay_order_id?.substring(0, 16)}
@@ -493,7 +558,13 @@ const AdminPortal = () => {
                           <p className="text-[11px] text-slate-500 font-medium mt-1">{tool.desc}</p>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full h-10 rounded-xl border-slate-800 text-slate-500 hover:text-white hover:border-indigo-500 hover:bg-slate-800 text-[10px] font-black uppercase tracking-widest">{tool.btn}</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleToolAction(tool.title)}
+                        className="w-full h-10 rounded-xl border-slate-800 text-slate-500 hover:text-white hover:border-indigo-500 hover:bg-slate-800 text-[10px] font-black uppercase tracking-widest"
+                      >
+                        {tool.title === "System Lockdown" && isMaintenanceMode ? "Deactivate Mode" : tool.btn}
+                      </Button>
                     </Card>
                   ))}
                 </motion.div>

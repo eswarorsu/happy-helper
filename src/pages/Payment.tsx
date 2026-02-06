@@ -99,10 +99,24 @@ const Payment = () => {
                 body: JSON.stringify({ amount: 499 }),
             });
 
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Failed to create order on server");
+            }
+
             const order = await res.json();
 
+            if (!order.id) {
+                throw new Error("Invalid order response from server");
+            }
+
+            const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+            if (!razorpayKey) {
+                throw new Error("Razorpay Key ID is missing in configuration");
+            }
+
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: razorpayKey,
                 amount: order.amount,
                 currency: order.currency,
                 name: "INNOVESTOR",
