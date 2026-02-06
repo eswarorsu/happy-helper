@@ -73,6 +73,9 @@ const AdminPortal = () => {
       setIdeas(ideaData || []);
       setPayments(payData || []);
       setInvestments(investData || []);
+      console.log('🔍 ADMIN DEBUG - Payments fetched:', payData);
+      console.log('🔍 ADMIN DEBUG - Payment count:', payData?.length);
+      console.log('🔍 ADMIN DEBUG - Total revenue:', payData?.reduce((acc, p) => acc + (Number(p.amount) || 0), 0));
     } catch (error) {
       console.error("Error fetching admin data:", error);
     } finally {
