@@ -13,12 +13,16 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [investments, setInvestments] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedIdea, setSelectedIdea] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [systemStatus, setSystemStatus] = useState("Operational");
@@ -293,7 +297,7 @@ const AdminDashboard = () => {
                                 key={idx}
                                 whileHover={{ x: 5 }}
                                 className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-indigo-500/10 hover:border-indigo-500/20 transition-all cursor-pointer"
-                                onClick={() => navigate(`/idea/${inv.idea_id}`)}
+                                onClick={() => setSelectedIdea(ideas.find(i => i.id === inv.idea_id))}
                               >
                                 <div className="flex items-center gap-4">
                                   <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-emerald-400 shadow-sm">
@@ -346,7 +350,7 @@ const AdminDashboard = () => {
                               layout
                               whileHover={{ scale: 1.005 }}
                               className="bg-white/5 border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group cursor-pointer"
-                              onClick={() => navigate(`/profile/${user.id}`)}
+                              onClick={() => setSelectedUser(user)}
                             >
                               <div className="flex items-center gap-5">
                                 <div className="relative">
@@ -373,14 +377,14 @@ const AdminDashboard = () => {
                                   )}
                                 </div>
                                 <Button
-                                  variant={user.is_approved ? "outline" : "default"}
+                                  variant="outline"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    toggleApprove(user.id, !!user.is_approved);
+                                    setSelectedUser(user);
                                   }}
-                                  className={`rounded-xl h-11 px-6 font-black text-xs transition-all ${user.is_approved ? 'border-white/10 text-slate-500 hover:text-white hover:border-white/20 hover:bg-white/5' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/15'}`}
+                                  className="rounded-xl h-11 px-6 font-black text-xs border-white/10 text-slate-500 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all"
                                 >
-                                  {user.is_approved ? "Revoke Access" : "Grant Authorization"}
+                                  Deep Review
                                 </Button>
                               </div>
                             </motion.div>
@@ -396,7 +400,8 @@ const AdminDashboard = () => {
                         <motion.div
                           key={idea.id}
                           whileHover={{ y: -4 }}
-                          className="bg-[#151921] border border-white/5 shadow-sm p-6 rounded-3xl flex items-center justify-between hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group"
+                          className="bg-[#151921] border border-white/5 shadow-sm p-6 rounded-3xl flex items-center justify-between hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group cursor-pointer"
+                          onClick={() => setSelectedIdea(idea)}
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
@@ -411,19 +416,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <select
-                              onChange={(e) => updateIdeaStatus(idea.id, e.target.value)}
-                              value={idea.status || ""}
-                              className="bg-white/5 border-none rounded-xl px-4 h-11 text-xs font-black text-slate-300 focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer min-w-[160px]"
-                            >
-                              <option value="pending" className="bg-[#151921]">Reviewing</option>
-                              <option value="approved" className="bg-[#151921]">Approve & Publish</option>
-                              <option value="rejected" className="bg-[#151921]">Reject Submission</option>
-                              <option value="in_progress" className="bg-[#151921]">Active Deal</option>
-                              <option value="funded" className="bg-[#151921]">Fully Funded</option>
-                              <option value="deal_done" className="bg-[#151921]">Deal Closed</option>
-                            </select>
-                            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-white/10 text-slate-500 hover:text-indigo-400 hover:bg-white/5"><ArrowUpRight size={18} /></Button>
+                            <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedIdea(idea); }} className="h-11 w-11 rounded-xl border-white/10 text-slate-500 hover:text-indigo-400 hover:bg-white/5"><ArrowUpRight size={18} /></Button>
                           </div>
                         </motion.div>
                       ))}
@@ -574,6 +567,260 @@ const AdminDashboard = () => {
             </div>
           </div>
         </main>
+
+        {/* User Review Modal */}
+        <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+          <DialogContent className="max-w-3xl bg-[#0f1115] border-white/5 text-white overflow-hidden p-0 rounded-[2rem] shadow-2xl">
+            <ScrollArea className="max-h-[85vh]">
+              <div className="p-8 space-y-8">
+                <DialogHeader>
+                  <div className="flex items-center gap-6">
+                    <Avatar className="w-20 h-20 rounded-2xl ring-4 ring-indigo-500/20">
+                      <AvatarImage src={selectedUser?.avatar_url} className="object-cover" />
+                      <AvatarFallback className="bg-indigo-600 text-white text-2xl font-black">{selectedUser?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <DialogTitle className="text-2xl font-black text-white">{selectedUser?.name}</DialogTitle>
+                      <DialogDescription className="text-slate-500 font-bold mt-1 flex items-center gap-2">
+                        {selectedUser?.user_type?.toUpperCase()} • {selectedUser?.email}
+                        <Badge className={`${selectedUser?.is_approved ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'} border-none text-[10px] px-2 h-5`}>
+                          {selectedUser?.is_approved ? 'AUTHORIZED' : 'PENDING REVIEW'}
+                        </Badge>
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3">Identity Details</h4>
+                      <div className="space-y-4">
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Current Role</p>
+                          <p className="text-sm font-bold text-slate-200">{selectedUser?.current_job || "N/A"}</p>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Education</p>
+                          <p className="text-sm font-bold text-slate-200">{selectedUser?.education || "N/A"}</p>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Domain Expertise</p>
+                          <p className="text-sm font-bold text-slate-200">{selectedUser?.domain || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3">Contact & Links</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><Phone size={18} /></div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase">Phone Number</p>
+                            <p className="text-sm font-bold text-slate-200">{selectedUser?.phone || "Private"}</p>
+                          </div>
+                        </div>
+                        {selectedUser?.linkedin_profile && (
+                          <a href={selectedUser.linkedin_profile} target="_blank" className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center"><Linkedin size={18} /></div>
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase">LinkedIn Profile</p>
+                              <p className="text-sm font-bold text-blue-400">View Network</p>
+                            </div>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3">Professional Narrative</h4>
+                      <div className="bg-white/5 p-6 rounded-3xl border border-white/5 h-[320px]">
+                        <ScrollArea className="h-full">
+                          <p className="text-sm text-slate-400 leading-relaxed font-medium italic whitespace-pre-wrap">
+                            "{selectedUser?.experience || "No professional narrative provided yet."}"
+                          </p>
+                        </ScrollArea>
+                      </div>
+                    </div>
+
+                    {selectedUser?.user_type === 'investor' && (
+                      <div>
+                        <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3">Investment profile</h4>
+                        <div className="bg-emerald-500/5 p-6 rounded-3xl border border-emerald-500/10">
+                          <p className="text-[10px] text-emerald-500/60 font-black uppercase mb-1">Declared Capital Capacity</p>
+                          <p className="text-3xl font-black text-emerald-400">₹{selectedUser?.investment_capital?.toLocaleString() || "0"}</p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {selectedUser?.interested_domains?.map((d: string) => (
+                              <Badge key={d} className="bg-emerald-500/10 text-emerald-400 border-none text-[9px] font-black">{d}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <DialogFooter className="pt-8 border-t border-white/5 sm:justify-between items-center bg-[#0b0e14] -mx-8 -mb-8 p-8 sticky bottom-0 z-10">
+                  <div className="flex items-center gap-2">
+                    <Clock size={14} className="text-slate-600" />
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Joined {format(new Date(selectedUser?.created_at || Date.now()), 'PP')}</span>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button variant="outline" className="rounded-xl border-white/10 text-slate-400 hover:text-white" onClick={() => setSelectedUser(null)}>Dismiss</Button>
+                    <Button
+                      className={`${selectedUser?.is_approved ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white rounded-xl px-8 font-black shadow-lg shadow-indigo-600/20`}
+                      onClick={() => { toggleApprove(selectedUser.id, !!selectedUser.is_approved); setSelectedUser(null); }}
+                    >
+                      {selectedUser?.is_approved ? 'Revoke Authorization' : 'Grant Verification'}
+                    </Button>
+                  </div>
+                </DialogFooter>
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Idea Review Modal */}
+        <Dialog open={!!selectedIdea} onOpenChange={() => setSelectedIdea(null)}>
+          <DialogContent className="max-w-4xl bg-[#0f1115] border-white/5 text-white overflow-hidden p-0 rounded-[2.5rem] shadow-2xl">
+            <ScrollArea className="max-h-[90vh]">
+              <div className="p-10 space-y-10">
+                <DialogHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge className="bg-indigo-500/10 text-indigo-400 border-none text-[10px] font-black px-3 py-1">{selectedIdea?.domain}</Badge>
+                        <Badge className="bg-white/5 text-slate-500 border-none text-[10px] font-black px-3 py-1">VERSION 1.4</Badge>
+                      </div>
+                      <DialogTitle className="text-4xl font-black text-white leading-tight">{selectedIdea?.title}</DialogTitle>
+                      <p className="text-slate-500 font-bold mt-2 flex items-center gap-3">
+                        Submitted by <span className="text-indigo-400 underline cursor-pointer">{selectedIdea?.founder?.name}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                        {format(new Date(selectedIdea?.created_at || Date.now()), 'PPP')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Verification Status</p>
+                      <Badge className="bg-emerald-500/10 text-emerald-400 border-none text-[12px] px-4 h-8 font-black rounded-xl">{selectedIdea?.status?.toUpperCase()}</Badge>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                <div className="grid grid-cols-12 gap-10">
+                  <div className="col-span-8 space-y-10">
+                    <section>
+                      <h4 className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <Target size={14} /> The Problem Statement
+                      </h4>
+                      <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5">
+                        <p className="text-lg font-medium text-slate-300 leading-relaxed italic">
+                          "{selectedIdea?.description?.split('\n\n')[0] || selectedIdea?.description}"
+                        </p>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <Lightbulb size={14} /> The Proposed Solution
+                      </h4>
+                      <div className="bg-indigo-500/5 p-8 rounded-[2rem] border border-indigo-500/10">
+                        <p className="text-slate-400 leading-relaxed font-medium whitespace-pre-wrap text-sm">
+                          {selectedIdea?.description?.split('\n\n').slice(1).join('\n\n') || "Documentation pending deep review session."}
+                        </p>
+                      </div>
+                    </section>
+
+                    <div className="grid grid-cols-3 gap-6">
+                      {[
+                        { label: "Market Size", val: selectedIdea?.market_size || "Undetermined", icon: Globe, color: "blue" },
+                        { label: "Current Traction", val: selectedIdea?.traction || "Early Stage", icon: TrendingUp, color: "amber" },
+                        { label: "Internal Team", val: `${selectedIdea?.team_size || '1'} Members`, icon: Users, color: "purple" }
+                      ].map((m, i) => (
+                        <div key={i} className="bg-white/5 p-5 rounded-3xl border border-white/5 text-center group hover:bg-white/10 transition-all">
+                          <div className={`w-10 h-10 rounded-2xl bg-${m.color}-500/10 text-${m.color}-400 flex items-center justify-center mx-auto mb-3`}><m.icon size={20} /></div>
+                          <p className="text-[9px] font-black text-slate-600 uppercase mb-1 tracking-widest">{m.label}</p>
+                          <p className="text-xs font-black text-slate-200">{m.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div >
+
+                  <div className="col-span-4 space-y-10">
+                    <section>
+                      <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-[0.2em] mb-4">Capital Requirements</h4>
+                      <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 space-y-6">
+                        <div>
+                          <p className="text-[10px] text-slate-500 font-black uppercase mb-1">Target Raise</p>
+                          <p className="text-3xl font-black text-white">₹{selectedIdea?.investment_needed?.toLocaleString()}</p>
+                        </div>
+                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((selectedIdea?.investment_received / selectedIdea?.investment_needed) * 100, 100)}%` }}
+                            className="h-full bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                          />
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-[10px] text-slate-600 font-bold uppercase">Secured: ₹{selectedIdea?.investment_received?.toLocaleString()}</p>
+                          <p className="text-[10px] text-amber-500 font-black uppercase">{Math.round((selectedIdea?.investment_received / selectedIdea?.investment_needed) * 100)}%</p>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] mb-4">External Assets</h4>
+                      <div className="space-y-4">
+                        {selectedIdea?.media_url && (
+                          <a href={selectedIdea.media_url} target="_blank" className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-indigo-500/30 group transition-all">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><FileText size={18} /></div>
+                              <span className="text-sm font-bold text-slate-300 group-hover:text-white">Pitch Deck</span>
+                            </div>
+                            <ArrowUpRight size={16} className="text-slate-600" />
+                          </a>
+                        )}
+                        {selectedIdea?.website_url && (
+                          <a href={selectedIdea.website_url} target="_blank" className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 group transition-all">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><Globe size={18} /></div>
+                              <span className="text-sm font-bold text-slate-300 group-hover:text-white">Live URL</span>
+                            </div>
+                            <ArrowUpRight size={16} className="text-slate-600" />
+                          </a>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+
+                <DialogFooter className="pt-10 border-t border-white/5 sm:justify-between items-center bg-[#0b0e14] -mx-10 -mb-10 p-10 sticky bottom-0 z-10">
+                  <div className="flex items-center gap-4">
+                    <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Update State:</p>
+                    <select
+                      onChange={(e) => { updateIdeaStatus(selectedIdea.id, e.target.value); setSelectedIdea(null); }}
+                      value={selectedIdea?.status || ""}
+                      className="bg-white/5 border border-white/10 rounded-xl px-6 h-12 text-xs font-black text-slate-300 focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer min-w-[240px]"
+                    >
+                      <option value="pending" className="bg-[#151921]">Under Preliminary Review</option>
+                      <option value="approved" className="bg-[#151921]">Authorize & Push to Market</option>
+                      <option value="rejected" className="bg-[#151921]">Flag as Non-Compliant</option>
+                      <option value="in_progress" className="bg-[#151921]">Escalate to Active Deal</option>
+                      <option value="funded" className="bg-[#151921]">Mark as Fully Capitalized</option>
+                      <option value="deal_done" className="bg-[#151921]">Archive as Successful Deal</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button variant="outline" className="rounded-xl border-white/5 bg-transparent text-slate-500 px-8 hover:text-white hover:bg-white/5" onClick={() => setSelectedIdea(null)}>Close Inspection</Button>
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-10 font-black shadow-xl shadow-indigo-600/20" onClick={() => setSelectedIdea(null)}>Finalize Review</Button>
+                  </div>
+                </DialogFooter>
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </TooltipProvider>
     </div>
   );
