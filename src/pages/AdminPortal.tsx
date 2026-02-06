@@ -505,8 +505,8 @@ const AdminPortal = () => {
                         <thead>
                           <tr className="bg-slate-500/5 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-800">
                             <th className="py-6 px-8">Transaction Hash</th>
-                            <th className="py-6 px-8">Account Owner</th>
-                            <th className="py-6 px-8">Volume (INR)</th>
+                            <th className="py-6 px-8">User Name</th>
+                            <th className="py-6 px-8">Amount (INR)</th>
                             <th className="py-6 px-8">Timestamp</th>
                             <th className="py-6 px-8 text-right">Status</th>
                           </tr>
