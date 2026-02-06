@@ -409,6 +409,8 @@ export type Database = {
           updated_at: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"]
+          is_admin: boolean
+          is_approved: boolean
         }
         Insert: {
           avatar_url?: string | null
@@ -428,6 +430,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"]
+          is_admin?: boolean
+          is_approved?: boolean
         }
         Update: {
           avatar_url?: string | null
@@ -436,7 +440,7 @@ export type Database = {
           dob?: string | null
           domain?: string | null
           education?: string | null
-          email: string
+          email?: string
           experience?: string | null
           id?: string
           interested_domains?: string[] | null
@@ -447,6 +451,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          is_admin?: boolean
+          is_approved?: boolean
         }
         Relationships: []
       }

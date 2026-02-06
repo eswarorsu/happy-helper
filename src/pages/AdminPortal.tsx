@@ -177,6 +177,16 @@ const AdminPortal = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({ title: "Logged Out", description: "Session terminated securely." });
+      navigate("/");
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to sign out", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans antialiased overflow-hidden flex relative">
       {isMaintenanceMode && (
@@ -217,11 +227,11 @@ const AdminPortal = () => {
 
           <div className="p-4 border-t border-slate-800">
             <button
-              onClick={() => navigate("/")}
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all group"
             >
               <LogOut size={20} />
-              {isSidebarOpen && <span className="font-semibold text-sm">Exit Portal</span>}
+              {isSidebarOpen && <span className="font-semibold text-sm">Log Out</span>}
             </button>
           </div>
         </aside>

@@ -19,6 +19,7 @@ import {
 import ChatBox from "@/components/ChatBox";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
 import { getUnreadCount, connectFirebase, subscribeToUnreadCount } from "@/lib/firebase";
+import { ProfileViewModal } from "@/components/ProfileViewModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -197,6 +198,7 @@ const VentureCard = ({
   idea,
   onClick,
   onRecordInvestment,
+  onShare,
   index = 0
 }: {
   idea: Idea;
@@ -447,9 +449,12 @@ const FounderDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [messageFilter, setMessageFilter] = useState<"all" | "unread">("all");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [chatWidth, setChatWidth] = useState(400);
+  const [isResizing, setIsResizing] = useState(false);
   const previousCountsRef = useRef<Map<string, number>>(new Map());
   const unsubscribersRef = useRef<(() => void)[]>([]);
   const [firebaseReady, setFirebaseReady] = useState(false);
+  const [profileToView, setProfileToView] = useState<any | null>(null);
 
   // Investment Recording State
   const [recordInvestmentModal, setRecordInvestmentModal] = useState<{
@@ -541,7 +546,66 @@ const FounderDashboard = () => {
   }, []);
 
   useEffect(() => {
+    // ---------------------------------------------------------
+    // REAL-TIME LISTENER FOR CHAT REQUESTS & STATUS UPDATES
+    // ---------------------------------------------------------
+    if (profile?.id) {
+      const channel = supabase
+        .channel(`founder-chats-${profile.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen for INSERT and UPDATE
+            schema: 'public',
+            table: 'chat_requests',
+            filter: `founder_id=eq.${profile.id}`
+          },
+          async (payload) => {
+            console.log('[REALTIME] Chat request update (Founder):', payload);
+
+            // If it's an update, reflect it in the state immediately
+            if (payload.eventType === 'UPDATE') {
+              setChatRequests((prev) =>
+                prev.map((req) => req.id === payload.new.id ? { ...req, ...payload.new } : req)
+              );
+
+              // If selected chat is the one updated, update it too so ChatBox gets new props
+              if (selectedChat?.id === payload.new.id) {
+                setSelectedChat((prev) => prev ? { ...prev, ...payload.new } : null);
+              }
+            } else if (payload.eventType === 'INSERT') {
+              // For inserts, fetch relations
+              const { data } = await supabase
+                .from('chat_requests')
+                .select(`
+                    *,
+                    investor:profiles!chat_requests_investor_id_fkey(*),
+                    idea:ideas(*)
+                 `)
+                .eq('id', payload.new.id)
+                .single();
+
+              if (data) {
+                setChatRequests(prev => [data, ...prev]);
+                toast({
+                  title: "New Investor Interest!",
+                  description: `${data.investor?.name} is interested in ${data.idea?.title}`,
+                  className: "bg-indigo-600 text-white"
+                });
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [profile?.id, selectedChat?.id]);
+  useEffect(() => {
     if (!profile) return;
+
     const channels = [
       supabase.channel('ideas-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => fetchIdeas(profile.id)),
@@ -593,7 +657,8 @@ const FounderDashboard = () => {
         console.log(`[FOUNDER] Initialized prevCount for chat ${req.id} to ${req.unread_count || 0}`);
       }
 
-      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
+      // @ts-ignore - firebase types might be lagging
+      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count, lastMessage) => {
         const prevCount = previousCountsRef.current.get(req.id) || 0;
 
         console.log(`[FOUNDER] Unread count update for chat ${req.id}:`, {
@@ -618,18 +683,38 @@ const FounderDashboard = () => {
         if (count > prevCount && selectedChat?.id !== req.id) {
           const newMessages = count - prevCount;
 
+          // Determine Notification Style based on Message Content
+          let toastVariant: "default" | "destructive" = "default";
+          let toastTitle = "💬 New Message";
+          let toastClass = "";
+          const content = lastMessage?.content || "";
+
+          // Money In (Green) - "Investment Received"
+          if (content.match(/Investment|Funded|Sent|✅|💰/i)) {
+            toastTitle = "💰 Investment Received!";
+            toastClass = "bg-emerald-600 text-white border-emerald-700";
+          }
+          // Money Out / Alert (Red) - "Refund Request" or "Updates Required"
+          else if (content.match(/Refund|Request|Update|🚨/i)) {
+            toastTitle = "🚨 Action Required";
+            toastClass = "bg-rose-600 text-white border-rose-700";
+            toastVariant = "destructive";
+          }
+
           // Play notification sound
           if (soundEnabled) {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU=');
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU');
             audio.volume = 0.3;
             audio.play().catch(() => { });
           }
 
           // Show toast notification
           toast({
-            title: "💬 New Message",
-            description: `${req.investor?.name || 'An investor'} sent you ${newMessages} new message${newMessages > 1 ? 's' : ''}`,
+            title: toastTitle,
+            description: content || `${req.investor?.name || 'An investor'} sent you ${newMessages} new message${newMessages > 1 ? 's' : ''}`,
             duration: 5000,
+            className: toastClass,
+            variant: toastVariant
           });
         }
 
@@ -1646,24 +1731,60 @@ const FounderDashboard = () => {
           {/* ============================================================== */}
           <AnimatePresence>
             {selectedChat && profile && (
-              <motion.aside
-                initial={{ x: "100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "100%", opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="fixed right-0 top-[73px] bottom-0 w-96 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-40"
-              >
-                <ChatBox
-                  chatRequest={selectedChat}
-                  currentUserId={profile.id}
-                  onClose={() => setSelectedChat(null)}
-                  onMessagesRead={() => {
-                    setChatRequests(prev => prev.map(x => x.id === selectedChat.id ? { ...x, unread_count: 0 } : x));
-                  }}
-                  variant="embedded"
-                  className="h-full"
-                />
-              </motion.aside>
+              <>
+                {/* Resize Overlay - active only during resize */}
+                {isResizing && (
+                  <div
+                    className="fixed inset-0 z-50 cursor-ew-resize"
+                    onMouseMove={(e) => {
+                      const newWidth = window.innerWidth - e.clientX;
+                      if (newWidth > 300 && newWidth < 800) {
+                        setChatWidth(newWidth);
+                      }
+                    }}
+                    onMouseUp={() => setIsResizing(false)}
+                    onMouseLeave={() => setIsResizing(false)}
+                  />
+                )}
+
+                <motion.aside
+                  initial={{ x: "100%", opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: "100%", opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{ width: chatWidth }}
+                  className="fixed right-0 top-[73px] bottom-0 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-40 flex"
+                >
+                  {/* Drag Handle */}
+                  <div
+                    className="w-1.5 h-full cursor-ew-resize hover:bg-indigo-500/50 transition-colors flex items-center justify-center group"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setIsResizing(true);
+                    }}
+                  >
+                    <div className="w-0.5 h-8 bg-slate-300 group-hover:bg-indigo-500 rounded-full" />
+                  </div>
+
+                  <div className="flex-1 h-full min-w-0">
+                    <ChatBox
+                      chatRequest={selectedChat}
+                      currentUserId={profile.id}
+                      onClose={() => setSelectedChat(null)}
+                      onMessagesRead={() => {
+                        setChatRequests(prev => prev.map(x => x.id === selectedChat.id ? { ...x, unread_count: 0 } : x));
+                      }}
+                      onViewProfile={async () => {
+                        if (!selectedChat.investor_id) return;
+                        const { data } = await supabase.from('profiles').select('*').eq('id', selectedChat.investor_id).single();
+                        if (data) setProfileToView(data);
+                      }}
+                      variant="embedded"
+                      className="h-full"
+                    />
+                  </div>
+                </motion.aside>
+              </>
             )}
           </AnimatePresence>
         </div>
@@ -1895,6 +2016,11 @@ const FounderDashboard = () => {
           )}
         </AnimatePresence>
       </div>
+      <ProfileViewModal
+        isOpen={!!profileToView}
+        onClose={() => setProfileToView(null)}
+        profile={profileToView}
+      />
     </AnimatedGridBackground >
   );
 };

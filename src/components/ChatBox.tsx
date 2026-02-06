@@ -11,7 +11,7 @@ import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as Firebas
 import {
   Send, Handshake, CheckCircle2, Paperclip, Image as ImageIcon,
   FileText, Download, File as FileIcon, X, Check, CheckCheck,
-  DollarSign, AlertCircle, TrendingUp, ChevronDown, ChevronUp
+  DollarSign, AlertCircle, TrendingUp, ChevronDown, ChevronUp, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,11 +25,12 @@ interface ChatBoxProps {
   currentUserId: string;
   onClose: () => void;
   onMessagesRead?: () => void;
+  onViewProfile?: () => void;
   variant?: 'dialog' | 'embedded';
   className?: string;
 }
 
-const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant = 'dialog', className = '' }: ChatBoxProps) => {
+const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewProfile, variant = 'dialog', className = '' }: ChatBoxProps) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -398,32 +399,51 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, variant 
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Status Badge */}
+        <div className="flex items-center gap-1">
+          {/* Status Badge - Compact */}
           {statusConfig && (
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${statusConfig.color}`}>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-medium ${statusConfig.color} hidden sm:flex`}>
               <statusConfig.icon className="w-3 h-3" />
               <span>{statusConfig.label}</span>
             </div>
           )}
 
-          {/* View Deal Button */}
+          {/* View Deal Button - Icon Only */}
           {requestStatus === "deal_done" && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => navigate(`/deal-center/${chatRequest.id}`)}
-              className="h-8 px-2.5 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full"
+              title="View Deal"
             >
-              <TrendingUp className="w-3.5 h-3.5 mr-1" />
-              Deal
+              <TrendingUp className="w-4 h-4" />
             </Button>
           )}
 
-          {/* Close Button */}
+          {/* View Profile Button - Icon Only */}
+          {onViewProfile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onViewProfile}
+              className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full"
+              title="View Profile Info"
+            >
+              <Info className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Close Button - Prominent Red Cross */}
           {variant === 'embedded' && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600" onClick={onClose}>
-              <X className="w-4 h-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-slate-400 hover:text-white hover:bg-red-500 rounded-full transition-colors ml-1"
+              onClick={onClose}
+              title="Close Chat"
+            >
+              <X className="w-5 h-5" />
             </Button>
           )}
         </div>

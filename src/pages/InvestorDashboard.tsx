@@ -12,6 +12,7 @@ import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbul
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 import ChatBox from "@/components/ChatBox";
 import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
+import { ProfileViewModal } from "@/components/ProfileViewModal";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -134,6 +135,9 @@ const InvestorDashboard = () => {
   const previousCountsRef = useRef<Map<string, number>>(new Map());
   const unsubscribersRef = useRef<(() => void)[]>([]);
   const [firebaseReady, setFirebaseReady] = useState(false);
+  const [profileToView, setProfileToView] = useState<any | null>(null);
+  const [chatWidth, setChatWidth] = useState(400); // Default width
+  const [isResizing, setIsResizing] = useState(false); // Track resizing state
 
   // Investor metrics
   const [totalInvested, setTotalInvested] = useState(0);
@@ -147,6 +151,9 @@ const InvestorDashboard = () => {
   // Invested ideas - ideas this investor has invested in
   const [investedIdeaIds, setInvestedIdeaIds] = useState<string[]>([]);
   const [investedIdeas, setInvestedIdeas] = useState<Idea[]>([]);
+
+  // State for unread counts map
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     // Keyboard shortcuts
@@ -206,92 +213,80 @@ const InvestorDashboard = () => {
 
   // Real-time subscription for unread message counts
   useEffect(() => {
-    if (!profile || chatRequests.length === 0 || !firebaseReady) {
-      console.log("[INVESTOR] Skipping subscription setup:", {
-        hasProfile: !!profile,
-        chatCount: chatRequests.length,
-        firebaseReady
-      });
-      return;
-    }
+    if (!profile || chatRequests.length === 0 || !firebaseReady) return;
 
     // Cleanup previous subscriptions
     unsubscribersRef.current.forEach(unsub => unsub());
     unsubscribersRef.current = [];
 
-    // Subscribe to each active chat for real-time unread updates
+    // Subscribe to active chats
     const activeChats = chatRequests.filter(r =>
       ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
     );
 
-    console.log(`[INVESTOR] Setting up subscriptions for ${activeChats.length} active chats`);
-
     activeChats.forEach(req => {
-      // Initialize previous count ONLY if it doesn't exist yet
-      if (!previousCountsRef.current.has(req.id)) {
-        previousCountsRef.current.set(req.id, req.unread_count || 0);
-        console.log(`[INVESTOR] Initialized prevCount for chat ${req.id} to ${req.unread_count || 0}`);
-      }
+      // @ts-ignore - firebase types might be lagging
+      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count, lastMessage) => {
+        // Update state map
+        setUnreadCounts(prev => {
+          const prevCount = prev[req.id] || 0;
 
-      const unsubscribe = subscribeToUnreadCount(req.id, profile.id, (count) => {
-        const prevCount = previousCountsRef.current.get(req.id) || 0;
+          // Notification logic: Only if count INCREASED and chat is not open
+          if (count > prevCount && selectedChatIdRef.current !== req.id) {
+            const newMessages = count - prevCount;
 
-        console.log(`[INVESTOR] Unread count update for chat ${req.id}:`, {
-          chatId: req.id,
-          founderName: req.founder?.name,
-          newCount: count,
-          prevCount: prevCount,
-          selectedChatId: selectedChat?.id,
-          willShowNotification: count > prevCount && selectedChat?.id !== req.id
-        });
+            // Determine Notification Style based on Message Content
+            let toastVariant: "default" | "destructive" = "default";
+            let toastTitle = "💬 New Message";
+            let toastClass = "";
+            const content = lastMessage?.content || "";
 
-        // Update the unread count in state - use functional update to avoid stale closure
-        setChatRequests(prev => {
-          const updated = prev.map(p =>
-            p.id === req.id ? { ...p, unread_count: count } : p
-          );
-          console.log(`[INVESTOR] State updated - chat ${req.id} now has unread_count: ${count}`);
-          return updated;
-        });
+            // Money In (Green) - "Profit Received"
+            if (content.match(/Profit|Dividends|Payout|✅/i)) {
+              toastTitle = "💰 Profit Received!";
+              toastClass = "bg-emerald-600 text-white border-emerald-700";
+            }
+            // Money Out / Alert (Red) - "Reinvestment Request"
+            else if (content.match(/Reinvest|Request|Refund|Propos|Deal|🚨/i)) {
+              toastTitle = "🚨 Action Required";
+              toastClass = "bg-rose-600 text-white border-rose-700";
+              toastVariant = "destructive";
+            }
 
-        // Show notification if new messages arrived and chat is not currently open
-        if (count > prevCount && selectedChat?.id !== req.id) {
-          const newMessages = count - prevCount;
-
-          // Play notification sound
-          if (soundEnabled) {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU=');
-            audio.volume = 0.3;
-            audio.play().catch(() => { });
+            // Play notification sound
+            if (soundEnabled) {
+              const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RiGwU7k9bx0H4qBSh+zPLaizsKGGS56+mnVRILSKHh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU2jdTy0oEtBSt+zPDajTwJFmW88eqoVRMKSKDh8bllHAU');
+              audio.volume = 0.3;
+              audio.play().catch(() => { });
+            }
+            toast({
+              title: toastTitle,
+              description: content || `${req.founder?.name || 'A founder'} sent you a message`,
+              duration: 5000,
+              className: toastClass,
+              variant: toastVariant
+            });
           }
-
-          // Show toast notification
-          toast({
-            title: "💬 New Message",
-            description: `${req.founder?.name || 'A founder'} sent you ${newMessages} new message${newMessages > 1 ? 's' : ''}`,
-            duration: 5000,
-          });
-        }
-
-        // Update previous count for next comparison
-        previousCountsRef.current.set(req.id, count);
+          return { ...prev, [req.id]: count };
+        });
       });
-
       unsubscribersRef.current.push(unsubscribe);
     });
 
-    // Cleanup on unmount or dependency change
     return () => {
-      console.log("[INVESTOR] Cleaning up subscriptions");
       unsubscribersRef.current.forEach(unsub => unsub());
       unsubscribersRef.current = [];
     };
-  }, [profile?.id, chatRequests.length, firebaseReady]);
+  }, [chatRequests.map(r => `${r.id}-${r.status}`).join(','), profile?.id, firebaseReady]); // Robust dependency including status
 
   // Separate effect for notification logic that depends on selectedChat
   const selectedChatIdRef = useRef<string | null>(null);
   useEffect(() => {
     selectedChatIdRef.current = selectedChat?.id || null;
+    // Clear unread count when opening a chat
+    if (selectedChat?.id) {
+      setUnreadCounts(prev => ({ ...prev, [selectedChat.id]: 0 }));
+    }
   }, [selectedChat?.id]);
 
   const fetchData = async () => {
@@ -465,21 +460,10 @@ const InvestorDashboard = () => {
       });
     }
 
-    // Fetch initial unread counts (real-time subscription will handle updates)
-    if (requestsData && requestsData.length > 0) {
-      const activeChats = requestsData.filter(r =>
-        ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)
-      );
-
-      for (const req of activeChats) {
-        try {
-          const count = await getUnreadCount(req.id, profileData.id);
-          setChatRequests(prev => prev.map(p => p.id === req.id ? { ...p, unread_count: count } : p));
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
-        }
-      }
-    }
+    // Initial fetch of unread counts REMOVED to avoid race conditions.
+    // The useEffect subscription handles this automatically and consistently.
+    // If we fetch manually here, we risk overwriting the real-time state with potentially stale data
+    // or causing flickers. The real-time listener will fire immediately upon connection anyway.
 
     setIsLoading(false);
   };
@@ -525,7 +509,6 @@ const InvestorDashboard = () => {
         idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .single();
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -533,6 +516,69 @@ const InvestorDashboard = () => {
       setChatRequests([...chatRequests, data]);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+
+    // ---------------------------------------------------------
+    // REAL-TIME LISTENER FOR CHAT REQUESTS & STATUS UPDATES
+    // ---------------------------------------------------------
+    if (profile?.id) {
+      const channel = supabase
+        .channel(`investor-chats-${profile.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen for INSERT and UPDATE
+            schema: 'public',
+            table: 'chat_requests',
+            filter: `investor_id=eq.${profile.id}`
+          },
+          async (payload) => {
+            console.log('[REALTIME] Chat request update:', payload);
+
+            // If it's an update, reflect it in the state immediately
+            if (payload.eventType === 'UPDATE') {
+              setChatRequests((prev) =>
+                prev.map((req) => req.id === payload.new.id ? { ...req, ...payload.new } : req)
+              );
+
+              // Also receive the FULL updated object if needed, or just partial is fine for status
+              // If selected chat is the one updated, update it too so ChatBox gets new props
+              if (selectedChatIdRef.current === payload.new.id) {
+                setSelectedChat((prev) => prev ? { ...prev, ...payload.new } : null);
+              }
+            } else if (payload.eventType === 'INSERT') {
+              // For inserts, we might need to fetch relations (founder/idea) so easy way is re-fetch or careful manual merge
+              // Re-fetching strictly the new row is cleaner
+              const { data } = await supabase
+                .from('chat_requests')
+                .select(`
+                    *,
+                    founder:profiles!chat_requests_founder_id_fkey(*),
+                    idea:ideas(*)
+                 `)
+                .eq('id', payload.new.id)
+                .single();
+
+              if (data) {
+                setChatRequests(prev => [data, ...prev]);
+                toast({
+                  title: "New Connect Request!",
+                  description: `${data.founder?.name} wants to connect regarding ${data.idea?.title}`,
+                  className: "bg-indigo-600 text-white"
+                });
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [profile?.id, supabase, setChatRequests, setSelectedChat, selectedChatIdRef]);
 
   const getRequestStatus = (ideaId: string) => {
     const request = chatRequests.find((r) => r.idea_id === ideaId);
@@ -576,6 +622,9 @@ const InvestorDashboard = () => {
       </div>
     );
   }
+
+  // Helper to get total unread
+  const totalUnreadCount = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
 
   return (
     <AnimatedGridBackground className="bg-slate-50">
@@ -636,10 +685,10 @@ const InvestorDashboard = () => {
                 className="rounded-full font-bold relative"
               >
                 <MessageSquare className="w-4 h-4 mr-2" /> Messages
-                {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                {totalUnreadCount > 0 && (
                   <>
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/50">
-                      {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)}
+                      {totalUnreadCount}
                     </span>
                     <span className="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full animate-ping opacity-75"></span>
                   </>
@@ -731,7 +780,6 @@ const InvestorDashboard = () => {
             <Card className="lg:col-span-2 bg-white border border-slate-200 shadow-sm rounded-xl">
               <CardHeader className="border-b border-slate-100 bg-slate-50/30">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold text-slate-900">Portfolio Growth & Profits</CardTitle>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-indigo-600" />
@@ -949,13 +997,13 @@ const InvestorDashboard = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-bold text-slate-900">Messages</h2>
-                      {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                      {totalUnreadCount > 0 && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
                         >
-                          {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)} new
+                          {totalUnreadCount} new
                         </motion.span>
                       )}
                     </div>
@@ -973,12 +1021,12 @@ const InvestorDashboard = () => {
                           <Activity className="w-4 h-4 text-slate-400" />
                         )}
                       </Button>
-                      {chatRequests.filter(r => r.unread_count && r.unread_count > 0).length > 0 && (
+                      {totalUnreadCount > 0 && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setChatRequests(prev => prev.map(r => ({ ...r, unread_count: 0 })));
+                            setUnreadCounts({});
                             toast({ title: "All messages marked as read" });
                           }}
                           className="text-xs text-slate-600 hover:text-slate-900 h-8"
@@ -1013,7 +1061,7 @@ const InvestorDashboard = () => {
                       onClick={() => setMessageFilter("unread")}
                       className="flex-1 h-8 text-xs rounded-lg"
                     >
-                      Unread ({chatRequests.filter(r => r.unread_count && r.unread_count > 0).length})
+                      Unread ({chatRequests.filter(r => (unreadCounts[r.id] || 0) > 0).length})
                     </Button>
                   </div>
                   <p className="text-[10px] text-slate-400 mt-2">Tip: Press Ctrl+M to toggle messages</p>
@@ -1029,55 +1077,61 @@ const InvestorDashboard = () => {
                   ) : (
                     <div className="p-2 space-y-1">
                       {chatRequests
-                        .filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status)).filter(r => messageFilter === "all" || (messageFilter === "unread" && r.unread_count && r.unread_count > 0)).map((chat) => (
-                          <motion.button
-                            key={chat.id}
-                            onClick={() => {
-                              setSelectedChat(chat);
-                              setShowChatList(false);
-                              setChatRequests(prev => prev.map(x => x.id === chat.id ? { ...x, unread_count: 0 } : x));
-                            }}
-                            className={`w-full p-3 rounded-lg text-left transition-all relative ${selectedChat?.id === chat.id
-                              ? 'bg-indigo-50 border border-indigo-200'
-                              : chat.unread_count && chat.unread_count > 0
-                                ? 'bg-blue-50/50 border border-blue-200 hover:bg-blue-50'
-                                : 'hover:bg-slate-50 border border-transparent'
-                              }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            {chat.unread_count && chat.unread_count > 0 && (
-                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-l-lg"></div>
-                            )}
-                            <div className="flex items-start justify-between mb-1">
-                              <p className={`text-sm truncate flex-1 ${chat.unread_count && chat.unread_count > 0 ? 'font-extrabold text-slate-900' : 'font-bold text-slate-700'
-                                }`}>
-                                {chat.founder?.name || "Founder"}
-                              </p>
-                              {chat.unread_count && chat.unread_count > 0 && (
-                                <motion.span
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  className="ml-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse shadow-lg shadow-indigo-500/50"
-                                >
-                                  {chat.unread_count}
-                                </motion.span>
+                        .filter(r => ["accepted", "communicating", "deal_pending_investor", "deal_done"].includes(r.status))
+                        .filter(r => messageFilter === "all" || (messageFilter === "unread" && (unreadCounts[r.id] || 0) > 0))
+                        .sort((a, b) => (unreadCounts[b.id] || 0) - (unreadCounts[a.id] || 0)) // Sort unread to top
+                        .map((chat) => {
+                          const count = unreadCounts[chat.id] || 0;
+                          return (
+                            <motion.button
+                              key={chat.id}
+                              onClick={() => {
+                                setSelectedChat(chat);
+                                setShowChatList(false);
+                                setUnreadCounts(prev => ({ ...prev, [chat.id]: 0 }));
+                              }}
+                              className={`w-full p-3 rounded-lg text-left transition-all relative ${selectedChat?.id === chat.id
+                                ? 'bg-indigo-50 border border-indigo-200'
+                                : count > 0
+                                  ? 'bg-blue-50/50 border border-blue-200 hover:bg-blue-50'
+                                  : 'hover:bg-slate-50 border border-transparent'
+                                }`}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              {count > 0 && (
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-l-lg"></div>
                               )}
-                            </div>
-                            <p className="text-xs text-slate-500 truncate mb-1">
-                              {chat.idea?.title || "Investment Opportunity"}
-                            </p>
-                            <p className="text-[11px] text-slate-400 truncate mb-2 italic">
-                              {chat.unread_count && chat.unread_count > 0 ? `${chat.unread_count} new message${chat.unread_count > 1 ? 's' : ''}` : 'No new messages'}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <Badge className="text-[9px] font-bold bg-slate-100 text-slate-600 border-slate-200">
-                                {chat.status === "deal_done" ? "Deal Closed" : "Active"}
-                              </Badge>
-                              <span className="text-[9px] text-slate-400">• Just now</span>
-                            </div>
-                          </motion.button>
-                        ))}
+                              <div className="flex items-start justify-between mb-1">
+                                <p className={`text-sm truncate flex-1 ${count > 0 ? 'font-extrabold text-slate-900' : 'font-bold text-slate-700'
+                                  }`}>
+                                  {chat.founder?.name || "Founder"}
+                                </p>
+                                {count > 0 && (
+                                  <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="ml-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse shadow-lg shadow-indigo-500/50"
+                                  >
+                                    {count}
+                                  </motion.span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-500 truncate mb-1">
+                                {chat.idea?.title || "Investment Opportunity"}
+                              </p>
+                              <p className="text-[11px] text-slate-400 truncate mb-2 italic">
+                                {count > 0 ? `${count} new message${count > 1 ? 's' : ''}` : 'No new messages'}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Badge className="text-[9px] font-bold bg-slate-100 text-slate-600 border-slate-200">
+                                  {chat.status === "deal_done" ? "Deal Closed" : "Active"}
+                                </Badge>
+                                <span className="text-[9px] text-slate-400">• Just now</span>
+                              </div>
+                            </motion.button>
+                          )
+                        })}
                     </div>
                   )}
                 </div>
@@ -1090,28 +1144,70 @@ const InvestorDashboard = () => {
         {/* RIGHT PANEL - Chat */}
         {/* ============================================================== */}
         <AnimatePresence>
-          {selectedChat && profile && !showChatList && (
-            <motion.aside
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-[73px] bottom-0 w-96 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-40"
-            >
-              <ChatBox
-                chatRequest={selectedChat}
-                currentUserId={profile.id}
-                onClose={() => setSelectedChat(null)}
-                onMessagesRead={() => {
-                  setChatRequests(prev => prev.map(x => x.id === selectedChat.id ? { ...x, unread_count: 0 } : x));
-                }}
-                variant="embedded"
-                className="h-full"
-              />
-            </motion.aside>
+          {selectedChat && profile && (
+            <>
+              {/* Resize Overlay - active only during resize to capture mouse events everywhere */}
+              {isResizing && (
+                <div
+                  className="fixed inset-0 z-50 cursor-ew-resize"
+                  onMouseMove={(e) => {
+                    const newWidth = window.innerWidth - e.clientX;
+                    if (newWidth > 300 && newWidth < 800) {
+                      setChatWidth(newWidth);
+                    }
+                  }}
+                  onMouseUp={() => setIsResizing(false)}
+                  onMouseLeave={() => setIsResizing(false)}
+                />
+              )}
+
+              <motion.aside
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                style={{ width: chatWidth }}
+                className="fixed right-0 top-[73px] bottom-0 bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-2xl z-40 flex"
+              >
+                {/* Drag Handle */}
+                <div
+                  className="w-1.5 h-full cursor-ew-resize hover:bg-indigo-500/50 transition-colors flex items-center justify-center group"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsResizing(true);
+                  }}
+                >
+                  <div className="w-0.5 h-8 bg-slate-300 group-hover:bg-indigo-500 rounded-full" />
+                </div>
+
+                <div className="flex-1 h-full min-w-0">
+                  <ChatBox
+                    chatRequest={selectedChat}
+                    currentUserId={profile.id}
+                    onClose={() => setSelectedChat(null)}
+                    onMessagesRead={() => {
+                      setChatRequests(prev => prev.map(x => x.id === selectedChat.id ? { ...x, unread_count: 0 } : x));
+                    }}
+                    onViewProfile={async () => {
+                      // Investor viewing Founder
+                      if (!selectedChat.founder_id) return;
+                      const { data } = await supabase.from('profiles').select('*').eq('id', selectedChat.founder_id).single();
+                      if (data) setProfileToView(data);
+                    }}
+                    variant="embedded"
+                    className="h-full"
+                  />
+                </div>
+              </motion.aside>
+            </>
           )}
         </AnimatePresence>
       </div>
+      <ProfileViewModal
+        isOpen={!!profileToView}
+        onClose={() => setProfileToView(null)}
+        profile={profileToView}
+      />
     </AnimatedGridBackground>
   );
 };
