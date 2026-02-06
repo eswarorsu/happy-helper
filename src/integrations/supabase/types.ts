@@ -186,6 +186,71 @@ export type Database = {
         }
         Relationships: []
       }
+      profit_shares: {
+        Row: {
+          id: string
+          investment_record_id: string | null
+          chat_request_id: string
+          founder_id: string
+          investor_id: string
+          idea_id: string
+          amount: number
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          investment_record_id?: string | null
+          chat_request_id: string
+          founder_id: string
+          investor_id: string
+          idea_id: string
+          amount: number
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          investment_record_id?: string | null
+          chat_request_id?: string
+          founder_id?: string
+          investor_id?: string
+          idea_id?: string
+          amount?: number
+          description?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profit_shares_chat_request_id_fkey"
+            columns: ["chat_request_id"]
+            isOneToOne: false
+            referencedRelation: "chat_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profit_shares_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profit_shares_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profit_shares_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       investor_ratings: {
         Row: {
           chat_request_id: string
