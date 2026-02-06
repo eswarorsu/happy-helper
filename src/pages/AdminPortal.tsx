@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -293,29 +293,27 @@ const AdminPortal = () => {
                       <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-full shadow-sm flex flex-col">
                         <CardHeader className="p-6 border-b border-slate-800/50">
                           <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
-                            Recent Events
-                            <Activity size={14} className="text-indigo-500" />
+                            Platform Activity
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">{users.length} Total Users</span>
+                              <Activity size={14} className="text-indigo-500" />
+                            </div>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 flex-1 overflow-y-auto no-scrollbar">
                           <div className="space-y-6">
-                            {[
-                              { id: 1, action: "Payment Verified", detail: "₹15,000 via Razorpay", time: "just now", color: "emerald" },
-                              { id: 2, action: "New Submission", detail: "SolarX Tech posted a new idea", time: "12m ago", color: "amber" },
-                              { id: 3, action: "Member Access", detail: "Invested Approved: S. Singh", time: "45m ago", color: "indigo" },
-                              { id: 4, action: "Deal Closure", detail: "HealthPlus closed ₹5M round", time: "3h ago", color: "emerald" },
-                            ].map((evt) => (
-                              <div key={evt.id} className="flex gap-4 group">
+                            {users.slice(0, 10).map((user) => (
+                              <div key={user.id} className="flex gap-4 group">
                                 <div className="relative shrink-0">
-                                  <div className={`w-8 h-8 rounded-full bg-${evt.color}-500/10 flex items-center justify-center text-${evt.color}-500 border border-${evt.color}-500/20`}>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                                  <div className={`w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20`}>
+                                    <Users size={14} />
                                   </div>
                                   <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-800/50" />
                                 </div>
                                 <div>
-                                  <p className="text-xs font-bold text-slate-200">{evt.action}</p>
-                                  <p className="text-[10px] text-slate-500 mt-0.5">{evt.detail}</p>
-                                  <p className="text-[9px] text-slate-600 mt-1 font-bold italic uppercase">{evt.time}</p>
+                                  <p className="text-xs font-bold text-slate-200">New Registration</p>
+                                  <p className="text-[10px] text-slate-500 mt-0.5"><span className="text-indigo-400 font-bold">{user.name || 'Anonymous User'}</span> created account as <span className="capitalize">{user.user_type}</span></p>
+                                  <p className="text-[9px] text-slate-600 mt-1 font-bold italic uppercase">{formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}</p>
                                 </div>
                               </div>
                             ))}
