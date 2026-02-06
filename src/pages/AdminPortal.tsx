@@ -343,7 +343,7 @@ const AdminPortal = () => {
 
                     {/* Side Feed */}
                     <div className="col-span-12 lg:col-span-4 space-y-6">
-                      <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-full shadow-sm flex flex-col">
+                      <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-[500px] shadow-sm flex flex-col">
                         <CardHeader className="p-6 border-b border-slate-800/50">
                           <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
                             Platform Activity
