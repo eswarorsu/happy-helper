@@ -77,6 +77,7 @@ const ideaCardHoverVariants = {
 interface GrowthDataPoint {
   month: string;
   capital: number;
+  profit: number;
 }
 
 interface PortfolioDataPoint {
@@ -136,6 +137,7 @@ const InvestorDashboard = () => {
 
   // Investor metrics
   const [totalInvested, setTotalInvested] = useState(0);
+  const [totalProfitReceived, setTotalProfitReceived] = useState(0);
 
   // Chart data - dynamically computed from real investments
   const [growthData, setGrowthData] = useState<GrowthDataPoint[]>([]);
@@ -177,6 +179,11 @@ const InvestorDashboard = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'investment_records' },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profit_shares' },
         () => fetchData()
       )
       .subscribe();
@@ -379,21 +386,46 @@ const InvestorDashboard = () => {
       });
       setInvestedIdeas(Array.from(uniqueIdeasMap.values()));
 
-      // Compute growth data - cumulative investments by month
-      const monthlyData: Record<string, number> = {};
-      let cumulative = 0;
+      // Fetch profit shares for this investor
+      const { data: profitData } = await supabase
+        .from("profit_shares")
+        .select("amount, created_at")
+        .eq("investor_id", profileData.id)
+        .order("created_at", { ascending: true });
+
+      const totalProfit = profitData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      setTotalProfitReceived(totalProfit);
+
+      // Compute growth data - cumulative investments AND profits by month
+      const monthlyInvestments: Record<string, number> = {};
+      const monthlyProfits: Record<string, number> = {};
+      let cumulativeInvest = 0;
+      let cumulativeProfit = 0;
 
       investmentData.forEach(inv => {
         const date = new Date(inv.created_at);
         const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-        cumulative += Number(inv.amount);
-        monthlyData[monthKey] = cumulative;
+        cumulativeInvest += Number(inv.amount);
+        monthlyInvestments[monthKey] = cumulativeInvest;
       });
 
-      const chartData = Object.entries(monthlyData).map(([month, capital]) => ({
-        month,
-        capital
-      }));
+      profitData?.forEach(p => {
+        const date = new Date(p.created_at);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        cumulativeProfit += Number(p.amount);
+        monthlyProfits[monthKey] = cumulativeProfit;
+      });
+
+      // Merge all months and create chart data
+      const allMonths = [...new Set([...Object.keys(monthlyInvestments), ...Object.keys(monthlyProfits)])];
+      let lastInvest = 0;
+      let lastProfit = 0;
+
+      const chartData = allMonths.map(month => {
+        if (monthlyInvestments[month]) lastInvest = monthlyInvestments[month];
+        if (monthlyProfits[month]) lastProfit = monthlyProfits[month];
+        return { month, capital: lastInvest, profit: lastProfit };
+      });
       setGrowthData(chartData);
 
       // Compute portfolio distribution by domain
@@ -410,6 +442,7 @@ const InvestorDashboard = () => {
     } else {
       // New user with no investments
       setTotalInvested(0);
+      setTotalProfitReceived(0);
       setGrowthData([]);
       setPortfolioData([]);
       setInvestedIdeaIds([]);
@@ -697,7 +730,19 @@ const InvestorDashboard = () => {
           >
             <Card className="lg:col-span-2 bg-white border border-slate-200 shadow-sm rounded-xl">
               <CardHeader className="border-b border-slate-100 bg-slate-50/30">
-                <CardTitle className="text-lg font-bold text-slate-900">Portfolio Growth & Strategy</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold text-slate-900">Portfolio Growth & Profits</CardTitle>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-indigo-600" />
+                      <span className="text-xs font-medium text-slate-600">Invested</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                      <span className="text-xs font-medium text-slate-600">Profit</span>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {growthData.length > 0 ? (
@@ -705,18 +750,26 @@ const InvestorDashboard = () => {
                     <AreaChart data={growthData}>
                       <defs>
                         <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4338ca" stopOpacity={0.1} />
+                          <stop offset="5%" stopColor="#4338ca" stopOpacity={0.15} />
                           <stop offset="95%" stopColor="#4338ca" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`} />
                       <Tooltip
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Total Invested']}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'white' }}
+                        formatter={(value: number, name: string) => [
+                          `₹${value.toLocaleString()}`,
+                          name === 'capital' ? 'Invested' : 'Profit Received'
+                        ]}
                       />
-                      <Area type="monotone" dataKey="capital" stroke="#4338ca" fillOpacity={1} fill="url(#colorCapital)" strokeWidth={3} />
+                      <Area type="monotone" dataKey="capital" stroke="#4338ca" fillOpacity={1} fill="url(#colorCapital)" strokeWidth={3} name="capital" />
+                      <Area type="monotone" dataKey="profit" stroke="#10b981" fillOpacity={1} fill="url(#colorProfit)" strokeWidth={3} name="profit" />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
