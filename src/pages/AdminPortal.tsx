@@ -27,6 +27,8 @@ const AdminPortal = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [ideaFilter, setIdeaFilter] = useState("all");
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -99,10 +101,14 @@ const AdminPortal = () => {
   };
 
   const combinedEvents = [
-    ...users.map(u => ({ id: u.id, type: 'user', title: 'New Registration', detail: `${u.name || 'Anonymous'} joined as ${u.user_type}`, time: new Date(u.created_at), color: 'indigo', icon: Users })),
-    ...ideas.map(i => ({ id: i.id, type: 'idea', title: 'Idea Submission', detail: `${i.title} by ${i.founder?.name || 'Unknown'}`, time: new Date(i.created_at), color: 'amber', icon: Lightbulb })),
-    ...payments.filter(p => p.status === 'success').map(p => ({ id: p.id, type: 'payment', title: 'Payment Secured', detail: `₹${p.amount?.toLocaleString()} from ${p.profiles?.name || 'User'}`, time: new Date(p.created_at), color: 'emerald', icon: DollarSign }))
-  ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 12);
+    ...users.filter(u => u.created_at).map(u => ({ id: u.id, type: 'user', title: 'New Registration', detail: `${u.name || 'Anonymous'} joined as ${u.user_type}`, time: new Date(u.created_at), color: 'indigo', icon: Users })),
+    ...ideas.filter(i => i.created_at).map(i => ({ id: i.id, type: 'idea', title: 'Idea Submission', detail: `${i.title} by ${i.founder?.name || 'Unknown'}`, time: new Date(i.created_at), color: 'amber', icon: Lightbulb })),
+    ...payments.filter(p => p.status === 'success' && p.created_at).map(p => ({ id: p.id, type: 'payment', title: 'Payment Secured', detail: `₹${p.amount?.toLocaleString()} from ${p.profiles?.name || 'User'}`, time: new Date(p.created_at), color: 'emerald', icon: DollarSign }))
+  ].sort((a, b) => {
+    const timeA = a.time instanceof Date && !isNaN(a.time.getTime()) ? a.time.getTime() : 0;
+    const timeB = b.time instanceof Date && !isNaN(b.time.getTime()) ? b.time.getTime() : 0;
+    return timeB - timeA;
+  }).slice(0, 12);
 
   const filteredUsers = users.filter(u =>
     u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,7 +116,6 @@ const AdminPortal = () => {
     u.user_type?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const [ideaFilter, setIdeaFilter] = useState("all");
   const filteredIdeas = ideas.filter(i => {
     const matchesSearch = i.title?.toLowerCase().includes(searchQuery.toLowerCase()) || i.domain?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = ideaFilter === "all" || i.status === ideaFilter;
@@ -131,8 +136,6 @@ const AdminPortal = () => {
     { id: 'financials', label: 'Financials', icon: CreditCard },
     { id: 'tools', label: 'System Tools', icon: Settings },
   ];
-
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
   const handleToolAction = (tool: string) => {
     switch (tool) {
