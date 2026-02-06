@@ -14,7 +14,7 @@ import {
   Rocket, Plus, LogOut, MessageSquare, DollarSign, Lightbulb,
   User, ExternalLink, Pin, Search, Bell, ChevronRight,
   ArrowUpRight, Building2, Users, Target, CheckCircle2, X, ChevronLeft,
-  Activity, LucideIcon, ThumbsUp, ThumbsDown, Receipt
+  Activity, LucideIcon, ThumbsUp, ThumbsDown, Receipt, Share2
 } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
@@ -202,6 +202,7 @@ const VentureCard = ({
   idea: Idea;
   onClick: () => void;
   onRecordInvestment?: () => void;
+  onShare?: () => void;
   index?: number;
 }) => {
   const progressPercent = Math.min((idea.investment_received / idea.investment_needed) * 100, 100);
@@ -250,16 +251,32 @@ const VentureCard = ({
               {idea.title}
             </h3>
           </div>
-          <motion.div
-            initial={{ x: 0 }}
-            whileHover={{ x: 3 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0 ml-4" />
-          </motion.div>
+          <div className="flex items-center gap-1">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare && onShare();
+              }}
+              className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors z-10"
+              title="Copy public link"
+            >
+              <Share2 className="w-4 h-4" />
+            </motion.button>
+            <motion.div
+              initial={{ x: 0 }}
+              whileHover={{ x: 3 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
+            </motion.div>
+          </div>
         </div>
 
         <p className="text-sm text-slate-500 line-clamp-2 mb-4">{idea.description}</p>
+
+
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
@@ -1544,11 +1561,61 @@ const FounderDashboard = () => {
                             <VentureCard
                               key={idea.id}
                               idea={idea}
-                              onClick={() => setViewingIdea(idea)}
-                              onRecordInvestment={() => openRecordInvestmentModal(idea)}
                               index={index}
-                            />
-                          ))}
+                              onClick={() => {
+                                // If it's a draft, maybe go to edit? For now detailed view
+                                setViewingIdea(idea);
+                              }}
+                              onShare={() => {
+                                const url = `${window.location.origin}/idea/${idea.id}`;
+
+                                const copyToClipboard = async (text: string) => {
+                                  try {
+                                    if (navigator.clipboard && window.isSecureContext) {
+                                      await navigator.clipboard.writeText(text);
+                                      toast({
+                                        title: "Link copied!",
+                                        description: "Public link copied to clipboard.",
+                                      });
+                                    } else {
+                                      // Fallback for non-secure contexts (e.g. non-localhost IP usage)
+                                      const textArea = document.createElement("textarea");
+                                      textArea.value = text;
+                                      textArea.style.position = "fixed";
+                                      textArea.style.left = "-999999px";
+                                      textArea.style.top = "-999999px";
+                                      document.body.appendChild(textArea);
+                                      textArea.focus();
+                                      textArea.select();
+                                      try {
+                                        document.execCommand('copy');
+                                        toast({
+                                          title: "Link copied!",
+                                          description: "Public link copied to clipboard.",
+                                        });
+                                      } catch (err) {
+                                        console.error('Fallback: Oops, unable to copy', err);
+                                        toast({
+                                          title: "Copy failed",
+                                          description: "Could not copy link to clipboard.",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                      document.body.removeChild(textArea);
+                                    }
+                                  } catch (err) {
+                                    console.error('Async: Could not copy text: ', err);
+                                    toast({
+                                      title: "Copy failed",
+                                      description: "Could not copy link to clipboard.",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                };
+
+                                copyToClipboard(url);
+                              }}
+                            />))}
                         </motion.div>
                       ) : (
                         <motion.div

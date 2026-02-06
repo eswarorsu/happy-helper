@@ -81,6 +81,14 @@ const Auth = () => {
   const checkProfileAndRedirect = async (userId: string) => {
     console.log("🔍 Checking profile for user:", userId);
 
+    // Check for returnUrl
+    const returnUrl = searchParams.get("returnUrl") || searchParams.get("next");
+    if (returnUrl) {
+      console.log("↪️ Redirecting to returnUrl:", returnUrl);
+      navigate(returnUrl);
+      return;
+    }
+
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
