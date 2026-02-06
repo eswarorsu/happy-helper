@@ -262,6 +262,19 @@ CREATE POLICY "Users can view own investments"
     ON public.investment_records FOR SELECT 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
 
+-- 7. Admin Access (Global)
+-- Allow admins to view all data in critical tables
+DROP POLICY IF EXISTS "Admins can view all payments" ON public.payments;
+CREATE POLICY "Admins can view all payments" 
+    ON public.payments FOR SELECT 
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.user_id = auth.uid() 
+            AND profiles.is_admin = true
+        )
+    );
+
 -- 7. Ratings
 DROP POLICY IF EXISTS "Users can manage ratings" ON public.investor_ratings;
 CREATE POLICY "Users can manage ratings" 

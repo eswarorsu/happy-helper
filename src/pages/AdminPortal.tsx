@@ -103,7 +103,18 @@ const AdminPortal = () => {
   const combinedEvents = [
     ...users.filter(u => u.created_at).map(u => ({ id: u.id, type: 'user', title: 'New Registration', detail: `${u.name || 'Anonymous'} joined as ${u.user_type}`, time: new Date(u.created_at), color: 'indigo', icon: Users })),
     ...ideas.filter(i => i.created_at).map(i => ({ id: i.id, type: 'idea', title: 'Idea Submission', detail: `${i.title} by ${i.founder?.name || 'Unknown'}`, time: new Date(i.created_at), color: 'amber', icon: Lightbulb })),
-    ...payments.filter(p => p.status === 'success' && p.created_at).map(p => ({ id: p.id, type: 'payment', title: 'Payment Secured', detail: `₹${p.amount?.toLocaleString()} from ${p.profiles?.name || 'User'}`, time: new Date(p.created_at), color: 'emerald', icon: DollarSign }))
+    ...payments.filter(p => p.created_at).map(p => {
+      const payer = users.find(u => u.id === p.profile_id || u.user_id === p.user_id) || p.profiles;
+      return {
+        id: p.id,
+        type: 'payment',
+        title: 'Payment Secured',
+        detail: `₹${p.amount?.toLocaleString()} from ${payer?.name || 'Unknown User'} (${p.status})`,
+        time: new Date(p.created_at),
+        color: 'emerald',
+        icon: DollarSign
+      };
+    })
   ].sort((a, b) => {
     const timeA = a.time instanceof Date && !isNaN(a.time.getTime()) ? a.time.getTime() : 0;
     const timeB = b.time instanceof Date && !isNaN(b.time.getTime()) ? b.time.getTime() : 0;
@@ -283,7 +294,7 @@ const AdminPortal = () => {
                   {/* Stats Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                      { label: "Platform Revenue", value: `₹${payments.filter(p => (p.status || '').toLowerCase() === 'success').reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString()}`, icon: DollarSign, trend: "+12.5%", color: "indigo" },
+                      { label: "Platform Revenue", value: `₹${payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString()}`, icon: DollarSign, trend: "+12.5%", color: "indigo" },
                       { label: "Elite Investors", value: users.filter(u => u.user_type === 'investor').length, icon: TrendingUp, trend: "+3 this week", color: "emerald" },
                       { label: "Idea Pipeline", value: ideas.length, icon: Lightbulb, trend: "8 new", color: "amber" },
                       { label: "Success Rate", value: `${Math.round((ideas.filter(i => i.status === 'deal_done').length / (ideas.length || 1)) * 100)}%`, icon: Zap, trend: "Top 5%", color: "purple" }
@@ -321,7 +332,7 @@ const AdminPortal = () => {
                       </CardHeader>
                       <CardContent className="p-6 h-[380px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={payments.slice(0, 15).reverse().map(p => ({ date: format(new Date(p.created_at), 'MMM dd'), amount: Number(p.amount) }))}>
+                          <AreaChart data={payments.filter(p => p.created_at).slice(0, 15).reverse().map(p => ({ date: format(new Date(p.created_at), 'MMM dd'), amount: Number(p.amount) || 0 }))}>
                             <defs>
                               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
@@ -343,7 +354,7 @@ const AdminPortal = () => {
 
                     {/* Side Feed */}
                     <div className="col-span-12 lg:col-span-4 space-y-6">
-                      <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-full shadow-sm flex flex-col">
+                      <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-[500px] shadow-sm flex flex-col">
                         <CardHeader className="p-6 border-b border-slate-800/50">
                           <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
                             Platform Activity
@@ -505,8 +516,8 @@ const AdminPortal = () => {
                         <thead>
                           <tr className="bg-slate-500/5 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-800">
                             <th className="py-6 px-8">Transaction Hash</th>
-                            <th className="py-6 px-8">Account Owner</th>
-                            <th className="py-6 px-8">Volume (INR)</th>
+                            <th className="py-6 px-8">User Name</th>
+                            <th className="py-6 px-8">Amount (INR)</th>
                             <th className="py-6 px-8">Timestamp</th>
                             <th className="py-6 px-8 text-right">Status</th>
                           </tr>
@@ -522,8 +533,15 @@ const AdminPortal = () => {
                                 {p.razorpay_payment_id || p.razorpay_order_id?.substring(0, 16)}
                               </td>
                               <td className="py-5 px-8">
-                                <p className="text-xs font-bold text-slate-200">{p.profiles?.name}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">{p.profiles?.email}</p>
+                                {(() => {
+                                  const payer = users.find(u => u.id === p.profile_id || u.user_id === p.user_id) || p.profiles;
+                                  return (
+                                    <>
+                                      <p className="text-xs font-bold text-slate-200">{payer?.name || 'Unknown User'}</p>
+                                      <p className="text-[10px] text-slate-500 font-medium">{payer?.email || 'No Email'}</p>
+                                    </>
+                                  );
+                                })()}
                               </td>
                               <td className="py-5 px-8 font-black text-white text-sm">₹{p.amount?.toLocaleString()}</td>
                               <td className="py-5 px-8 text-xs text-slate-500 font-medium">{format(new Date(p.created_at), 'dd MMM, HH:mm')}</td>
