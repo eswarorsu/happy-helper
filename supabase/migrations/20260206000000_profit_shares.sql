@@ -44,7 +44,7 @@ ALTER TABLE public.profit_shares ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own profit shares" ON public.profit_shares;
 CREATE POLICY "Users can view own profit shares" 
     ON public.profit_shares FOR SELECT 
-    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+    USING (auth.uid() = founder_id OR auth.uid() = investor_id);
 
 -- Only founders can insert profit shares
 DROP POLICY IF EXISTS "Founders can insert profit shares" ON public.profit_shares;

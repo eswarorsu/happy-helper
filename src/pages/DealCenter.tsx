@@ -149,6 +149,10 @@ const DealCenter = () => {
             if (error) throw error;
 
             toast({ title: "Success! 🎉", description: `₹${parseFloat(profitAmount).toLocaleString()} profit shared with investor` });
+
+            // Send chat notification
+            await sendProfitNotification(parseFloat(profitAmount), profitDescription || `Profit share on ${new Date().toLocaleDateString()}`);
+
             setProfitAmount("");
             setProfitDescription("");
             fetchDealData(); // Refresh data
@@ -157,6 +161,23 @@ const DealCenter = () => {
             toast({ title: "Error", description: "Failed to record profit share", variant: "destructive" });
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    // Helper to send system message
+    const sendProfitNotification = async (amount: number, description: string) => {
+        try {
+            // Dynamically import to avoid circular dependencies if any, or just use the imported function
+            const { sendMessage, connectFirebase } = await import("@/lib/firebase");
+            await connectFirebase();
+
+            await sendMessage(chatRequestId!, {
+                sender_id: data!.founder.id, // Sent by founder
+                content: `💰 Profit Shared: ₹${amount.toLocaleString()} - ${description}`,
+                type: 'text'
+            });
+        } catch (error) {
+            console.error("Failed to send notification:", error);
         }
     };
 
