@@ -118,32 +118,6 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
     e.preventDefault();
     if (!newMessage.trim() || isLoading) return;
 
-    // Security Check: Block Contact Details, Socials, & Links
-    const patterns = {
-      phone: /(\+?91|0)?[ -]?\d{3}[ -]?\d{3}[ -]?\d{4}|\b\d{10}\b/g,
-      email: /\b[A-Za-z0-9._%+-]+(?:@|\[at\]|\(at\))[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/gi,
-      social: /(?:instagram|insta|ig|telegram|tele|tg|whatsapp|wa|snapchat|snap|linkedin|twitter)\s*[:@-]?\s*[\w.]+/i,
-      handle: /(?:^|\s)@[a-zA-Z0-9_.]+/g,
-      link: /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(\.com|\.in|\.net|\.org|\.me|\.io)/i,
-      obfuscated: /(dot\s*com|at\s*the\s*rate|ph\s*no|call\s*me)/i
-    };
-
-    if (
-      patterns.phone.test(newMessage) ||
-      patterns.email.test(newMessage) ||
-      patterns.social.test(newMessage) ||
-      patterns.handle.test(newMessage) ||
-      patterns.link.test(newMessage) ||
-      patterns.obfuscated.test(newMessage)
-    ) {
-      toast({
-        title: "Security Alert 🔒",
-        description: "Sharing external contact details, social handles, or links is restricted to keep our community safe.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       await connectFirebase();
