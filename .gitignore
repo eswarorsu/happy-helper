@@ -23,10 +23,23 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment Variables
+# Environment Variables & Secrets (API Keys, Database Credentials, etc.)
 .env
-.env.*
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
 backend/.env
+backend/.env.local
+backend/.env.production
+backend/.env.development
+
+# Secret files
+*.secret
+*.key
+*.pem
+secrets/
 
 
 .agent
