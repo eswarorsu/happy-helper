@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, Wallet, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const VALID_COUPONS = ["FREEIDEA", "INNOVATE50"];
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://happy-helper.onrender.com";
+// const VALID_COUPONS = ["FREEIDEA", "INNOVATE50"]; // Deprecated in favor of DB check
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -42,6 +43,18 @@ const Payment = () => {
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
+    // Helper function to get auth headers
+    const getAuthHeaders = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+            throw new Error("Not authenticated");
+        }
+        return {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`
+        };
+    };
+
     const handleVerify = () => {
         if (!upiId.includes("@")) return;
         setIsVerifying(true);
@@ -60,12 +73,6 @@ const Payment = () => {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const code = couponCode.toUpperCase().trim();
-
-        if (!VALID_COUPONS.includes(code)) {
-            setIsValidatingCoupon(false);
-            toast({ title: "Invalid Coupon", description: "This coupon code is not valid.", variant: "destructive" });
-            return;
-        }
 
         try {
             // Call RPC to check limit and redeem
@@ -108,7 +115,7 @@ const Payment = () => {
                 }
             } else {
                 setIsValidatingCoupon(false);
-                toast({ title: "Limit Reached", description: "This coupon has reached its global usage limit.", variant: "destructive" });
+                toast({ title: "Invalid or Limit Reached", description: "This coupon is invalid or has reached its usage limit.", variant: "destructive" });
             }
         } catch (error) {
             console.error(error);
@@ -117,20 +124,23 @@ const Payment = () => {
         }
     };
 
+    // SEC-002 FIX: Payment now includes auth headers
     const handlePayment = async () => {
         if (!isVerified) return;
         setIsProcessing(true);
 
         try {
-            const res = await fetch("https://happy-helper.onrender.com/api/payment/create-order", {
+            const headers = await getAuthHeaders();
+
+            const res = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify({ amount: 499 }),
             });
 
             if (!res.ok) {
                 const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to create order on server");
+                throw new Error(errorData.message || "Failed to create order");
             }
 
             const order = await res.json();
@@ -152,31 +162,38 @@ const Payment = () => {
                 description: "Founder Access Plan",
                 order_id: order.id,
                 handler: async function (response: any) {
-                    const verifyRes = await fetch("https://happy-helper.onrender.com/api/payment/verify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(response),
-                    });
+                    try {
+                        const verifyHeaders = await getAuthHeaders();
 
-                    const result = await verifyRes.json();
+                        const verifyRes = await fetch(`${BACKEND_URL}/api/payment/verify`, {
+                            method: "POST",
+                            headers: verifyHeaders,
+                            body: JSON.stringify(response),
+                        });
 
-                    if (result.success) {
-                        const { data: { session } } = await supabase.auth.getSession();
-                        if (session?.user) {
-                            await supabase.from("payments").insert({
-                                user_id: session.user.id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                amount: 499,
-                                status: "success",
-                                verified_at: new Date().toISOString()
-                            });
+                        const result = await verifyRes.json();
+
+                        if (result.success) {
+                            const { data: { session } } = await supabase.auth.getSession();
+                            if (session?.user) {
+                                await supabase.from("payments").insert({
+                                    user_id: session.user.id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: 499,
+                                    status: "success",
+                                    verified_at: new Date().toISOString()
+                                });
+                            }
+                            toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
+                            navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
+                        } else {
+                            toast({ title: "Payment Failed", description: "Verification failed", variant: "destructive" });
                         }
-                        toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
-                        navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
-                    } else {
-                        toast({ title: "Payment Failed", description: "Verification failed", variant: "destructive" });
+                    } catch (error) {
+                        console.error("Payment verification error:", error);
+                        toast({ title: "Verification Error", description: "Please contact support", variant: "destructive" });
                     }
                 },
                 theme: { color: "#0f172a" },
@@ -186,7 +203,12 @@ const Payment = () => {
             razorpay.open();
             setIsProcessing(false);
         } catch (error) {
-            toast({ title: "Payment Error", description: "Something went wrong", variant: "destructive" });
+            console.error("Payment error:", error);
+            toast({
+                title: "Payment Error",
+                description: error instanceof Error ? error.message : "Something went wrong",
+                variant: "destructive"
+            });
             setIsProcessing(false);
         }
     };

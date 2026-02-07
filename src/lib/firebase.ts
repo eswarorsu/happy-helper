@@ -62,7 +62,7 @@ export const sendMessage = async (chatId: string, message: Omit<Message, 'id' | 
 export const subscribeToChat = (chatId: string, callback: (messages: Message[]) => void) => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
   console.log("Firebase: Subscribing to chat", chatId);
-  
+
   const listener = onValue(messagesRef, (snapshot: DataSnapshot) => {
     const data = snapshot.val();
     const messages: Message[] = [];
@@ -85,7 +85,7 @@ export const subscribeToChat = (chatId: string, callback: (messages: Message[]) 
   }, (error) => {
     console.error("Firebase: Subscription error for chat", chatId, error);
   });
-  
+
   return () => {
     console.log("Firebase: Unsubscribing from chat", chatId);
     off(messagesRef, 'value', listener);
@@ -99,10 +99,10 @@ export const markMessageAsRead = async (chatId: string, messageId: string) => {
 
 export const getUnreadCount = async (chatId: string, currentUserId: string): Promise<number> => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
-  
+
   try {
     const snapshot = await get(messagesRef);
-    
+
     if (!snapshot.exists()) return 0;
 
     let count = 0;
@@ -122,14 +122,14 @@ export const getUnreadCount = async (chatId: string, currentUserId: string): Pro
 
 // Subscribe to unread message count changes in real-time
 export const subscribeToUnreadCount = (
-  chatId: string, 
-  currentUserId: string, 
-  callback: (count: number) => void
+  chatId: string,
+  currentUserId: string,
+  callback: (count: number, lastMessage?: any) => void
 ) => {
   const messagesRef = ref(db, `chats/${chatId}/messages`);
-  
+
   console.log(`[Firebase] Setting up unread count subscription for chat ${chatId}, userId: ${currentUserId}`);
-  
+
   const listener = onValue(messagesRef, (snapshot: DataSnapshot) => {
     if (!snapshot.exists()) {
       console.log(`[Firebase] No messages in chat ${chatId}`);
@@ -146,20 +146,16 @@ export const subscribeToUnreadCount = (
         count++;
       }
     });
-    
+
+    const lastMessage = allMessages.length > 0 ? allMessages[allMessages.length - 1] : undefined;
+
     console.log(`[Firebase] Unread count for chat ${chatId}:`, {
       totalMessages: allMessages.length,
       unreadCount: count,
-      currentUserId,
-      messages: allMessages.map(m => ({
-        id: m.id,
-        sender: m.sender_id,
-        isRead: m.is_read,
-        content: m.content?.substring(0, 20)
-      }))
+      lastMessageContent: lastMessage?.content
     });
-    
-    callback(count);
+
+    callback(count, lastMessage);
   });
 
   return () => {

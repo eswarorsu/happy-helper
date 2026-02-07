@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import IdeaDetailPage from "./pages/IdeaDetailPage";
 import Marketplace from "./pages/Marketplace";
 import Transactions from "./pages/Transactions";
+import DealCenter from "./pages/DealCenter";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/idea/:id" element={<IdeaDetailPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/transactions" element={<Transactions />} />
+          <Route path="/deal-center/:chatRequestId" element={<DealCenter />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

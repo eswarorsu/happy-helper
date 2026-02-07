@@ -29,6 +29,7 @@ interface Transaction {
     idea?: { title: string; domain: string };
     investor?: { name: string; avatar_url: string | null };
     founder?: { name: string; avatar_url: string | null };
+    type: "investment" | "profit_share";
 }
 
 interface Profile {
@@ -121,9 +122,59 @@ const Transactions = () => {
                     transaction_date: inv.transaction_date || inv.created_at,
                     idea: ideaData || undefined,
                     investor: investorData || undefined,
-                    founder: founderData || undefined
+                    founder: founderData || undefined,
+                    type: "investment"
                 });
             }
+
+            // Fetch profit shares
+            const { data: profitData, error: profitError } = await supabase
+                .from("profit_shares")
+                .select("*")
+                .eq(filterColumn, profileData.id)
+                .order("created_at", { ascending: false });
+
+            if (!profitError && profitData) {
+                for (const profit of profitData) {
+                    // Fetch idea info
+                    const { data: ideaData } = await supabase
+                        .from("ideas")
+                        .select("title, domain")
+                        .eq("id", profit.idea_id)
+                        .single();
+
+                    // Fetch investor/founder info
+                    const { data: investorData } = await supabase
+                        .from("profiles")
+                        .select("name, avatar_url")
+                        .eq("id", profit.investor_id)
+                        .single();
+
+                    const { data: founderData } = await supabase
+                        .from("profiles")
+                        .select("name, avatar_url")
+                        .eq("id", profit.founder_id)
+                        .single();
+
+                    enrichedTransactions.push({
+                        ...profit,
+                        status: "confirmed", // Profits are always confirmed for now
+                        payment_method: "bank_transfer",
+                        transaction_date: profit.created_at,
+                        notes: profit.description,
+                        idea: ideaData || undefined,
+                        investor: investorData || undefined,
+                        founder: founderData || undefined,
+                        type: "profit_share",
+                        chat_request_id: profit.chat_request_id
+                    });
+                }
+            }
+
+            // Sort mixed transactions by date
+            enrichedTransactions.sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
 
             setTransactions(enrichedTransactions);
             setIsLoading(false);
@@ -341,7 +392,13 @@ const Transactions = () => {
                                                             <h4 className="text-sm font-semibold text-slate-900 truncate">
                                                                 {tx.idea?.title || "Unknown Venture"}
                                                             </h4>
-                                                            {getStatusBadge(tx.status)}
+                                                            {tx.type === "profit_share" ? (
+                                                                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                                                                    <TrendingUp className="w-3 h-3 mr-1" /> Profit Share
+                                                                </Badge>
+                                                            ) : (
+                                                                getStatusBadge(tx.status)
+                                                            )}
                                                         </div>
                                                         <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
                                                             <span className="flex items-center gap-1">
@@ -361,12 +418,17 @@ const Transactions = () => {
 
                                                     {/* Amount */}
                                                     <div className="text-right shrink-0">
-                                                        <p className={`text-lg font-bold ${profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600"
+                                                        <p className={`text-lg font-bold ${tx.type === "profit_share"
+                                                                ? (profile?.user_type === "investor" ? "text-emerald-600" : "text-red-600")
+                                                                : (profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600")
                                                             }`}>
-                                                            {profile?.user_type === "investor" ? "-" : "+"}₹{Number(tx.amount).toLocaleString()}
+                                                            {tx.type === "profit_share"
+                                                                ? (profile?.user_type === "investor" ? "+" : "-")
+                                                                : (profile?.user_type === "investor" ? "-" : "+")
+                                                            }₹{Number(tx.amount).toLocaleString()}
                                                         </p>
                                                         <p className="text-[10px] text-slate-400 uppercase tracking-wider">
-                                                            {tx.payment_method || "Bank Transfer"}
+                                                            {tx.notes || tx.payment_method || "Bank Transfer"}
                                                         </p>
                                                     </div>
                                                 </div>

@@ -40,6 +40,14 @@ export default function IdeaDetailPage() {
         if (!id) return;
 
         const fetchIdea = async () => {
+            // Check authentication
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                // Redirect to auth with return URL
+                navigate(`/auth?returnUrl=${encodeURIComponent(location.pathname)}`);
+                return;
+            }
+
             // Fetch idea with founder profile
             const { data: ideaData, error } = await supabase
                 .from("ideas")
@@ -130,10 +138,10 @@ export default function IdeaDetailPage() {
                         <Badge
                             variant="outline"
                             className={`${stage.variant === "running"
-                                    ? "text-green-700 border-green-300"
-                                    : stage.variant === "early"
-                                        ? "text-blue-700 border-blue-300"
-                                        : "text-slate-600 border-slate-300"
+                                ? "text-green-700 border-green-300"
+                                : stage.variant === "early"
+                                    ? "text-blue-700 border-blue-300"
+                                    : "text-slate-600 border-slate-300"
                                 }`}
                         >
                             {stage.label}
