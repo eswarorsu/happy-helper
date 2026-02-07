@@ -172,6 +172,52 @@ CREATE TABLE IF NOT EXISTS public.payments (
 );
 
 -- ==========================================
+-- 8. COUPONS TABLE
+-- Tracks usage of discount codes.
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.coupons (
+    code TEXT PRIMARY KEY,
+    usage_count INTEGER DEFAULT 0,
+    max_limit INTEGER DEFAULT 5
+);
+
+-- Insert default coupons if not exist
+INSERT INTO public.coupons (code, max_limit) VALUES 
+('FREEIDEA', 5), 
+('INNOVATE50', 5)
+ON CONFLICT (code) DO NOTHING;
+
+-- RPC to redeem coupon securely
+CREATE OR REPLACE FUNCTION redeem_coupon(coupon_code TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    current_usage INTEGER;
+    limit_val INTEGER;
+BEGIN
+    SELECT usage_count, max_limit INTO current_usage, limit_val
+    FROM public.coupons
+    WHERE code = coupon_code;
+    
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+    
+    IF current_usage >= limit_val THEN
+        RETURN FALSE;
+    END IF;
+    
+    UPDATE public.coupons
+    SET usage_count = usage_count + 1
+    WHERE code = coupon_code;
+    
+    RETURN TRUE;
+END;
+$$;
+
+-- ==========================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ==========================================
 
@@ -183,6 +229,7 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.investment_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.investor_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
 
 -- 1. Profiles
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
@@ -280,3 +327,8 @@ DROP POLICY IF EXISTS "Users can manage ratings" ON public.investor_ratings;
 CREATE POLICY "Users can manage ratings" 
     ON public.investor_ratings FOR ALL 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+-- 8. Coupons
+DROP POLICY IF EXISTS "Public can view coupons" ON public.coupons;
+CREATE POLICY "Public can view coupons" 
+    ON public.coupons FOR SELECT USING (true);

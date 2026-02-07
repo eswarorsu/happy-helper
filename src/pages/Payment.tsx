@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, Wallet, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const VALID_COUPONS = ["FREEIDEA", "INNOVESTOR100", "SKIP2026"];
+const VALID_COUPONS = ["FREEIDEA", "INNOVATE50"];
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -55,36 +55,65 @@ const Payment = () => {
     const handleValidateCoupon = async () => {
         if (!couponCode.trim()) return;
         setIsValidatingCoupon(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const isValid = VALID_COUPONS.includes(couponCode.toUpperCase().trim());
-        setIsCouponValid(isValid);
-        setIsValidatingCoupon(false);
+        // Optional: Artificial delay for UX
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        if (isValid) {
-            toast({ title: "Coupon Applied! 🎉", description: "Payment skipped. Redirecting to submit your idea..." });
-            setIsProcessing(true);
+        const code = couponCode.toUpperCase().trim();
 
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    await supabase.from("payments").insert({
-                        user_id: session.user.id,
-                        razorpay_order_id: `COUPON_${couponCode.toUpperCase()}_${Date.now()}`,
-                        razorpay_payment_id: `FREE_${Date.now()}`,
-                        razorpay_signature: "COUPON_REDEMPTION",
-                        amount: 0,
-                        status: "success",
-                        verified_at: new Date().toISOString()
-                    });
-                }
-                navigate("/submit-idea?coupon=" + couponCode.toUpperCase());
-            } catch (error) {
-                toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
-                setIsProcessing(false);
-            }
-        } else {
+        if (!VALID_COUPONS.includes(code)) {
+            setIsValidatingCoupon(false);
             toast({ title: "Invalid Coupon", description: "This coupon code is not valid.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            // Call RPC to check limit and redeem
+            // @ts-ignore
+            const { data: success, error } = await supabase.rpc('redeem_coupon', { coupon_code: code });
+
+            if (error) {
+                console.error("Coupon RPC Error:", error);
+                // Fallback for development/testing if RPC is missing
+                toast({ title: "System Error", description: "Could not verify coupon limit. Please contact support.", variant: "destructive" });
+                setIsValidatingCoupon(false);
+                return;
+            }
+
+            if (success) {
+                setIsCouponValid(true);
+                setIsValidatingCoupon(false);
+                toast({ title: "Coupon Applied! 🎉", description: "Access granted! Redirecting..." });
+                setIsProcessing(true);
+
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.user) {
+                        // Insert ONE payment record for the successful redemption
+                        await supabase.from("payments").insert({
+                            user_id: session.user.id,
+                            razorpay_order_id: `COUPON_${code}_${Date.now()}`,
+                            razorpay_payment_id: `FREE_${Date.now()}`,
+                            razorpay_signature: "COUPON_REDEMPTION",
+                            amount: 0,
+                            status: "success",
+                            verified_at: new Date().toISOString()
+                        });
+                    }
+                    navigate("/submit-idea?coupon=" + code);
+                } catch (err) {
+                    console.error("Payment Record Error:", err);
+                    toast({ title: "Error", description: "Failed to record transaction.", variant: "destructive" });
+                    setIsProcessing(false);
+                }
+            } else {
+                setIsValidatingCoupon(false);
+                toast({ title: "Limit Reached", description: "This coupon has reached its global usage limit.", variant: "destructive" });
+            }
+        } catch (error) {
+            console.error(error);
+            setIsValidatingCoupon(false);
+            toast({ title: "Error", description: "Something went wrong validating the coupon.", variant: "destructive" });
         }
     };
 
