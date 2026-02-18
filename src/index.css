@@ -9,6 +9,12 @@
    ═══════════════════════════════════════════════════════ */
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+    min-height: 100%;
+    width: 100%;
+  }
+
   :root {
     /* INNOVESTOR Brand Colors */
     --brand-yellow: 48 97% 47%; /* #EFBF04 */

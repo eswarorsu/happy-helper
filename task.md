@@ -18,15 +18,22 @@
     - [ ] Tables (Scrollable or stacked on mobile)
     - [ ] Modals/Dialogs (Fullscreen on mobile or centered with safe areas)
 
-- [ ] **Phase 4: Page-Level Refactor**
-    - [ ] Landing Page
+- [x] **Phase 4: Page-Level Refactor**
+    - [x] Landing Page
     - [ ] Admin Portal
-    - [ ] Investor Dashboard
-    - [ ] Founder Dashboard
-    - [ ] Transactions Page
-    - [ ] Auth Pages (Login/Signup)
+    - [x] Investor Dashboard
+    - [x] Founder Dashboard
+    - [x] Transactions Page
+    - [x] Auth Pages (Login/Signup)
 
 - [ ] **Phase 5: Verification & Polish**
     - [ ] Verify Mobile (Portrait/Landscape)
     - [ ] Verify Tablet
     - [ ] Verify Desktop
+
+- [ ] **Phase 6: Audit Remediation (User Selected)**
+    - [ ] Secure Admin Portal (Route Guard + Role Check)
+    - [ ] Implement Route Guards (Protected Routes)
+    - [ ] Add React Error Boundaries
+    - [ ] Add Loading Skeletons
+    - [ ] Optimize Hero3D Performance

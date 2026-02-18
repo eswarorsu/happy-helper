@@ -503,22 +503,22 @@ const Landing = () => {
   ];
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="bg-black min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* ================================================================ */}
       {/* NAVBAR - Light theme header */}
       {/* ================================================================ */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80'}`}
-        style={{ backdropFilter: 'blur(12px)' }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navScrolled ? 'bg-white/95 shadow-md py-3' : 'bg-transparent py-4'}`}
+        style={{ backdropFilter: navScrolled ? 'blur(12px)' : 'none' }}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
           {/* Logo */}
           <Link to="/">
-            <Logo showText />
+            <Logo showText light={!navScrolled} />
           </Link>
 
           {/* Center Nav */}
-          <nav className="hidden lg:flex items-center gap-1 px-3 py-2 rounded-full bg-gray-100/80">
+          <nav className={`hidden lg:flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${navScrolled ? 'bg-gray-100/80' : 'bg-white/10 backdrop-blur-md border border-white/10'}`}>
             {[
               { label: 'How it works', href: '#how-it-works' },
               { label: 'Features', href: '#features' },
@@ -529,7 +529,7 @@ const Landing = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-all hover:bg-white/60 text-gray-600 hover:text-brand-yellow"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${navScrolled ? 'hover:bg-white/60 text-gray-600 hover:text-brand-yellow' : 'text-white/90 hover:bg-white/10 hover:text-white'}`}
               >
                 {item.label}
               </a>
@@ -539,7 +539,7 @@ const Landing = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-3">
             <Link to="/auth?mode=login" className="hidden sm:block">
-              <Button variant="ghost" className="text-sm font-medium rounded-full px-5 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+              <Button variant="ghost" className={`text-sm font-medium rounded-full px-5 transition-colors ${navScrolled ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' : 'text-white hover:bg-white/10 hover:text-white'}`}>
                 Login
               </Button>
             </Link>
@@ -550,11 +550,11 @@ const Landing = () => {
             </Link>
             {/* Mobile Hamburger */}
             <button
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className={`lg:hidden p-2 rounded-xl transition-colors ${navScrolled ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6 text-gray-900" /> : <Menu className="w-6 h-6 text-gray-900" />}
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -597,7 +597,7 @@ const Landing = () => {
       {/* 3D HERO SECTION */}
       {/* ================================================================ */}
       <Hero3D>
-        <div className="max-w-6xl mx-auto px-6 pt-32 pb-20 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-32 pb-10 sm:pb-20 text-center">
           {/* Badge with glassmorphism */}
           <div
             ref={(el) => {
@@ -613,7 +613,7 @@ const Landing = () => {
 
           {/* Headline with 3D text effect */}
           <h1
-            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8 leading-[1.05]"
+            className="text-2xl sm:text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5 sm:mb-8 leading-[1.05]"
             style={{
               textShadow: '0 0 60px rgba(239, 191, 4, 0.3)'
             }}
@@ -651,7 +651,7 @@ const Landing = () => {
 
           {/* Subtitle */}
           <p
-            className="text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed text-muted-foreground"
+            className="text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed text-muted-foreground"
           >
             INNOVESTOR bridges the gap between visionary founders and strategic investors.
             Showcase your ideas, discover opportunities, and make deals - all in one platform.
@@ -659,13 +659,13 @@ const Landing = () => {
 
           {/* CTAs with enhanced hover effects */}
           <div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-20 w-full px-2"
           >
             <Link to="/auth?mode=register">
               <div className="alive-float"
               >
                 <Button
-                  className="text-base font-semibold rounded-full px-10 py-6 text-brand-charcoal bg-brand-yellow hover:scale-105 transition-all duration-300 shadow-xl shadow-brand-yellow/30"
+                  className="text-sm sm:text-base font-semibold rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto text-brand-charcoal bg-brand-yellow hover:scale-105 transition-all duration-300 shadow-xl shadow-brand-yellow/30"
                 >
                   Get Started - It's Free
                   <ChevronRight className="ml-2 w-5 h-5" />
@@ -677,7 +677,7 @@ const Landing = () => {
               >
                 <Button
                   variant="outline"
-                  className="bg-transparent/10 backdrop-blur-sm text-base font-medium rounded-full px-10 py-6 transition-all duration-300 hover:bg-white/10"
+                  className="bg-transparent/10 backdrop-blur-sm text-sm sm:text-base font-medium rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all duration-300 hover:bg-white/10"
                   style={{
                     borderColor: 'rgba(255,255,255,0.2)',
                     color: '#CBD5E1',
@@ -692,7 +692,7 @@ const Landing = () => {
 
           {/* Trust Indicators with glass effect */}
           <div
-            className="flex flex-wrap items-center justify-center gap-6 text-sm"
+            className="flex flex-wrap items-center justify-center gap-2 sm:gap-6 text-xs sm:text-sm"
           >
             {[
               { icon: Shield, text: "Secure & Encrypted" },
@@ -720,20 +720,20 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* HOW IT WORKS */}
       {/* ================================================================ */}
-      <section id="how-it-works" className="py-28 px-6 bg-background">
+      <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6 bg-background">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-20">
+          <div className="text-center mb-10 sm:mb-16">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               How It Works
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               From idea to investment<br />in four simple steps
             </h2>
           </div>
 
           {/* Steps */}
-          <div className="grid md:grid-cols-4 gap-12 relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 relative">
             {/* Connector Line (desktop only) */}
             <div className="hidden md:block absolute top-10 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-transparent via-brand-yellow/40 to-transparent" />
 
@@ -756,18 +756,18 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* FOR FOUNDERS */}
       {/* ================================================================ */}
-      <section id="for-founders" className="py-28 px-6 bg-black">
+      <section id="for-founders" className="py-12 sm:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
             {/* Left Content */}
             <div>
               <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
                 For Founders
               </span>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight text-white">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 leading-tight text-white">
                 Turn your vision<br />into <span className="text-brand-yellow">reality</span>
               </h2>
-              <p className="text-lg mb-10 leading-relaxed text-muted-foreground">
+              <p className="text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed text-muted-foreground">
                 Stop cold-emailing investors. INNOVESTOR puts your ideas directly in front of verified
                 investors who are actively looking for opportunities like yours.
               </p>
@@ -841,9 +841,9 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* FOR INVESTORS */}
       {/* ================================================================ */}
-      <section id="for-investors" className="py-28 px-6 text-white bg-brand-charcoal">
+      <section id="for-investors" className="py-12 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
             {/* Left Visual - Professional Dark Dashboard */}
             <div className="order-2 lg:order-1 relative">
               <Card className="p-6 bg-primary border-2 border-brand-yellow shadow-sm reveal-on-scroll reveal-item alive-float-slow">
@@ -915,10 +915,10 @@ const Landing = () => {
               <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
                 For Investors
               </span>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 leading-tight">
                 Discover the next<br /><span className="text-brand-yellow">big thing</span>
               </h2>
-              <p className="text-lg mb-10 leading-relaxed text-slate-300">
+              <p className="text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed text-slate-300">
                 Stop sifting through noise. INNOVESTOR delivers curated, admin-verified startup
                 opportunities matched to your investment interests.
               </p>
@@ -937,18 +937,18 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* PLATFORM FEATURES */}
       {/* ================================================================ */}
-      <section id="features" className="py-28 px-6 bg-background">
+      <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-background">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-8 sm:mb-14">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               Platform Features
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Everything you need,<br />nothing you don't
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="reveal-on-scroll reveal-item" data-direction="left"><PlatformCard3D icon={Shield} title="Bank-Grade Security" description="End-to-end encryption, Row Level Security, and admin-verified accounts keep your data safe." delay={0} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="right"><PlatformCard3D icon={MessageSquare} title="Real-time Chat" description="Instant messaging with read receipts, typing indicators, and deal-specific conversation threads." delay={100} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="left"><PlatformCard3D icon={Zap} title="Instant Notifications" description="Stay in the loop with real-time alerts for new requests, investments, and profit updates." delay={200} /></div>
@@ -962,14 +962,14 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* STATS */}
       {/* ================================================================ */}
-      <section className="py-28 px-6 text-white bg-brand-charcoal">
+      <section className="py-10 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
               Growing <span className="text-brand-yellow">every day</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8">
             <div className="reveal-on-scroll reveal-item" data-direction="left"><AnimatedCounter3D target={5} label="Colleges Registered" icon={Building2} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="right"><AnimatedCounter3D target={30} label="Student Founders" icon={GraduationCap} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="left"><AnimatedCounter3D target={10} label="Professionals" icon={Briefcase} /></div>
@@ -981,18 +981,18 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* TESTIMONIALS */}
       {/* ================================================================ */}
-      <section className="py-28 px-6 bg-brand-charcoal">
+      <section className="py-10 sm:py-20 px-4 sm:px-6 bg-brand-charcoal">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 sm:mb-12">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               Testimonials
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
               What our community says
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="reveal-on-scroll reveal-item" data-direction="left">
               <TestimonialCard3D
                 name="Sarah Jenkins"
@@ -1024,12 +1024,12 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* COLLEGE MARQUEE */}
       {/* ================================================================ */}
-      <section className="py-20 overflow-hidden bg-background">
-        <div className="text-center mb-12 px-6">
+      <section className="py-10 sm:py-16 overflow-hidden bg-background">
+        <div className="text-center mb-6 sm:mb-10 px-4 sm:px-6">
           <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
             Our Network
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             Students from 100+ colleges
           </h2>
         </div>
@@ -1056,13 +1056,13 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* FAQ */}
       {/* ================================================================ */}
-      <section id="faq" className="py-28 px-6 bg-black">
+      <section id="faq" className="py-10 sm:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 sm:mb-12">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               FAQ
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
               Got questions?
             </h2>
           </div>
@@ -1084,29 +1084,29 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* CTA SECTION */}
       {/* ================================================================ */}
-      <section className="relative py-28 px-6 text-center overflow-hidden bg-brand-charcoal">
+      <section className="relative py-10 sm:py-20 px-4 sm:px-6 text-center overflow-hidden bg-brand-charcoal">
         {/* Background glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px] parallax" style={{ background: 'rgba(239, 191, 4, 0.08)' }} />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto reveal-on-scroll reveal-item">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
+          <h2 className="text-2xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white mb-4 sm:mb-6">
             Ready to build the future?
           </h2>
-          <p className="text-lg mb-10 max-w-xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg mb-6 sm:mb-10 max-w-xl mx-auto text-muted-foreground">
             Join hundreds of founders and investors already using INNOVESTOR
             to connect, invest, and grow together.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-sm sm:max-w-none mx-auto">
             <Link to="/auth?mode=register">
-              <Button className="text-base font-semibold rounded-full px-10 py-6 bg-brand-yellow text-brand-charcoal hover:scale-105 transition-all shadow-xl shadow-brand-yellow/30">
+              <Button className="text-sm sm:text-base font-semibold rounded-full px-8 sm:px-10 py-5 sm:py-6 w-full sm:w-auto bg-brand-yellow text-brand-charcoal hover:scale-105 transition-all shadow-xl shadow-brand-yellow/30">
                 Get Started for Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link to="/auth?mode=login">
-              <Button variant="outline" className="text-base font-medium rounded-full px-10 py-6 transition-all hover:bg-white/10 border-white/20 text-white/60">
+              <Button variant="outline" className="text-sm sm:text-base font-medium rounded-full px-8 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all hover:bg-white/10 border-white/20 text-white/60">
                 I already have an account
               </Button>
             </Link>
@@ -1118,9 +1118,9 @@ const Landing = () => {
       {/* FOOTER */}
       {/* ================================================================ */}
       <footer style={{ background: 'rgb(0, 0, 0)' }}>
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-10">
           {/* Main Footer */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
             {/* Company */}
             <div>
               <div className="flex items-center gap-2.5 mb-5">

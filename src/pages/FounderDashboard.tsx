@@ -180,8 +180,8 @@ const MetricCard = ({
         >
             <motion.div variants={cardHoverVariants}>
                 <Card className="rounded-2xl border-border/60 bg-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
+                    <CardContent className="p-3 sm:p-6">
+                        <div className="flex items-start justify-between mb-2 sm:mb-4">
                             <motion.div
                                 className={`p-3 rounded-xl ${accentStyles[accentColor]}`}
                                 whileHover={{ scale: 1.05 }}
@@ -204,7 +204,7 @@ const MetricCard = ({
                         </div>
                         <div>
                             <motion.p
-                                className="text-3xl font-black text-foreground tracking-tight"
+                                className="text-xl sm:text-3xl font-black text-foreground tracking-tight"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.2 + index * 0.05 }}
@@ -1290,10 +1290,12 @@ const FounderDashboard = () => {
                             </Popover>
                         </div>
                         {profile?.is_approved && (
-                            <ActivityTimerBadge
-                                profileId={profile?.id}
-                                isApproved={profile?.is_approved}
-                            />
+                            <div className="hidden md:block">
+                                <ActivityTimerBadge
+                                    profileId={profile?.id}
+                                    isApproved={profile?.is_approved}
+                                />
+                            </div>
                         )}
                         <div className="h-8 w-px bg-border/60 mx-2" />
                         <Popover>
@@ -1448,14 +1450,14 @@ const FounderDashboard = () => {
 
                 {/* MAIN CONTENT */}
                 <main className={`flex-1 overflow-y-auto bg-background transition-all duration-300 ${selectedChat ? "lg:mr-96" : ""}`}>
-                    <motion.div className="max-w-[1600px] mx-auto p-4 md:p-8" variants={containerVariants} initial="hidden" animate="visible">
+                    <motion.div className="max-w-[1600px] mx-auto p-3 sm:p-4 md:p-8" variants={containerVariants} initial="hidden" animate="visible">
                         {/* Page Header */}
-                        <motion.div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4" variants={itemVariants}>
+                        <motion.div className="flex flex-col md:flex-row md:items-end justify-between mb-4 sm:mb-8 gap-4" variants={itemVariants}>
                             <div>
-                                <h1 className="text-3xl font-black text-foreground tracking-tight">
+                                <h1 className="text-xl sm:text-3xl font-black text-foreground tracking-tight">
                                     Welcome back, {profile?.name?.split(" ")[0]}
                                 </h1>
-                                <p className="text-muted-foreground mt-1 text-lg">Here's an overview of your venture portfolio</p>
+                                <p className="text-muted-foreground mt-1 text-sm sm:text-lg">Here's an overview of your venture portfolio</p>
                             </div>
                             <div className="flex items-center gap-3">
 
@@ -1471,7 +1473,7 @@ const FounderDashboard = () => {
                         </motion.div>
 
                         {/* Metrics Grid */}
-                        <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" variants={containerVariants}>
+                        <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8" variants={containerVariants}>
                             <MetricCard title="Total Raised" value={`$${totalRaised.toLocaleString()}`} subtitle="Across all ventures" icon={DollarSign} accentColor="emerald"
                                 trend={totalRaised > 0 ? { value: "+12%", positive: true } : undefined} index={0} />
                             <MetricCard title="Active Ventures" value={ideas.length} subtitle="In your portfolio" icon={Lightbulb} accentColor="blue" index={1} />
@@ -1480,7 +1482,7 @@ const FounderDashboard = () => {
                         </motion.div>
 
                         {/* Analytics Charts */}
-                        <motion.div className="grid lg:grid-cols-3 gap-6 mb-8" variants={containerVariants}>
+                        <motion.div className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8" variants={containerVariants}>
                             {/* Funding Overview Chart */}
                             <motion.div variants={itemVariants} className="lg:col-span-2 h-full">
                                 <div className="border border-border/60 bg-white rounded-3xl shadow-sm h-full overflow-hidden p-6 flex flex-col">
@@ -1598,7 +1600,7 @@ const FounderDashboard = () => {
 
                         {/* Ventures Section */}
                         <motion.div className="bg-white border border-border/60 rounded-3xl shadow-sm overflow-hidden" variants={itemVariants}>
-                            <div className="p-6 border-b border-border/60">
+                            <div className="p-4 sm:p-6 border-b border-border/60">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div>
                                         <h2 className="text-xl font-bold text-foreground">Your Ventures</h2>
@@ -1614,11 +1616,11 @@ const FounderDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-6">
+                            <div className="p-4 sm:p-6">
                                 <AnimatePresence mode="wait">
                                     <motion.div key={activeTab} variants={tabContentVariants} initial="hidden" animate="visible" exit="exit">
                                         {filteredIdeas.length > 0 ? (
-                                            <motion.div className="grid md:grid-cols-2 gap-4" variants={containerVariants} initial="hidden" animate="visible">
+                                            <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-4" variants={containerVariants} initial="hidden" animate="visible">
                                                 {filteredIdeas.map((idea, index) => (
                                                     <VentureCard key={idea.id} idea={idea} index={index}
                                                         onClick={() => navigate(`/idea/${idea.id}`)}

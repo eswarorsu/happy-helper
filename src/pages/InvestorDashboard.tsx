@@ -813,7 +813,7 @@ const InvestorDashboard = () => {
           </div>
         </header>
 
-        <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+        <main className="relative z-10 max-w-6xl mx-auto px-3 sm:px-4 sm:px-6 lg:px-10 py-4 sm:py-6 sm:py-8">
           {/* ===== Company Header Card ===== */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -821,7 +821,7 @@ const InvestorDashboard = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <div className="bg-slate-900 rounded-2xl p-6 lg:p-8 text-white">
+            <div className="bg-slate-900 rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-2xl bg-slate-700/60 flex items-center justify-center border border-slate-600">
                   <span className="text-2xl font-black text-white">{profile?.name?.charAt(0) || 'I'}</span>
@@ -893,7 +893,7 @@ const InvestorDashboard = () => {
 
               {/* Inline metric stats row */}
               {/* Pearl Street Style Metrics Row */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-px bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
+              <div className="mt-4 sm:mt-8 grid grid-cols-2 sm:grid-cols-3 gap-px bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
                 {[
                   {
                     label: "Total Invested",
@@ -917,7 +917,7 @@ const InvestorDashboard = () => {
                     icon: PieChartIcon
                   },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-slate-900/40 p-6 flex flex-col justify-between group hover:bg-slate-800/60 transition-colors relative">
+                  <div key={i} className="bg-slate-900/40 p-3 sm:p-6 flex flex-col justify-between group hover:bg-slate-800/60 transition-colors relative">
                     {i < 2 && <div className="absolute right-0 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-slate-700 to-transparent hidden md:block" />}
 
                     <div className="flex items-center gap-2 mb-3">
@@ -928,7 +928,7 @@ const InvestorDashboard = () => {
                     </div>
 
                     <div>
-                      <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                      <div className="text-lg sm:text-2xl font-bold text-white mb-1">{stat.value}</div>
                       <div className="flex items-center gap-2">
                         {stat.trendUp ? <ArrowUpRight className="w-3 h-3 text-emerald-400" /> : <ArrowDownRight className="w-3 h-3 text-rose-400" />}
                         <span className={cn("text-xs font-medium", stat.trendUp ? "text-emerald-400" : "text-rose-400")}>{stat.trend}</span>
@@ -945,7 +945,7 @@ const InvestorDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid lg:grid-cols-3 gap-6 mb-8"
+            className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
           >
             {/* Left Col: Growth Chart (Cash on Hand equivalent) */}
             <Card className="lg:col-span-2 bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
@@ -980,7 +980,7 @@ const InvestorDashboard = () => {
               </CardHeader>
               <CardContent className="pt-6">
                 {growthData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={200}>
                     <AreaChart data={growthData}>
                       <defs>
                         <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
@@ -1008,7 +1008,7 @@ const InvestorDashboard = () => {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-[280px] flex flex-col items-center justify-center text-center">
+                  <div className="h-[200px] flex flex-col items-center justify-center text-center">
                     <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center mb-3">
                       <TrendingUp className="w-6 h-6 text-slate-300" />
                     </div>

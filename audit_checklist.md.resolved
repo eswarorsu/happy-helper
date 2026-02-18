@@ -1,0 +1,66 @@
+# INNOVESTOR Audit Fix Checklist
+
+Based on the "Comprehensive Technical, Design & Business Audit (Feb 2026)".
+
+## 🚨 Phase 1: Critical Security & Integrity (Immediate)
+*These items must be fixed before any public launch or testing.*
+
+- [ ] **Revoke & Regenerate Firebase Keys** (Issue 4.1, 5.2)
+    - [ ] Go to Firebase Console > Project Settings > General.
+    - [ ] Remove current Web API Key.
+    - [ ] Generate a new one.
+    - [ ] Update [.env](file:///d:/REDESIGUBG/happy-helper/.env) (use `VITE_FIREBASE_API_KEY`) and **do not** commit hardcoded keys to `firebase.ts`.
+- [ ] **Implement Route Guards** (Issue A-2, 4.1)
+    - [ ] Create a `PrivateRoute` component that checks Supabase session.
+    - [ ] Wrap `/founder-dashboard`, `/investor-dashboard`, `/transactions`, `/deal-center`, `/submit-idea` in [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
+    - [ ] Redirect unauthenticated users to `/auth`.
+- [ ] **Secure Admin Portal** (Issue 4.1, 5.2)
+    - [ ] Implement `AdminRoute` wrapper.
+    - [ ] Check `profile.is_admin === true` before rendering `/admin-innovestor`.
+- [ ] **Remove Test Routes** (Issue A-3, 4.2)
+    - [ ] Remove `/test-payment` route from [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
+    - [ ] Delete [TestPayment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/TestPayment.tsx) (or move to a `tests/` folder outside `src/pages` if needed for dev).
+- [ ] **Fix Environment Variables** (Issue A-4, 4.2)
+    - [ ] Standardize `VITE_SUPABASE_PUBLISHABLE_KEY` vs `VITE_SUPABASE_ANON_KEY`.
+    - [ ] Ensure `client.ts` and [main.tsx](file:///d:/REDESIGUBG/happy-helper/src/main.tsx) use the same variable name.
+    - [ ] Update [.env](file:///d:/REDESIGUBG/happy-helper/.env) file.
+
+## 🟠 Phase 2: High Priority Structural Fixes (Sprint 1)
+*Essential for stability and trust.*
+
+- [ ] **Fix Fake UPI Verification** (Issue U-2, 4.1)
+    - [ ] Remove the `setTimeout` fake success in [Payment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/Payment.tsx).
+    - [ ] Either implement real verification (e.g., Razorpay VPA API) OR clearly label it as "Format Check" to avoid misleading users.
+- [ ] **Add React Error Boundaries** (Issue A-5, 4.2)
+    - [ ] Create an `ErrorBoundary` component.
+    - [ ] Wrap main dashboard routes to prevent white-screen crashes.
+- [ ] **Fix Chat/Auth Sync** (Issue A-1, 4.2)
+    - [ ] Investigate migrating Chat from Firebase to Supabase Realtime (long term) OR ensure user deletion handles both (short term).
+    - [ ] *Recommendation: Stick to Firebase for now if working, but ensure keys are secure.*
+- [ ] **Resolve TypeScript Errors** (Issue 4.2)
+    - [ ] Run `tsc --noEmit` and fix module resolution errors (especially in [AdminPortal.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/AdminPortal.tsx)).
+
+## 🟡 Phase 3: UX & Performance (Sprint 2)
+*Improving perceived performance and accessibility.*
+
+- [ ] **Add Loading Skeletons** (Issue U-1)
+    - [ ] Create skeleton loaders for:
+        - [ ] Idea Cards ([Marketplace](file:///d:/REDESIGUBG/happy-helper/src/pages/Marketplace.tsx#88-667))
+        - [ ] Dashboard Metrics (`Founder/Investor Dashboard`)
+        - [ ] Transaction List
+    - [ ] Replace simple spinners where appropriate.
+- [ ] **Optimize Hero3D Performance** (Issue U-5)
+    - [ ] Add a check for low-end devices/mobile.
+    - [ ] Disable Three.js canvas on mobile/low-power mode and show a static CSS gradient instead.
+- [ ] **Accessibility Improvements** (Issue U-3)
+    - [ ] Add `aria-label` to icon-only buttons.
+    - [ ] Ensure clickable `motion.div`s have keyboard handlers (`onKeyDown`) and `role="button"`.
+
+## 🟢 Phase 4: Legal & Compliance (Pre-Launch)
+*Required for operating legally in India.*
+
+- [ ] **Update Privacy Policy** (Issue 7.3)
+    - [ ] Ensure DPDPA compliance (Data Principal rights).
+- [ ] **Update Terms & Conditions** (Issue 7.4)
+    - [ ] Add disclaimer: "Not a SEBI-registered investment adviser".
+    - [ ] Add "High Risk" investment warning.
