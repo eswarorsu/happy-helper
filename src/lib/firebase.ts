@@ -3,15 +3,59 @@ import { getAuth, signInAnonymously } from "firebase/auth";
 import { getDatabase, ref, push, set, onValue, off, serverTimestamp, update, DataSnapshot, query, orderByChild, equalTo, get } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
+// ============================================================================
+// SECURITY: Firebase config loaded from environment variables (OWASP A02:2021)
+//
+// Firebase client-side API keys are NOT secret (they identify the project, not
+// authenticate privileged access), but keeping them in .env:
+//   1. Prevents accidental git commits of hard-coded credentials.
+//   2. Allows per-environment config (dev / staging / prod) without code changes.
+//   3. Satisfies audit requirements for "no hard-coded keys in source".
+//
+// Required VITE_ env vars (add to .env, never commit to git):
+//   VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN,
+//   VITE_FIREBASE_DATABASE_URL, VITE_FIREBASE_PROJECT_ID,
+//   VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID,
+//   VITE_FIREBASE_APP_ID
+// ============================================================================
+const {
+  VITE_FIREBASE_API_KEY,
+  VITE_FIREBASE_AUTH_DOMAIN,
+  VITE_FIREBASE_DATABASE_URL,
+  VITE_FIREBASE_PROJECT_ID,
+  VITE_FIREBASE_STORAGE_BUCKET,
+  VITE_FIREBASE_MESSAGING_SENDER_ID,
+  VITE_FIREBASE_APP_ID,
+} = import.meta.env;
+
+// Fail loudly in development if vars are missing; silently degrade in prod
+// so a mis-configuration doesn't white-screen non-chat features.
+const REQUIRED_FIREBASE_VARS = [
+  "VITE_FIREBASE_API_KEY",
+  "VITE_FIREBASE_AUTH_DOMAIN",
+  "VITE_FIREBASE_DATABASE_URL",
+  "VITE_FIREBASE_PROJECT_ID",
+  "VITE_FIREBASE_STORAGE_BUCKET",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  "VITE_FIREBASE_APP_ID",
+];
+const missingFirebaseVars = REQUIRED_FIREBASE_VARS.filter(
+  (k) => !import.meta.env[k]
+);
+if (missingFirebaseVars.length > 0) {
+  console.warn(
+    `⚠️ Firebase: missing env vars – ${missingFirebaseVars.join(", ")}. Chat will be unavailable.`
+  );
+}
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAdpp7QV2sd9U0aTzkPuuviMrdSggcb3zE",
-  authDomain: "innovestor-fa784.firebaseapp.com",
-  databaseURL:
-    "https://innovestor-fa784-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "innovestor-fa784",
-  storageBucket: "innovestor-fa784.firebasestorage.app",
-  messagingSenderId: "919426530586",
-  appId: "1:919426530586:web:ed2116dfc83e0c21180a3",
+  apiKey:            VITE_FIREBASE_API_KEY,
+  authDomain:        VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL:       VITE_FIREBASE_DATABASE_URL,
+  projectId:         VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

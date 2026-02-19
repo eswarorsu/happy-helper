@@ -12,6 +12,7 @@ import { z } from "zod";
 import { connectFirebase } from "@/lib/firebase";
 import { ref, set } from "firebase/database";
 import { db } from "@/lib/firebase";
+import { authLimiter } from "@/lib/rateLimiter";
 
 
 
@@ -36,6 +37,7 @@ const Auth = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -136,6 +138,17 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side rate limit (belt-and-suspenders; real limit is on the backend)
+    if (!authLimiter.allow()) {
+      toast({
+        title: "Too many attempts",
+        description: authLimiter.retryMessage(),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setErrors({});
 
@@ -184,11 +197,32 @@ const Auth = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side rate limit
+    if (!authLimiter.allow()) {
+      toast({
+        title: "Too many attempts",
+        description: authLimiter.retryMessage(),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setErrors({});
 
     try {
       const validated = registerSchema.parse(formData);
+
+      if (!agreedToTerms) {
+        toast({
+          title: "Agreement required",
+          description: "Please accept the Terms & Conditions and Privacy Policy to create an account.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase.auth.signUp({
         email: validated.email,
@@ -381,15 +415,52 @@ const Auth = () => {
                   {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
                 </div>
 
-                {/* Submit */}
-                <Button
-                  type="submit"
-                  className="w-full h-11 text-sm sm:text-base gradient-cta"
-                  size="lg"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
-                </Button>
+                {/* Terms agreement + submit — register mode */}
+                {mode === "register" && (
+                  <>
+                    <div className="flex items-start gap-2.5 pt-1">
+                      <input
+                        id="terms"
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-border accent-brand-charcoal cursor-pointer shrink-0"
+                      />
+                      <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+                        I have read and agree to the{" "}
+                        <Link to="/terms-and-conditions" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
+                          Terms &amp; Conditions
+                        </Link>
+                        {" "}and{" "}
+                        <Link to="/privacy-policy" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
+                          Privacy Policy
+                        </Link>
+                        , including the High Risk Investment Warning and SEBI disclaimer.
+                      </label>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-sm sm:text-base gradient-cta"
+                      size="lg"
+                      disabled={isLoading || !agreedToTerms}
+                    >
+                      {isLoading ? "Please wait..." : "Create Account"}
+                    </Button>
+                  </>
+                )}
+
+                {/* Submit — login mode */}
+                {mode === "login" && (
+                  <Button
+                    type="submit"
+                    className="w-full h-11 text-sm sm:text-base gradient-cta"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Please wait..." : "Sign In"}
+                  </Button>
+                )}
               </form>
 
               {/* Divider */}

@@ -31,7 +31,7 @@ const PrivacyPolicy: React.FC = () => {
             Your privacy is critically important to us. We're committed to protecting your personal information.
           </p>
           <p className="text-sm text-blue-200 mt-4">
-            Last Updated: January 24, 2026
+            Last Updated: February 19, 2026
           </p>
         </div>
       </div>
@@ -198,6 +198,51 @@ const PrivacyPolicy: React.FC = () => {
                 <li><strong>Withdraw Consent:</strong> Withdraw consent for data processing where applicable</li>
               </ul>
               <p className="text-slate-700 mt-3">To exercise these rights, please contact us at <a href="mailto:privacy@innovestor.com" className="text-primary hover:underline font-medium">privacy@innovestor.com</a>.</p>
+            </div>
+          </section>
+
+          {/* DPDPA Section */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-indigo-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">5A. Rights Under the Digital Personal Data Protection Act, 2023 (DPDPA)</h2>
+            </div>
+
+            <div className="ml-13 space-y-4">
+              <p className="text-slate-700">
+                As a Data Fiduciary under India's <strong>Digital Personal Data Protection Act, 2023 (DPDPA)</strong>, INNOVESTOR is committed to upholding the rights of every Data Principal (you) whose personal data we process.
+              </p>
+
+              <div className="p-4 bg-indigo-50 border-l-4 border-indigo-400 rounded">
+                <p className="text-sm font-semibold text-indigo-800 mb-2">Your Rights as a Data Principal (Section 12–14, DPDPA 2023)</p>
+                <ul className="list-disc pl-5 space-y-2 text-sm text-slate-700">
+                  <li><strong>Right to Information (Sec 11):</strong> You have the right to obtain a summary of personal data we process and the identity of all third parties with whom your data has been shared.</li>
+                  <li><strong>Right to Correction & Erasure (Sec 12):</strong> You may request correction of inaccurate, incomplete, or misleading data, or erasure of personal data that is no longer necessary for the purpose for which it was collected.</li>
+                  <li><strong>Right of Grievance Redressal (Sec 13):</strong> You have the right to readily available means of grievance redressal. We will respond to your grievance within a reasonable period.</li>
+                  <li><strong>Right to Nominate (Sec 14):</strong> You may nominate another individual to exercise your data rights in the event of your death or incapacity.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Our Obligations</h3>
+                <ul className="list-disc pl-6 space-y-1 text-slate-700 text-sm">
+                  <li>We process your personal data only for lawful purposes and with your consent or on other permissible legal grounds.</li>
+                  <li>We implement reasonable security safeguards to prevent personal data breaches.</li>
+                  <li>In the event of a data breach that is likely to affect you, we will notify the Data Protection Board of India and, where required, inform you.</li>
+                  <li>We do not retain personal data beyond the period necessary for the original purpose, unless required by law.</li>
+                  <li>We will not process personal data of children (under 18) without verifiable parental consent.</li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-sm text-slate-700">
+                  <strong>Data Protection Officer / Grievance Contact:</strong><br />
+                  To exercise your DPDPA rights or submit a grievance, write to: <a href="mailto:privacy@innovestor.com" className="text-primary hover:underline">privacy@innovestor.com</a><br />
+                  We will acknowledge your request within <strong>3 business days</strong> and resolve it within <strong>30 days</strong>.
+                </p>
+              </div>
             </div>
           </section>
 

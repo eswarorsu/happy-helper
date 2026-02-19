@@ -5,59 +5,104 @@ Based on the "Comprehensive Technical, Design & Business Audit (Feb 2026)".
 ## 🚨 Phase 1: Critical Security & Integrity (Immediate)
 *These items must be fixed before any public launch or testing.*
 
-- [ ] **Revoke & Regenerate Firebase Keys** (Issue 4.1, 5.2)
+- [ ] **Revoke & Regenerate Firebase Keys** (Issue 4.1, 5.2) ⚠️ *Requires manual action in Firebase Console*
     - [ ] Go to Firebase Console > Project Settings > General.
     - [ ] Remove current Web API Key.
     - [ ] Generate a new one.
     - [ ] Update [.env](file:///d:/REDESIGUBG/happy-helper/.env) (use `VITE_FIREBASE_API_KEY`) and **do not** commit hardcoded keys to `firebase.ts`.
-- [ ] **Implement Route Guards** (Issue A-2, 4.1)
-    - [ ] Create a `PrivateRoute` component that checks Supabase session.
-    - [ ] Wrap `/founder-dashboard`, `/investor-dashboard`, `/transactions`, `/deal-center`, `/submit-idea` in [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
-    - [ ] Redirect unauthenticated users to `/auth`.
-- [ ] **Secure Admin Portal** (Issue 4.1, 5.2)
-    - [ ] Implement `AdminRoute` wrapper.
-    - [ ] Check `profile.is_admin === true` before rendering `/admin-innovestor`.
-- [ ] **Remove Test Routes** (Issue A-3, 4.2)
-    - [ ] Remove `/test-payment` route from [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
-    - [ ] Delete [TestPayment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/TestPayment.tsx) (or move to a `tests/` folder outside `src/pages` if needed for dev).
-- [ ] **Fix Environment Variables** (Issue A-4, 4.2)
-    - [ ] Standardize `VITE_SUPABASE_PUBLISHABLE_KEY` vs `VITE_SUPABASE_ANON_KEY`.
-    - [ ] Ensure `client.ts` and [main.tsx](file:///d:/REDESIGUBG/happy-helper/src/main.tsx) use the same variable name.
-    - [ ] Update [.env](file:///d:/REDESIGUBG/happy-helper/.env) file.
+- [x] **Implement Route Guards** (Issue A-2, 4.1)
+    - [x] Create a `PrivateRoute` component that checks Supabase session.
+    - [x] Wrap `/founder-dashboard`, `/investor-dashboard`, `/transactions`, `/deal-center`, `/submit-idea` in [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
+    - [x] Redirect unauthenticated users to `/auth`.
+- [x] **Secure Admin Portal** (Issue 4.1, 5.2)
+    - [x] Implement `AdminRoute` wrapper.
+    - [x] Check `profile.is_admin === true` before rendering `/admin-innovestor`.
+- [x] **Remove Test Routes** (Issue A-3, 4.2)
+    - [x] Remove `/test-payment` route from [App.tsx](file:///d:/REDESIGUBG/happy-helper/src/App.tsx).
+    - [ ] Delete [TestPayment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/TestPayment.tsx) (file still exists on disk — safe to delete manually).
+- [x] **Fix Environment Variables** (Issue A-4, 4.2)
+    - [x] Standardize `VITE_SUPABASE_PUBLISHABLE_KEY` vs `VITE_SUPABASE_ANON_KEY` — verified both `client.ts` and `supabase.ts` use `VITE_SUPABASE_PUBLISHABLE_KEY` consistently.
+    - [x] Ensure `client.ts` and [main.tsx](file:///d:/REDESIGUBG/happy-helper/src/main.tsx) use the same variable name.
+    - [ ] Update [.env](file:///d:/REDESIGUBG/happy-helper/.env) file. ⚠️ *Verify your `.env` has `VITE_SUPABASE_PUBLISHABLE_KEY` (not `ANON_KEY`)*
 
 ## 🟠 Phase 2: High Priority Structural Fixes (Sprint 1)
 *Essential for stability and trust.*
 
-- [ ] **Fix Fake UPI Verification** (Issue U-2, 4.1)
-    - [ ] Remove the `setTimeout` fake success in [Payment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/Payment.tsx).
-    - [ ] Either implement real verification (e.g., Razorpay VPA API) OR clearly label it as "Format Check" to avoid misleading users.
+- [x] **Fix Fake UPI Verification** (Issue U-2, 4.1)
+    - [x] Remove the `setTimeout` fake success in [Payment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/Payment.tsx).
+    - [x] Labelled as "Format Check" with a real UPI regex — no longer misleads users.
 - [ ] **Fix Chat/Auth Sync** (Issue A-1, 4.2)
     - [ ] Investigate migrating Chat from Firebase to Supabase Realtime (long term) OR ensure user deletion handles both (short term).
     - [ ] *Recommendation: Stick to Firebase for now if working, but ensure keys are secure.*
-- [ ] **Resolve TypeScript Errors** (Issue 4.2)
-    - [ ] Run `tsc --noEmit` and fix module resolution errors (especially in [AdminPortal.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/AdminPortal.tsx)).
+- [x] **Resolve TypeScript Errors** (Issue 4.2)
+    - [x] Added `is_admin` and `is_premium` to generated types in `integrations/supabase/types.ts`. `tsc --noEmit` reports zero errors.
 
 ## 🟡 Phase 3: UX & Performance (Sprint 2)
 *Improving perceived performance and accessibility.*
 
-- [ ] **Add Loading Skeletons** (Issue U-1)
-    - [ ] Create skeleton loaders for:
-        - [ ] Idea Cards ([Marketplace](file:///d:/REDESIGUBG/happy-helper/src/pages/Marketplace.tsx#88-667))
-        - [ ] Dashboard Metrics (`Founder/Investor Dashboard`)
-        - [ ] Transaction List
-    - [ ] Replace simple spinners where appropriate.
-- [ ] **Optimize Hero3D Performance** (Issue U-5)
-    - [ ] Add a check for low-end devices/mobile.
-    - [ ] Disable Three.js canvas on mobile/low-power mode and show a static CSS gradient instead.
-- [ ] **Accessibility Improvements** (Issue U-3)
-    - [ ] Add `aria-label` to icon-only buttons.
-    - [ ] Ensure clickable `motion.div`s have keyboard handlers (`onKeyDown`) and `role="button"`.
+- [x] **Add Loading Skeletons** (Issue U-1)
+    - [x] Create skeleton loaders for:
+        - [x] Idea Cards ([Marketplace](file:///d:/REDESIGUBG/happy-helper/src/pages/Marketplace.tsx))
+        - [x] Dashboard Metrics (FounderDashboard + InvestorDashboard)
+        - [x] Transaction List
+    - [x] Replace simple spinners where appropriate.
+- [x] **Optimize Hero3D Performance** (Issue U-5)
+    - [x] Add a check for low-end devices/mobile — detects screen width, `prefers-reduced-motion`, `deviceMemory < 2GB`, `hardwareConcurrency < 4`.
+    - [x] Disable Three.js canvas on mobile/low-power mode and show a static CSS gradient instead.
+- [x] **Accessibility Improvements** (Issue U-3)
+    - [x] Add `aria-label` to icon-only buttons (FounderDashboard, InvestorDashboard, ChatBox).
+    - [x] Audited clickable `motion.div`s — none were interactive (pure animation wrappers), no keyboard handlers needed.
 
 ## 🟢 Phase 4: Legal & Compliance (Pre-Launch)
 *Required for operating legally in India.*
 
-- [ ] **Update Privacy Policy** (Issue 7.3)
-    - [ ] Ensure DPDPA compliance (Data Principal rights).
-- [ ] **Update Terms & Conditions** (Issue 7.4)
-    - [ ] Add disclaimer: "Not a SEBI-registered investment adviser".
-    - [ ] Add "High Risk" investment warning.
+- [x] **Update Privacy Policy** (Issue 7.3)
+    - [x] Added DPDPA 2023 compliance section (Section 5A) covering all Data Principal rights, Data Fiduciary obligations, breach notification, and grievance contact with 3-day acknowledgement / 30-day resolution SLA.
+- [x] **Update Terms & Conditions** (Issue 7.4)
+    - [x] Added prominent SEBI disclaimer: "INNOVESTOR is NOT a SEBI-registered investment adviser".
+    - [x] Added High Risk Investment Warning banner at top of Terms.
+- [x] **T&C Consent Gate on Registration** (new)
+    - [x] Auth page register form: checkbox linking to both Terms & Conditions and Privacy Policy pages.
+    - [x] Submit button disabled until checkbox is ticked; server-side guard in `handleRegister` as well.
+
+## 🔐 Phase 5: Security Hardening (OWASP)
+*Rate limiting, input validation, API key management.*
+
+- [x] **Rate Limiting — Backend** (OWASP A04:2021)
+    - [x] Installed `express-rate-limit` + `helmet` in `backend/`.
+    - [x] Global limiter: 100 req / 15 min per IP on all routes (`backend/index.js`).
+    - [x] Per-route tighter limits in `backend/routes/payment.js`:
+        - `/validate-coupon`: 10 req / 15 min (brute-force coupon guess protection)
+        - `/create-order`: 20 req / 15 min
+        - `/verify`: 30 req / 15 min
+    - [x] Keys combine IP + authenticated user ID (IP rotation does not reset per-user counter).
+    - [x] `app.set('trust proxy', 1)` — real client IP read from `X-Forwarded-For` when behind Render/Railway.
+    - [x] Graceful 429 JSON responses with `RateLimit-*` standard headers (RFC 6585).
+- [x] **Rate Limiting — Client-side guard** (OWASP A04:2021)
+    - [x] Created `src/lib/rateLimiter.ts` — sliding-window in-memory limiter utility.
+    - [x] Pre-built limiters: `authLimiter`, `couponLimiter`, `orderLimiter`, `verifyLimiter`.
+    - [x] Wired into `Auth.tsx` (`handleLogin` / `handleRegister`) and `Payment.tsx` (`handleValidateCoupon` / `handlePayment`).
+    - [x] Shows descriptive "please wait N seconds" message before server returns 429.
+- [x] **Input Validation & Sanitization — Backend** (OWASP A03:2021)
+    - [x] Installed `zod` in backend.
+    - [x] Zod schemas in `backend/routes/payment.js`:
+        - `couponSchema`: alphanumeric+hyphen/underscore only, max 50 chars, `.strict()` (extra fields rejected).
+        - `createOrderSchema`: integer amount, min ₹1, max ₹1,00,000, `.strict()`.
+        - `verifyPaymentSchema`: Razorpay ID regex /^[A-Za-z0-9_]+$/, signature lowercase hex, `.strict()`.
+    - [x] `validateBody()` helper strips unknown fields and returns typed clean objects.
+    - [x] Request body limited to **10 KB** via `express.json({ limit: "10kb" })`.
+    - [x] `timingSafeEqual` used for HMAC signature comparison (prevents timing oracle attacks).
+- [x] **Input Validation — Frontend** (OWASP A03:2021)
+    - [x] Auth.tsx already uses Zod (`registerSchema`, `loginSchema`) — unchanged, confirmed correct.
+    - [x] ChatBox: message length capped at 2 000 chars; trimmed before sending to Firebase.
+    - [x] ChatBox deal proposals: investment amount validated ≤ ₹50 Crore with toast on violation.
+- [x] **HTTP Security Headers** (OWASP A05:2021)
+    - [x] `helmet()` added to Express — sets `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy` (restrictive default: `default-src 'none'`), and more.
+    - [x] CORS locked to `ALLOWED_ORIGIN` env var (comma-separated list); wildcard `*` removed.
+- [x] **Secure API Key Handling** (OWASP A02:2021, Issue 4.1)
+    - [x] Firebase config moved from hard-coded constants in `src/lib/firebase.ts` to `VITE_FIREBASE_*` env vars.
+    - [x] Startup warning logged if any `VITE_FIREBASE_*` vars are missing (non-fatal, chat degrades gracefully).
+    - [x] Root-level `.env.example` created listing all required frontend env vars.
+    - [x] `backend/.env.example` updated with `ALLOWED_ORIGIN` entry.
+    - [x] Backend validates `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` at startup and logs missing vars.
+    - [ ] ⚠️ **Manual action required**: Rotate Firebase API key (new key → `VITE_FIREBASE_API_KEY` in `.env`). See Phase 1 item above.

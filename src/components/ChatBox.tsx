@@ -115,14 +115,27 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || isLoading) return;
+    const trimmed = newMessage.trim();
+    if (!trimmed || isLoading) return;
+
+    // SECURITY: Enforce message length limit (OWASP A03 – uncontrolled input size)
+    // Firebase charges per byte written; unbounded messages also risk RTDB abuse.
+    const MAX_MSG_LENGTH = 2000;
+    if (trimmed.length > MAX_MSG_LENGTH) {
+      toast({
+        title: "Message too long",
+        description: `Messages must be ${MAX_MSG_LENGTH} characters or fewer.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
       await connectFirebase();
       await sendMessage(chatRequest.id, {
         sender_id: currentUserId,
-        content: newMessage,
+        content: trimmed, // send the trimmed copy
         type: 'text'
       });
       setNewMessage("");
@@ -243,9 +256,14 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
         setShowDealPanel(true);
         return;
       }
+      // SECURITY: Validate investment amount – must be a positive number ≤ ₹50 Crore
       const amount = parseFloat(proposedAmount);
       if (isNaN(amount) || amount <= 0) {
         toast({ title: "Invalid Amount", description: "Enter a valid investment amount", variant: "destructive" });
+        return;
+      }
+      if (amount > 500_000_000) {
+        toast({ title: "Amount too large", description: "Maximum proposal is ₹50 Crore.", variant: "destructive" });
         return;
       }
       const { error } = await supabase
@@ -299,8 +317,12 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
       setShowDealPanel(true);
       return;
     }
+    // SECURITY: Validate reinvestment amount
     const amount = parseFloat(proposedAmount);
-    if (isNaN(amount) || amount <= 0) return;
+    if (isNaN(amount) || amount <= 0 || amount > 500_000_000) {
+      toast({ title: "Invalid Amount", description: "Enter a valid amount (₹1 – ₹50 Crore).", variant: "destructive" });
+      return;
+    }
     const { error } = await (supabase as any).from("chat_requests").update({ proposed_amount: amount, deal_status: "requested" }).eq("id", chatRequest.id);
     if (!error) {
       toast({ title: "Request Sent! 📩" });

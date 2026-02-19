@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, Wallet, Ticket } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useToast } from "@/hooks/use-toast";
+import { couponLimiter, orderLimiter } from "@/lib/rateLimiter";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://happy-helper.onrender.com";
 // const VALID_COUPONS = ["FREEIDEA", "INNOVATE50"]; // Deprecated in favor of DB check
@@ -78,6 +79,13 @@ const Payment = () => {
 
     const handleValidateCoupon = async () => {
         if (!couponCode.trim()) return;
+
+        // Client-side rate limit – real limit enforced server-side
+        if (!couponLimiter.allow()) {
+            toast({ title: "Too many attempts", description: couponLimiter.retryMessage(), variant: "destructive" });
+            return;
+        }
+
         setIsValidatingCoupon(true);
 
         // Optional: Artificial delay for UX
@@ -144,6 +152,13 @@ const Payment = () => {
     // SEC-002 FIX: Payment now includes auth headers
     const handlePayment = async () => {
         if (!isVerified) return;
+
+        // Client-side rate limit
+        if (!orderLimiter.allow()) {
+            toast({ title: "Too many attempts", description: orderLimiter.retryMessage(), variant: "destructive" });
+            return;
+        }
+
         setIsProcessing(true);
 
         try {

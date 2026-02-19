@@ -31,7 +31,7 @@ const TermsAndConditions: React.FC = () => {
             Please read these terms carefully before using our services.
           </p>
           <p className="text-sm text-white/60 mt-4">
-            Last Updated: January 24, 2026
+            Last Updated: February 19, 2026
           </p>
         </div>
       </div>
@@ -49,6 +49,32 @@ const TermsAndConditions: React.FC = () => {
               <p className="text-sm text-slate-700">
                 <strong>Important Notice:</strong> INNOVESTOR is a SaaS-based startup discovery and networking platform. We <strong>DO NOT</strong> facilitate direct investments, handle funds, or act as a financial intermediary. All investment decisions and transactions occur independently between users.
               </p>
+            </div>
+
+            {/* SEBI Disclaimer */}
+            <div className="mt-4 p-5 bg-orange-50 border-2 border-orange-400 rounded-xl">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-6 h-6 text-orange-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-base font-bold text-orange-800 mb-1">Regulatory Disclaimer</p>
+                  <p className="text-sm text-slate-700">
+                    <strong>INNOVESTOR is NOT a SEBI-registered investment adviser, broker, dealer, portfolio manager, or research analyst</strong> under the Securities and Exchange Board of India (SEBI) Act, 1992, or any rules and regulations framed thereunder. Nothing on this platform constitutes investment advice, a solicitation, or a recommendation to buy, sell, or hold any security or financial instrument. Users should consult a SEBI-registered investment adviser or other qualified financial professional before making any investment decisions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* High Risk Warning */}
+            <div className="mt-4 p-5 bg-red-50 border-2 border-red-500 rounded-xl">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-base font-bold text-red-800 mb-1">⚠️ HIGH RISK INVESTMENT WARNING</p>
+                  <p className="text-sm text-slate-700">
+                    Investing in early-stage startups is <strong>speculative and carries an extremely high level of risk</strong>. You may lose some or all of your invested capital. Past performance of any startup or founder profile on this platform is not indicative of future results. Key risks include, but are not limited to: business failure, lack of liquidity, dilution, regulatory changes, and fraud. You should not invest money that you cannot afford to lose. Diversification does not guarantee a profit or protect against loss. Please read all risk factors carefully and seek independent advice before investing.
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
 
