@@ -21,7 +21,8 @@ import Marketplace from "./pages/Marketplace";
 import Transactions from "./pages/Transactions";
 import DealCenter from "./pages/DealCenter";
 import DealCenterIndex from "./pages/DealCenterIndex";
-import TestPayment from "./pages/TestPayment";
+import PrivateRoute from "./components/PrivateRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,25 +33,32 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/founder-dashboard" element={<FounderDashboard />} />
-          <Route path="/investor-dashboard" element={<InvestorDashboard />} />
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/submit-idea" element={<SubmitIdea />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
-          <Route path="/admin-innovestor" element={<AdminPortal />} />
-          <Route path="/profile/:id?" element={<Profile />} />
-          <Route path="/idea/:id" element={<IdeaDetailPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/deal-center/:chatRequestId" element={<DealCenter />} />
-          <Route path="/deal-center" element={<DealCenterIndex />} />
-          <Route path="/test-payment" element={<TestPayment />} />
+          <Route path="/idea/:id" element={<IdeaDetailPage />} />
 
+          {/* Protected routes – require authentication */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/founder-dashboard" element={<FounderDashboard />} />
+            <Route path="/investor-dashboard" element={<InvestorDashboard />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/submit-idea" element={<SubmitIdea />} />
+            <Route path="/profile/:id?" element={<Profile />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/deal-center/:chatRequestId" element={<DealCenter />} />
+            <Route path="/deal-center" element={<DealCenterIndex />} />
+          </Route>
+
+          {/* Admin-only route */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin-innovestor" element={<AdminPortal />} />
+          </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

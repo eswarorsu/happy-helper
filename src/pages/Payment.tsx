@@ -19,7 +19,6 @@ const Payment = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [upiId, setUpiId] = useState("");
     const [isVerified, setIsVerified] = useState(false);
-    const [isVerifying, setIsVerifying] = useState(false);
     const [paymentStarted, setPaymentStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(600);
 
@@ -56,14 +55,25 @@ const Payment = () => {
         };
     };
 
+    // FORMAT CHECK ONLY — not real bank verification.
+    // We validate the UPI VPA pattern: alphanum/dots/hyphens @ provider handle (2–30 chars, no spaces).
+    const UPI_REGEX = /^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,30}$/;
+
     const handleVerify = () => {
-        if (!upiId.includes("@")) return;
-        setIsVerifying(true);
-        setTimeout(() => {
-            setIsVerifying(false);
-            setIsVerified(true);
-            toast({ title: "UPI Verified", description: "Your UPI ID has been successfully verified." });
-        }, 1500);
+        if (!UPI_REGEX.test(upiId.trim())) {
+            toast({
+                title: "Invalid UPI Format",
+                description: "Please enter a valid UPI ID (e.g. yourname@upi or 9876543210@paytm).",
+                variant: "destructive",
+            });
+            return;
+        }
+        // Instantly mark as format-valid (no live bank ping)
+        setIsVerified(true);
+        toast({
+            title: "UPI Format Accepted",
+            description: "Format looks correct. Proceed to pay — your bank will confirm on checkout.",
+        });
     };
 
     const handleValidateCoupon = async () => {
@@ -332,11 +342,11 @@ const Payment = () => {
                                         </div>
                                         <Button
                                             onClick={handleVerify}
-                                            disabled={isVerifying || isVerified || !upiId.includes("@")}
+                                            disabled={isVerified || !upiId.includes("@")}
                                             variant="outline"
                                             className={`h-11 px-5 rounded-lg font-semibold border-2 ${isVerified ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-border text-slate-700 hover:bg-background"}`}
                                         >
-                                            {isVerifying ? "..." : isVerified ? "Verified" : "Verify"}
+                                            {isVerified ? "Accepted" : "Check Format"}
                                         </Button>
                                     </div>
                                 </div>

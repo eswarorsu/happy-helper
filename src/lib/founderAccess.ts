@@ -9,7 +9,7 @@ export interface SubmitAccessResult {
 }
 
 export const ensurePremiumFlag = async (userId: string) => {
-    const { data: successfulPayment } = await (supabase as any)
+    const { data: successfulPayment } = await supabase
         .from("payments")
         .select("id")
         .eq("user_id", userId)
@@ -18,7 +18,7 @@ export const ensurePremiumFlag = async (userId: string) => {
         .maybeSingle();
 
     if (successfulPayment) {
-        await (supabase as any)
+        await supabase
             .from("profiles")
             .update({ is_premium: true })
             .eq("user_id", userId);
@@ -34,7 +34,7 @@ export const evaluateFounderSubmitAccess = async (profile: { id: string; user_id
         return { allowed: true, reason: "premium" };
     }
 
-    const { data: successfulPayment } = await (supabase as any)
+    const { data: successfulPayment } = await supabase
         .from("payments")
         .select("id")
         .eq("user_id", profile.user_id)
@@ -43,12 +43,12 @@ export const evaluateFounderSubmitAccess = async (profile: { id: string; user_id
         .maybeSingle();
 
     if (successfulPayment?.id) {
-        await (supabase as any)
+        await supabase
             .from("profiles")
             .update({ is_premium: true })
             .eq("user_id", profile.user_id);
 
-        return { allowed: true, reason: "premium" };
+        return { allowed: true, reason: "premium" as SubmitAccessReason };
     }
 
     const { count: ideasCount } = await supabase
@@ -60,7 +60,7 @@ export const evaluateFounderSubmitAccess = async (profile: { id: string; user_id
         return { allowed: true, reason: "first_free" };
     }
 
-    const { data: unclaimedPayment } = await (supabase as any)
+    const { data: unclaimedPayment } = await supabase
         .from("payments")
         .select("id")
         .eq("user_id", profile.user_id)

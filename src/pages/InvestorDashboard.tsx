@@ -17,6 +17,7 @@ import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/f
 import { ProfileViewModal } from "@/components/ProfileViewModal";
 // AnimatedGridBackground removed in redesign
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { InvestorSidebar } from "@/components/layout/InvestorSidebar";
 import { cn } from "@/lib/utils";
@@ -725,8 +726,49 @@ const InvestorDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        {/* Skeleton nav */}
+        <div className="border-b border-border bg-background/80 backdrop-blur-md py-3 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <Skeleton className="h-8 w-32 rounded" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-28 rounded-full" />
+              <Skeleton className="h-9 w-28 rounded-full" />
+            </div>
+          </div>
+        </div>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-24 rounded" />
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+                <Skeleton className="h-8 w-20 rounded" />
+                <Skeleton className="h-3 w-28 rounded" />
+              </div>
+            ))}
+          </div>
+          {/* Idea cards */}
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-40 rounded" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-5 flex items-start gap-4">
+                <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-5 w-2/5 rounded" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-4/5 rounded" />
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -756,7 +798,7 @@ const InvestorDashboard = () => {
           <div className="flex items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative rounded-full w-9 h-9 border border-border hover:bg-secondary text-muted-foreground">
+                <Button variant="ghost" size="icon" className="relative rounded-full w-9 h-9 border border-border hover:bg-secondary text-muted-foreground" aria-label="Notifications">
                   <Bell className="w-5 h-5" />
                   {notifications.some(n => !n.is_read) && (
                     <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse" />
@@ -841,7 +883,7 @@ const InvestorDashboard = () => {
                 <div className="hidden lg:flex items-center gap-2 sm:ml-auto">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="relative rounded-full w-9 h-9 border border-slate-600 hover:bg-slate-700 text-slate-300">
+                      <Button variant="ghost" size="icon" className="relative rounded-full w-9 h-9 border border-slate-600 hover:bg-slate-700 text-slate-300" aria-label="Notifications">
                         <Bell className="w-5 h-5" />
                         {notifications.some(n => !n.is_read) && (
                           <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse" />
@@ -1182,6 +1224,7 @@ const InvestorDashboard = () => {
                       size="icon"
                       onClick={() => setSoundEnabled(!soundEnabled)}
                       className="h-8 w-8 rounded-full hover:bg-secondary"
+                      aria-label={soundEnabled ? "Mute notifications" : "Unmute notifications"}
                       title={soundEnabled ? "Mute notifications" : "Unmute notifications"}
                     >
                       {soundEnabled ? (
@@ -1208,6 +1251,7 @@ const InvestorDashboard = () => {
                       size="icon"
                       onClick={() => setShowChatList(false)}
                       className="h-8 w-8 rounded-full hover:bg-secondary"
+                      aria-label="Close chat panel"
                     >
                       <X className="w-4 h-4" />
                     </Button>

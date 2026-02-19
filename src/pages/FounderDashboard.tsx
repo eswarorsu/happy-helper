@@ -23,6 +23,7 @@ import { getUnreadCount, connectFirebase, subscribeToUnreadCount, auth as fireba
 import { signOut as firebaseSignOut } from "firebase/auth";
 import { ProfileViewModal } from "@/components/ProfileViewModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { WeeklyLogSheet } from "@/components/WeeklyLogSheet";
@@ -1206,20 +1207,52 @@ const FounderDashboard = () => {
     // ============================================================================
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <motion.div
-                    className="flex flex-col items-center gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                >
-                    <motion.div
-                        className="w-10 h-10 border-2 border-border border-t-foreground rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                    <p className="text-sm text-muted-foreground font-medium">Loading dashboard...</p>
-                </motion.div>
+            <div className="min-h-screen bg-background">
+                {/* Skeleton nav */}
+                <div className="border-b border-border bg-background/80 backdrop-blur-md py-3 px-4 sm:px-6">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <Skeleton className="h-8 w-32 rounded" />
+                        <div className="flex gap-2">
+                            <Skeleton className="h-9 w-28 rounded-full" />
+                            <Skeleton className="h-9 w-28 rounded-full" />
+                        </div>
+                    </div>
+                </div>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+                    {/* Stat cards */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Skeleton className="h-4 w-24 rounded" />
+                                    <Skeleton className="h-8 w-8 rounded-lg" />
+                                </div>
+                                <Skeleton className="h-8 w-20 rounded" />
+                                <Skeleton className="h-3 w-28 rounded" />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Venture cards */}
+                    <div className="space-y-3">
+                        <Skeleton className="h-6 w-32 rounded" />
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="rounded-2xl border border-border bg-card p-5 flex items-start gap-4">
+                                <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="flex justify-between">
+                                        <Skeleton className="h-5 w-2/5 rounded" />
+                                        <Skeleton className="h-5 w-16 rounded-full" />
+                                    </div>
+                                    <Skeleton className="h-4 w-4/5 rounded" />
+                                    <div className="flex gap-2">
+                                        <Skeleton className="h-4 w-20 rounded" />
+                                        <Skeleton className="h-4 w-24 rounded" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </main>
             </div>
         );
     }
@@ -1381,6 +1414,7 @@ const FounderDashboard = () => {
                                 </div>
                             )}
                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100 rounded-full text-slate-400"
+                                aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
                                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                                 <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${!isSidebarOpen ? "rotate-180" : ""}`} />
                             </Button>
@@ -1400,6 +1434,7 @@ const FounderDashboard = () => {
                                     className={`flex-1 h-8 text-xs rounded-lg font-semibold ${messageFilter === 'unread' ? 'bg-white shadow-sm text-slate-800 border border-slate-200' : 'text-slate-500 hover:bg-white/60'}`}>Unread</Button>
                                 <Button variant="ghost" size="icon" onClick={() => setSoundEnabled(!soundEnabled)}
                                     className={`h-8 w-8 rounded-lg ${soundEnabled ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:bg-white/60'}`}
+                                    aria-label={soundEnabled ? "Mute notifications" : "Unmute notifications"}
                                     title={soundEnabled ? "Mute" : "Unmute"}>
                                     <Activity className="w-3.5 h-3.5" />
                                 </Button>

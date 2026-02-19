@@ -162,7 +162,9 @@ export type Database = {
           id: string
           interested_domains: string[] | null
           investment_capital: number | null
-          is_approved: boolean | null // Added missing column
+          is_admin: boolean | null
+          is_approved: boolean | null
+          is_premium: boolean | null
           linkedin_profile: string | null
           name: string
           phone: string | null
@@ -182,7 +184,9 @@ export type Database = {
           id?: string
           interested_domains?: string[] | null
           investment_capital?: number | null
-          is_approved?: boolean | null // Added missing column
+          is_admin?: boolean | null
+          is_approved?: boolean | null
+          is_premium?: boolean | null
           linkedin_profile?: string | null
           name: string
           phone?: string | null
@@ -202,7 +206,9 @@ export type Database = {
           id?: string
           interested_domains?: string[] | null
           investment_capital?: number | null
-          is_approved?: boolean | null // Added missing column
+          is_admin?: boolean | null
+          is_approved?: boolean | null
+          is_premium?: boolean | null
           linkedin_profile?: string | null
           name?: string
           phone?: string | null

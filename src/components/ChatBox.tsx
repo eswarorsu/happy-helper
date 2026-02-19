@@ -382,19 +382,19 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
           )}
 
           {requestStatus === "deal_done" && (
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/deal-center/${chatRequest.id}`)} className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full" title="View Deal">
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/deal-center/${chatRequest.id}`)} className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full" title="View Deal" aria-label="View deal centre">
               <TrendingUp className="w-4 h-4" />
             </Button>
           )}
 
           {onViewProfile && (
-            <Button variant="ghost" size="icon" onClick={onViewProfile} className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full" title="View Profile Info">
+            <Button variant="ghost" size="icon" onClick={onViewProfile} className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full" title="View Profile Info" aria-label="View profile">
               <Info className="w-4 h-4" />
             </Button>
           )}
 
           {variant === 'embedded' && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-1" onClick={onClose} title="Close Chat">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-1" onClick={onClose} title="Close Chat" aria-label="Close chat">
               <X className="w-5 h-5" />
             </Button>
           )}
@@ -458,7 +458,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
                   <Button size="sm" onClick={showRequestInput ? handleFounderRequest : handleDealProposal} className={`h-8 mr-1 px-4 ${showRequestInput ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white`}>
                     {showRequestInput ? 'Send Request' : 'Send Proposal'}
                   </Button>
-                  <Button size="icon" variant="ghost" onClick={() => { setShowProposalInput(false); setShowRequestInput(false); }} className="h-8 w-8 text-slate-400 hover:text-slate-600 rounded-lg mr-1">
+                  <Button size="icon" variant="ghost" onClick={() => { setShowProposalInput(false); setShowRequestInput(false); }} className="h-8 w-8 text-slate-400 hover:text-slate-600 rounded-lg mr-1" aria-label="Cancel input">
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
@@ -524,6 +524,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
               size="icon"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
+              aria-label="Attach file"
               className="h-10 w-10 text-slate-400 hover:text-slate-600 hover:bg-white rounded-full shrink-0"
             >
               {isUploading ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <Paperclip className="w-5 h-5" />}
@@ -552,6 +553,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
             type="submit"
             size="icon"
             disabled={isLoading || !newMessage.trim()}
+            aria-label="Send message"
             className="h-10 w-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg transition-all shrink-0 disabled:opacity-40"
           >
             <Send className="w-4 h-4 ml-0.5" />

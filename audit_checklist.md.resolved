@@ -31,9 +31,6 @@ Based on the "Comprehensive Technical, Design & Business Audit (Feb 2026)".
 - [ ] **Fix Fake UPI Verification** (Issue U-2, 4.1)
     - [ ] Remove the `setTimeout` fake success in [Payment.tsx](file:///d:/REDESIGUBG/happy-helper/src/pages/Payment.tsx).
     - [ ] Either implement real verification (e.g., Razorpay VPA API) OR clearly label it as "Format Check" to avoid misleading users.
-- [ ] **Add React Error Boundaries** (Issue A-5, 4.2)
-    - [ ] Create an `ErrorBoundary` component.
-    - [ ] Wrap main dashboard routes to prevent white-screen crashes.
 - [ ] **Fix Chat/Auth Sync** (Issue A-1, 4.2)
     - [ ] Investigate migrating Chat from Firebase to Supabase Realtime (long term) OR ensure user deletion handles both (short term).
     - [ ] *Recommendation: Stick to Firebase for now if working, but ensure keys are secure.*

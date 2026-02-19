@@ -274,21 +274,26 @@ interface Hero3DProps {
 }
 
 const Hero3D = ({ children }: Hero3DProps) => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [use3D, setUse3D] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const evaluate = () => {
+      const isNarrow = window.innerWidth < 768;
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // navigator.deviceMemory and hardwareConcurrency may be undefined on some browsers
+      const lowMemory = typeof (navigator as any).deviceMemory === "number" && (navigator as any).deviceMemory < 2;
+      const lowCPU = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency < 4;
+      setUse3D(!isNarrow && !prefersReduced && !lowMemory && !lowCPU);
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    evaluate();
+    window.addEventListener("resize", evaluate);
+    return () => window.removeEventListener("resize", evaluate);
   }, []);
 
   return (
     <div className="relative w-full min-h-[100vh] overflow-hidden" style={{ background: '#000000' }}>
       {/* 3D Canvas - Fixed position, behind content */}
-      {!isMobile && (
+      {use3D && (
         <div className="absolute inset-0 pointer-events-none">
           <Canvas
             camera={{ position: [0, 0, 10], fov: 60 }}
@@ -305,8 +310,8 @@ const Hero3D = ({ children }: Hero3DProps) => {
         </div>
       )}
 
-      {/* Mobile Fallback */}
-      {isMobile && <MobileFallback />}
+      {/* Mobile / low-power fallback */}
+      {!use3D && <MobileFallback />}
 
       {/* Content Overlay - On top of 3D */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[100vh] px-6">
