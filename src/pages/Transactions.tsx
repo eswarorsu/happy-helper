@@ -214,11 +214,11 @@ const Transactions = () => {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "confirmed":
-                return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200"><CheckCircle2 className="w-3 h-3 mr-1" />Confirmed</Badge>;
+                return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 whitespace-nowrap"><CheckCircle2 className="w-3 h-3 mr-1" />Confirmed</Badge>;
             case "pending":
-                return <Badge className="bg-amber-100 text-amber-700 border-amber-200"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+                return <Badge className="bg-amber-100 text-amber-700 border-amber-200 whitespace-nowrap"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
             case "cancelled":
-                return <Badge className="bg-red-100 text-red-700 border-red-200"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
+                return <Badge className="bg-red-100 text-red-700 border-red-200 whitespace-nowrap"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
             default:
                 return <Badge variant="outline">{status}</Badge>;
         }
@@ -277,7 +277,7 @@ const Transactions = () => {
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 w-40 sm:w-64 h-10 bg-white border-slate-200 focus:border-indigo-500"
+                                    className="pl-10 w-28 sm:w-64 h-10 bg-white border-slate-200 focus:border-indigo-500"
                                 />
                             </div>
                         </div>
@@ -290,7 +290,7 @@ const Transactions = () => {
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="grid grid-cols-3 gap-3 sm:gap-4"
+                        className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
                     >
                         <motion.div variants={itemVariants}>
                             <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
@@ -374,65 +374,68 @@ const Transactions = () => {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, x: 10 }}
                                                 transition={{ delay: index * 0.05 }}
-                                                className="p-4 hover:bg-slate-50 transition-colors cursor-pointer group"
+                                                className="px-4 py-2 sm:p-4 hover:bg-slate-50 transition-colors cursor-pointer group"
                                                 onClick={() => setSelectedTransaction(tx)}
                                             >
-                                                <div className="flex items-center gap-4">
-                                                    {/* Icon */}
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tx.status === "confirmed" ? "bg-emerald-100" :
+                                                <div className="flex items-start gap-3">
+                                                    <div className={`w-9 h-9 mt-0.5 rounded-lg flex items-center justify-center shrink-0 ${tx.status === "confirmed" ? "bg-emerald-100" :
                                                         tx.status === "pending" ? "bg-amber-100" : "bg-red-100"
                                                         }`}>
                                                         {tx.status === "confirmed" ? (
-                                                            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                                         ) : tx.status === "pending" ? (
-                                                            <Clock className="w-5 h-5 text-amber-600" />
+                                                            <Clock className="w-4 h-4 text-amber-600" />
                                                         ) : (
-                                                            <XCircle className="w-5 h-5 text-red-600" />
+                                                            <XCircle className="w-4 h-4 text-red-600" />
                                                         )}
                                                     </div>
 
-                                                    {/* Details */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <h4 className="text-sm font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
-                                                                {tx.idea?.title || "Unknown Venture"}
-                                                            </h4>
-                                                            {tx.type === "profit_share" ? (
-                                                                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                                                                    <TrendingUp className="w-3 h-3 mr-1" /> Profit Share
-                                                                </Badge>
-                                                            ) : (
-                                                                getStatusBadge(tx.status)
-                                                            )}
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="min-w-0">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <h4 className="text-base font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors max-w-full">
+                                                                        {tx.idea?.title || "Unknown Venture"}
+                                                                    </h4>
+                                                                    {tx.type === "profit_share" ? (
+                                                                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 whitespace-nowrap">
+                                                                            <TrendingUp className="w-3 h-3 mr-1" /> Profit Share
+                                                                        </Badge>
+                                                                    ) : (
+                                                                        getStatusBadge(tx.status)
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="text-right shrink-0 pl-2">
+                                                                <p className={`text-2xl sm:text-lg font-bold leading-none whitespace-nowrap ${tx.type === "profit_share"
+                                                                    ? (profile?.user_type === "investor" ? "text-emerald-600" : "text-red-600")
+                                                                    : (profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600")
+                                                                    }`}>
+                                                                    {tx.type === "profit_share"
+                                                                        ? (profile?.user_type === "investor" ? "+" : "-")
+                                                                        : (profile?.user_type === "investor" ? "-" : "+")
+                                                                    }₹{Number(tx.amount).toLocaleString()}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                                                            <span className="flex items-center gap-1">
+
+                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-slate-500">
+                                                            <span className="flex items-center gap-1 whitespace-nowrap">
                                                                 <Building2 className="w-3 h-3 text-slate-400" />
                                                                 {tx.idea?.domain || "N/A"}
                                                             </span>
-                                                            <span className="flex items-center gap-1">
+                                                            <span className="flex items-center gap-1 whitespace-nowrap">
                                                                 <User className="w-3 h-3 text-slate-400" />
                                                                 {profile?.user_type === "investor" ? tx.founder?.name : tx.investor?.name}
                                                             </span>
-                                                            <span className="flex items-center gap-1">
+                                                            <span className="flex items-center gap-1 whitespace-nowrap">
                                                                 <Calendar className="w-3 h-3 text-slate-400" />
                                                                 {formatDate(tx.created_at)}
                                                             </span>
                                                         </div>
-                                                    </div>
 
-                                                    {/* Amount */}
-                                                    <div className="text-right shrink-0">
-                                                        <p className={`text-lg font-bold ${tx.type === "profit_share"
-                                                            ? (profile?.user_type === "investor" ? "text-emerald-600" : "text-red-600")
-                                                            : (profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600")
-                                                            }`}>
-                                                            {tx.type === "profit_share"
-                                                                ? (profile?.user_type === "investor" ? "+" : "-")
-                                                                : (profile?.user_type === "investor" ? "-" : "+")
-                                                            }₹{Number(tx.amount).toLocaleString()}
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+                                                        <p className="text-[11px] text-slate-400 uppercase tracking-wider mt-1 break-words pr-2">
                                                             {tx.notes || tx.payment_method || "Bank Transfer"}
                                                         </p>
                                                     </div>
@@ -505,7 +508,7 @@ const Transactions = () => {
                                 </div>
                                 <div className="flex justify-between py-2 border-b border-slate-100">
                                     <span className="text-slate-500">Purpose/Description</span>
-                                    <span className="font-medium text-slate-900 text-right max-w-[200px] truncate">
+                                    <span className="font-medium text-slate-900 text-right max-w-full sm:max-w-[200px] break-words">
                                         {selectedTransaction.notes || "N/A"}
                                     </span>
                                 </div>

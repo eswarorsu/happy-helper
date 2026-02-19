@@ -29,6 +29,7 @@ import { WeeklyLogSheet } from "@/components/WeeklyLogSheet";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityTimerBadge } from "@/components/ActivityTimerBadge";
+import { evaluateFounderSubmitAccess, ensurePremiumFlag } from "@/lib/founderAccess";
 import {
     BarChart,
     Bar,
@@ -1155,6 +1156,27 @@ const FounderDashboard = () => {
         });
     };
 
+    const handleNewVentureNavigation = async () => {
+        if (!profile?.is_approved) {
+            toast({
+                title: "Verification Required",
+                description: "Your profile must be verified first.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        await ensurePremiumFlag(profile.user_id);
+
+        const access = await evaluateFounderSubmitAccess(profile);
+        if (access.allowed) {
+            navigate("/submit-idea");
+            return;
+        }
+
+        navigate("/payment");
+    };
+
     // ============================================================================
     // DERIVED DATA
     // ============================================================================
@@ -1459,13 +1481,20 @@ const FounderDashboard = () => {
                                 </h1>
                                 <p className="text-muted-foreground mt-1 text-sm sm:text-lg">Here's an overview of your venture portfolio</p>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
 
                                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                    <Button onClick={() => {
-                                        if (!profile?.is_approved) { toast({ title: "Verification Required", description: "Your profile must be verified first.", variant: "destructive" }); return; }
-                                        navigate("/payment");
-                                    }} className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal shadow-lg shadow-brand-yellow/20 rounded-xl h-11 px-6 font-bold">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => navigate("/transactions")}
+                                        className="rounded-xl h-11 px-5 font-semibold"
+                                    >
+                                        <Receipt className="w-4 h-4 mr-2" /> Transactions
+                                    </Button>
+                                </motion.div>
+
+                                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                    <Button onClick={handleNewVentureNavigation} className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal shadow-lg shadow-brand-yellow/20 rounded-xl h-11 px-6 font-bold">
                                         <Plus className="w-5 h-5 mr-2" /> New Venture
                                     </Button>
                                 </motion.div>
@@ -1640,7 +1669,7 @@ const FounderDashboard = () => {
                                                 <h3 className="text-lg font-semibold text-foreground mb-2">No ventures yet</h3>
                                                 <p className="text-sm text-muted-foreground mb-6">Launch your first venture to start connecting with investors</p>
                                                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                                    <Button onClick={() => navigate("/payment")} className="bg-indigo-600 hover:bg-indigo-700">
+                                                    <Button onClick={handleNewVentureNavigation} className="bg-indigo-600 hover:bg-indigo-700">
                                                         <Plus className="w-4 h-4 mr-2" /> Launch Venture
                                                     </Button>
                                                 </motion.div>

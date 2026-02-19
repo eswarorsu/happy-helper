@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
     MapPin, Phone, Briefcase
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import { evaluateFounderSubmitAccess, ensurePremiumFlag, type SubmitAccessResult } from "@/lib/founderAccess";
 
 const DOMAINS = [
     "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
@@ -31,13 +32,13 @@ const STEPS = [
 const SubmitIdea = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
-    const [searchParams] = useSearchParams();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [paymentVerified, setPaymentVerified] = useState(false);
     const [profile, setProfile] = useState<any>(null);
+    const [access, setAccess] = useState<SubmitAccessResult | null>(null);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -75,36 +76,34 @@ const SubmitIdea = () => {
                 return;
             }
 
-            setProfile(profileData);
+            await ensurePremiumFlag(session.user.id);
 
-            const paymentId = searchParams.get("payment_id");
-            const couponCode = searchParams.get("coupon");
-            let hasValidAccess = false;
+            const { data: refreshedProfile } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("user_id", session.user.id)
+                .single();
 
-            if (paymentId) {
-                const { data } = await ((supabase as any).from("payments").select("*").eq("razorpay_payment_id", paymentId).eq("status", "success").is("idea_id", null).single() as any);
-                if (data) hasValidAccess = true;
-            } else if (couponCode) {
-                const { data } = await ((supabase as any).from("payments").select("*").eq("user_id", session.user.id).eq("status", "success").eq("razorpay_signature", "COUPON_REDEMPTION").is("idea_id", null).order("created_at", { ascending: false }).limit(1).single() as any);
-                if (data) hasValidAccess = true;
-            } else {
-                const { data } = await ((supabase as any).from("payments").select("*").eq("user_id", session.user.id).eq("status", "success").is("idea_id", null).order("created_at", { ascending: false }).limit(1).single() as any);
-                if (data) hasValidAccess = true;
-            }
+            const activeProfile = refreshedProfile || profileData;
+            setProfile(activeProfile);
 
-            if (hasValidAccess) {
+            const accessResult = await evaluateFounderSubmitAccess(activeProfile);
+            setAccess(accessResult);
+
+            if (accessResult.allowed) {
                 setPaymentVerified(true);
-            } else {
-                toast({ title: "Access Denied", description: "Please complete payment before submitting an idea.", variant: "destructive" });
-                navigate("/payment");
+                setIsLoading(false);
                 return;
             }
 
-            setIsLoading(false);
+            toast({ title: "Payment Required", description: "Complete payment or use an available coupon to submit another idea.", variant: "destructive" });
+            navigate("/payment");
+            return;
+
         };
 
         verifyAccess();
-    }, [navigate, searchParams, toast]);
+    }, [navigate, toast]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -180,11 +179,11 @@ const SubmitIdea = () => {
 
             if (error) throw error;
 
-            const paymentId = searchParams.get("payment_id");
-            if (paymentId) {
-                await ((supabase as any).from("payments").update({ idea_id: ideaData.id }).eq("razorpay_payment_id", paymentId) as any);
-            } else {
-                await ((supabase as any).from("payments").update({ idea_id: ideaData.id }).eq("user_id", profile.user_id).eq("status", "success").is("idea_id", null).order("created_at", { ascending: false }).limit(1) as any);
+            if (access?.reason === "payment_or_coupon" && access.unclaimedPaymentRecordId) {
+                await ((supabase as any)
+                    .from("payments")
+                    .update({ idea_id: ideaData.id })
+                    .eq("id", access.unclaimedPaymentRecordId) as any);
             }
 
             toast({ title: "Idea Submitted! 🚀", description: "Your vision is under review." });

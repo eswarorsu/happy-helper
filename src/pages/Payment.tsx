@@ -108,6 +108,11 @@ const Payment = () => {
                             status: "success",
                             verified_at: new Date().toISOString()
                         });
+
+                        await (supabase as any)
+                            .from("profiles")
+                            .update({ is_premium: true })
+                            .eq("user_id", session.user.id);
                     }
                     navigate("/submit-idea?coupon=" + code);
                 } catch (err) {
@@ -188,6 +193,11 @@ const Payment = () => {
                                     status: "success",
                                     verified_at: new Date().toISOString()
                                 });
+
+                                await (supabase as any)
+                                    .from("profiles")
+                                    .update({ is_premium: true })
+                                    .eq("user_id", session.user.id);
                             }
                             toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
                             navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
