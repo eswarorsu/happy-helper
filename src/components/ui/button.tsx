@@ -18,10 +18,10 @@ const buttonVariants = cva(
         accent: "bg-brand-yellow text-brand-charcoal hover:bg-brand-charcoal hover:text-brand-yellow hover:-translate-y-0.5",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-md px-3.5",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-11 sm:h-10 px-5 py-2",
+        sm: "h-10 sm:h-9 rounded-md px-3.5",
+        lg: "h-12 sm:h-11 rounded-md px-8",
+        icon: "h-11 w-11 sm:h-10 sm:w-10",
       },
     },
     defaultVariants: {

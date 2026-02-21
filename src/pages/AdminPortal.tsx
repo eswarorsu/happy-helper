@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminPortal = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -34,6 +35,11 @@ const AdminPortal = () => {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (isMobile) setIsSidebarOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -68,7 +74,7 @@ const AdminPortal = () => {
     try {
       const { data: userData } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
       const { data: ideaData } = await supabase.from("ideas").select("*, founder:profiles!ideas_founder_id_fkey(name, email, current_job, education, experience, linkedin_profile, avatar_url, phone, domain, investment_capital, interested_domains, created_at)").order("created_at", { ascending: false });
-      const { data: payData } = await supabase.from("payments").select("*, profiles(name, email)").order("created_at", { ascending: false });
+      const { data: payData } = await (supabase as any).from("payments").select("*, profiles(name, email)").order("created_at", { ascending: false });
       const { data: investData } = await (supabase as any).from("investment_records").select("*, founder:profiles!founder_id(name), investor:profiles!investor_id(name), idea:ideas(*)").order("created_at", { ascending: false });
 
       // Fetch UPI Transactions
@@ -221,10 +227,17 @@ const AdminPortal = () => {
         <aside
           className={`bg-[#020617] border-r border-slate-800 transition-all duration-300 flex flex-col z-50 ${isSidebarOpen ? 'fixed inset-y-0 left-0 w-64 lg:relative' : 'hidden lg:flex w-20'}`}
         >
-          <div className="p-6 flex items-center gap-3 border-b border-slate-800 h-20">
-            <Logo size="sm" />
+          <div className="p-6 flex items-center justify-between border-b border-slate-800 h-20">
+            <div className="flex items-center gap-3">
+              <Logo size="sm" />
+              {isSidebarOpen && (
+                <span className="font-bold text-lg tracking-tight text-white truncate">INNOVESTOR</span>
+              )}
+            </div>
             {isSidebarOpen && (
-              <span className="font-bold text-lg tracking-tight text-white truncate">INNOVESTOR</span>
+              <Button variant="ghost" size="icon" className="lg:hidden text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+                <X size={20} />
+              </Button>
             )}
           </div>
 
@@ -235,7 +248,10 @@ const AdminPortal = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (isMobile) setIsSidebarOpen(false);
+                  }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${isActive ? 'bg-brand-yellow/10 text-brand-yellow' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
                 >
                   <Icon size={20} className={isActive ? 'text-brand-yellow' : 'group-hover:text-slate-200'} />
