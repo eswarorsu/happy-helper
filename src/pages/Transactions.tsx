@@ -14,7 +14,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
-import { Skeleton } from "@/components/ui/skeleton";
+
 
 interface Transaction {
     id: string;
@@ -236,46 +236,9 @@ const Transactions = () => {
 
     if (isLoading) {
         return (
-            <AnimatedGridBackground className="bg-background">
-                <div className="min-h-screen">
-                    {/* Skeleton header */}
-                    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
-                        <div className="max-w-6xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Skeleton className="h-8 w-16 rounded-md" />
-                                <Skeleton className="h-6 w-36 rounded" />
-                            </div>
-                            <Skeleton className="h-6 w-24 rounded-full" />
-                        </div>
-                    </header>
-                    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-4">
-                        {/* Summary cards skeleton */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                            {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="rounded-xl border bg-white p-4 space-y-2">
-                                    <Skeleton className="h-4 w-20 rounded" />
-                                    <Skeleton className="h-7 w-28 rounded" />
-                                </div>
-                            ))}
-                        </div>
-                        {/* Transaction row skeletons */}
-                        <div className="rounded-xl border bg-white divide-y">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="flex items-start gap-3 p-4">
-                                    <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex justify-between">
-                                            <Skeleton className="h-4 w-2/5 rounded" />
-                                            <Skeleton className="h-5 w-20 rounded" />
-                                        </div>
-                                        <Skeleton className="h-3 w-3/5 rounded" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </main>
-                </div>
-            </AnimatedGridBackground>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin" />
+            </div>
         );
     }
 

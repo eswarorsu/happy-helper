@@ -23,7 +23,7 @@ import { getUnreadCount, connectFirebase, subscribeToUnreadCount, auth as fireba
 import { signOut as firebaseSignOut } from "firebase/auth";
 import { ProfileViewModal } from "@/components/ProfileViewModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { formatDistanceToNow } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { WeeklyLogSheet } from "@/components/WeeklyLogSheet";
@@ -1207,52 +1207,8 @@ const FounderDashboard = () => {
     // ============================================================================
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-background">
-                {/* Skeleton nav */}
-                <div className="border-b border-border bg-background/80 backdrop-blur-md py-3 px-4 sm:px-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <Skeleton className="h-8 w-32 rounded" />
-                        <div className="flex gap-2">
-                            <Skeleton className="h-9 w-28 rounded-full" />
-                            <Skeleton className="h-9 w-28 rounded-full" />
-                        </div>
-                    </div>
-                </div>
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-                    {/* Stat cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <Skeleton className="h-4 w-24 rounded" />
-                                    <Skeleton className="h-8 w-8 rounded-lg" />
-                                </div>
-                                <Skeleton className="h-8 w-20 rounded" />
-                                <Skeleton className="h-3 w-28 rounded" />
-                            </div>
-                        ))}
-                    </div>
-                    {/* Venture cards */}
-                    <div className="space-y-3">
-                        <Skeleton className="h-6 w-32 rounded" />
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="rounded-2xl border border-border bg-card p-5 flex items-start gap-4">
-                                <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="flex justify-between">
-                                        <Skeleton className="h-5 w-2/5 rounded" />
-                                        <Skeleton className="h-5 w-16 rounded-full" />
-                                    </div>
-                                    <Skeleton className="h-4 w-4/5 rounded" />
-                                    <div className="flex gap-2">
-                                        <Skeleton className="h-4 w-20 rounded" />
-                                        <Skeleton className="h-4 w-24 rounded" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </main>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin" />
             </div>
         );
     }

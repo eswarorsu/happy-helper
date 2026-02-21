@@ -15,7 +15,7 @@ import {
     DollarSign, TrendingUp, Users, Sparkles, ChevronDown, X, Store
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -307,41 +307,8 @@ const Marketplace = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-background text-foreground">
-                {/* Skeleton header */}
-                <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="h-8 w-16 rounded-md" />
-                            <Skeleton className="h-6 w-40 rounded" />
-                        </div>
-                        <Skeleton className="h-9 w-64 rounded-full" />
-                    </div>
-                </header>
-                {/* Skeleton card grid */}
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
-                                <div className="flex items-center justify-between">
-                                    <Skeleton className="h-5 w-3/5 rounded" />
-                                    <Skeleton className="h-5 w-16 rounded-full" />
-                                </div>
-                                <Skeleton className="h-4 w-full rounded" />
-                                <Skeleton className="h-4 w-4/5 rounded" />
-                                <div className="flex gap-2 mt-1">
-                                    <Skeleton className="h-5 w-20 rounded-full" />
-                                    <Skeleton className="h-5 w-24 rounded-full" />
-                                </div>
-                                <Skeleton className="h-2.5 w-full rounded-full mt-2" />
-                                <div className="flex justify-between mt-1">
-                                    <Skeleton className="h-4 w-24 rounded" />
-                                    <Skeleton className="h-4 w-20 rounded" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </main>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin" />
             </div>
         );
     }
