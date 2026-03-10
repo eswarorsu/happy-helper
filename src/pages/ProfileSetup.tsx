@@ -430,190 +430,262 @@ const ProfileSetup = () => {
 
     return (
       <div className="flex min-h-screen bg-slate-50 font-sans selection:bg-brand-yellow/20 selection:text-brand-charcoal">
-        {/* Sidebar - Light Theme */}
-        <div className="hidden lg:flex w-80 bg-brand-yellow text-brand-charcoal border-r border-border/60 flex-col justify-between fixed h-full z-20">
-          <div className="p-8">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{mode === 'edit' ? 'Edit Profile' : 'Onboarding'}</h2>
-            <h1 className="text-2xl font-black text-foreground mb-10">{mode === 'edit' ? 'Update Details' : 'Founder Profile'}</h1>
+        {/* Sidebar - Clean White */}
+        <div className="hidden lg:flex w-72 flex-col justify-between fixed h-full z-20 bg-white border-r border-slate-100">
+          <div className="p-7">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 mb-8">
+              <Logo size="sm" />
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mode === 'edit' ? 'Edit Profile' : 'Onboarding'}</p>
+                <p className="text-sm font-black text-slate-900 leading-tight">{mode === 'edit' ? 'Update Details' : 'Founder Profile'}</p>
+              </div>
+            </div>
 
-            <div className="space-y-6 relative">
-              {/* Connecting Line */}
-              <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border/60 z-0"></div>
+            {/* Progress bar */}
+            <div className="mb-8">
+              <div className="flex justify-between text-[11px] text-slate-400 mb-2">
+                <span>Progress</span>
+                <span className="text-amber-500 font-semibold">{Math.round((step / 4) * 100)}%</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-brand-yellow to-amber-400 rounded-full transition-all duration-700" style={{ width: `${(step / 4) * 100}%` }} />
+              </div>
+            </div>
 
+            <div className="space-y-1">
               {steps.map((s) => {
                 const isActive = step === s.id;
                 const isCompleted = s.id < step;
                 return (
-                  <div key={s.id} className="relative z-10 flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white transition-all ${isActive ? 'bg-brand-yellow text-brand-charcoal shadow-lg shadow-brand-yellow/30 scale-110' : isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                      {isCompleted ? <Check className="w-4 h-4" /> : s.id}
+                  <div key={s.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-amber-50 border border-amber-200' : 'border border-transparent'
+                    }`}>
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-all shrink-0 ${isActive ? 'bg-brand-yellow text-brand-charcoal shadow-sm'
+                      : isCompleted ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-400'
+                      }`}>
+                      {isCompleted ? <Check className="w-3.5 h-3.5" /> : s.id}
                     </div>
-                    <div className={`transition-colors ${isActive ? 'text-brand-charcoal font-bold' : 'text-slate-500 font-medium'}`}>
-                      {s.label}
-                    </div>
+                    <span className={`text-sm font-semibold ${isActive ? 'text-amber-700' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
+                      }`}>{s.label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          <div className="p-8 border-t border-border/60">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-red-600 hover:bg-red-50" onClick={() => navigate("/auth?mode=login")}>
+          <div className="p-7 border-t border-slate-100">
+            <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => navigate("/auth?mode=login")}>
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-80">
-          <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-12 pt-8 sm:pt-12 lg:pt-20">
+        <div className="flex-1 lg:ml-72">
+          <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-10 pt-8 sm:pt-12 lg:pt-16">
             {/* Mobile Progress */}
             <div className="lg:hidden mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-foreground">Step {step} of 4</span>
-                <span className="text-xs text-muted-foreground">{steps[step - 1].label}</span>
+                <span className="text-sm font-bold text-slate-800">Step {step} of 4</span>
+                <span className="text-xs text-slate-400">{steps[step - 1].label}</span>
               </div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-brand-yellow transition-all duration-500 rounded-full" style={{ width: `${(step / 4) * 100}%` }} />
+              <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-brand-yellow to-amber-400 transition-all duration-500 rounded-full" style={{ width: `${(step / 4) * 100}%` }} />
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden text-slate-900">
-              <div className="hidden lg:block p-1 h-1 bg-secondary/50">
-                <div className="h-full bg-brand-yellow transition-all duration-500 ease-out rounded-full" style={{ width: `${(step / 4) * 100}%` }} />
-              </div>
+            {/* Step label on desktop */}
+            <div className="hidden lg:flex items-center gap-3 mb-6">
+              <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">Step {step} of 4</span>
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs text-slate-400">{steps[step - 1].label}</span>
+            </div>
 
-              <div className="p-5 sm:p-8 lg:p-12 min-h-[500px] flex flex-col justify-between">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/60 overflow-hidden">
+              {/* Yellow top accent bar */}
+              <div className="h-1 bg-gradient-to-r from-brand-yellow to-amber-400" />
+
+              <div className="p-6 sm:p-8 lg:p-10 min-h-[520px] flex flex-col justify-between">
                 {/* --- STEP CONTENT --- */}
                 {step === 1 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
-                      <h2 className="text-2xl font-black text-foreground">Let's start with the basics</h2>
-                      <p className="text-muted-foreground mt-2">Tell us a bit about yourself.</p>
+                      <h2 className="text-2xl font-black text-slate-900">Let's start with the basics</h2>
+                      <p className="text-slate-500 mt-1.5 text-sm">Tell us a bit about yourself to personalise your experience.</p>
                     </div>
 
                     <div className="space-y-6">
-                      <div className="flex items-center gap-6">
-                        <Avatar className="w-24 h-24 border-4 border-slate-50">
-                          <AvatarImage src={formData.avatarUrl} className="object-cover" />
-                          <AvatarFallback className="bg-slate-100 text-slate-400 text-2xl font-bold">
-                            {formData.name?.charAt(0) || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-bold text-slate-700 mb-2">Profile Photo <span className="text-slate-400 font-normal">(Optional)</span></p>
-                          <Button variant="outline" size="sm" onClick={() => handleInputChange("avatarUrl", `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`)}>
-                            Generate Random
+                      {/* Avatar Picker */}
+                      <div className="flex items-center gap-5 p-4 rounded-2xl border border-slate-100 bg-slate-50">
+                        <div className="relative shrink-0">
+                          <div className="w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-brand-yellow/50 ring-offset-2 ring-offset-white">
+                            {formData.avatarUrl ? (
+                              <img src={formData.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+                                <span className="text-2xl font-black text-amber-600">{formData.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                              </div>
+                            )}
+                          </div>
+                          {formData.avatarUrl && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-slate-800 mb-1">Profile Photo <span className="text-slate-400 font-normal text-xs">(Optional)</span></p>
+                          <p className="text-xs text-slate-400 mb-3">Generate a unique avatar or skip for now</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleInputChange("avatarUrl", `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`)}
+                            className="border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 text-xs"
+                          >
+                            ✨ Generate Avatar
                           </Button>
+                          {formData.avatarUrl && (
+                            <button onClick={() => handleInputChange("avatarUrl", "")} className="ml-2 text-xs text-slate-400 hover:text-red-500 transition-colors">
+                              Remove
+                            </button>
+                          )}
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-bold text-slate-700">Full Name</Label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e) => handleInputChange("name", e.target.value)}
-                          className={`h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all ${errors.name ? 'border-destructive' : ''}`}
-                          placeholder="e.g. John Doe"
-                        />
-                        {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Full Name</Label>
+                        <div className="relative">
+                          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input
+                            value={formData.name}
+                            onChange={(e) => handleInputChange("name", e.target.value)}
+                            className={`h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 transition-all rounded-xl ${errors.name ? 'border-red-400' : ''}`}
+                            placeholder="e.g. Chepuri Natraj"
+                          />
+                        </div>
+                        {errors.name && <p className="text-xs text-red-500 flex items-center gap-1">⚠ {errors.name}</p>}
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-bold text-slate-700">Current Status</Label>
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Current Status</Label>
                         <Select value={formData.status} onValueChange={(v) => handleInputChange("status", v)}>
-                          <SelectTrigger className="h-12 bg-slate-50 border-slate-200">
-                            <SelectValue placeholder="Student" />
+                          <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 rounded-xl focus:border-amber-400">
+                            <SelectValue placeholder="Select your current status" />
                           </SelectTrigger>
-                          <SelectContent>
-                            {STATUS_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
+                            {STATUS_OPTIONS.map(opt => <SelectItem key={opt} value={opt} className="focus:bg-amber-50 focus:text-amber-700">{opt}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                        {errors.status && <p className="text-xs text-red-500">⚠ {errors.status}</p>}
                       </div>
                     </div>
                   </div>
                 )}
 
                 {step === 2 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Professional Info</h2>
-                      <p className="text-slate-500 mt-2">Your experience matters.</p>
+                      <p className="text-slate-500 mt-1.5 text-sm">Help investors understand your background.</p>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-5">
+                      <div className="grid md:grid-cols-2 gap-5">
                         <div className="space-y-2">
-                          <Label>Current Job / Role</Label>
-                          <Input value={formData.currentJob} onChange={(e) => handleInputChange("currentJob", e.target.value)} className="h-12 bg-slate-50" placeholder="e.g. Founder" />
+                          <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Current Job / Role</Label>
+                          <div className="relative">
+                            <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input value={formData.currentJob} onChange={(e) => handleInputChange("currentJob", e.target.value)} className="h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl" placeholder="e.g. Founder" />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <Label>Education</Label>
-                          <Input value={formData.education} onChange={(e) => handleInputChange("education", e.target.value)} className="h-12 bg-slate-50" placeholder="University" />
-                          {errors.education && <p className="text-sm text-destructive">{errors.education}</p>}
+                          <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Education</Label>
+                          <div className="relative">
+                            <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input value={formData.education} onChange={(e) => handleInputChange("education", e.target.value)} className={`h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl ${errors.education ? 'border-red-400' : ''}`} placeholder="University or College" />
+                          </div>
+                          {errors.education && <p className="text-xs text-red-500">⚠ {errors.education}</p>}
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Primary Domain</Label>
-                        <Input value={formData.domain} onChange={(e) => handleInputChange("domain", e.target.value)} className="h-12 bg-slate-50" placeholder="e.g. Fintech" />
-                        {errors.domain && <p className="text-sm text-destructive">{errors.domain}</p>}
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Primary Domain / Industry</Label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input value={formData.domain} onChange={(e) => handleInputChange("domain", e.target.value)} className={`h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl ${errors.domain ? 'border-red-400' : ''}`} placeholder="e.g. Fintech, EdTech, SaaS" />
+                        </div>
+                        {errors.domain && <p className="text-xs text-red-500">⚠ {errors.domain}</p>}
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-bold text-slate-700">UPI ID <span className="text-slate-400 font-normal">(For receiving investments)</span></Label>
-                        <Input
-                          value={formData.upiId}
-                          onChange={(e) => handleInputChange("upiId", e.target.value)}
-                          className="h-12 bg-slate-50 border-slate-200 focus:bg-white"
-                          placeholder="e.g. founder@upi"
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">UPI ID <span className="text-slate-400 font-normal normal-case">(For receiving investments)</span></Label>
+                        <div className="relative">
+                          <Receipt className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input
+                            value={formData.upiId}
+                            onChange={(e) => handleInputChange("upiId", e.target.value)}
+                            className="h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl transition-all"
+                            placeholder="e.g. yourname@okicici"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">About You / Experience</Label>
+                        <Textarea
+                          value={formData.experience}
+                          onChange={(e) => handleInputChange("experience", e.target.value)}
+                          className={`min-h-[110px] bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl p-4 resize-none ${errors.experience ? 'border-red-400' : ''}`}
+                          placeholder="Briefly describe your journey, skills, and what drives you as a founder..."
                         />
-                      </div>
-
-
-                      <div className="space-y-2">
-                        <Label>About You (Experience)</Label>
-                        <Textarea value={formData.experience} onChange={(e) => handleInputChange("experience", e.target.value)} className="min-h-[120px] bg-slate-50 p-4" placeholder="Briefly describe your journey..." />
-                        {errors.experience && <p className="text-sm text-destructive">{errors.experience}</p>}
+                        {errors.experience && <p className="text-xs text-red-500">⚠ {errors.experience}</p>}
                       </div>
                     </div>
                   </div>
                 )}
 
                 {step === 3 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Contact & Socials</h2>
-                      <p className="text-slate-500 mt-2">Connect with investors.</p>
+                      <p className="text-slate-500 mt-1.5 text-sm">How investors can reach and verify you.</p>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-5">
+                      <div className="grid md:grid-cols-2 gap-5">
                         <div className="space-y-2">
-                          <Label>Email</Label>
-                          <Input value={formData.email} disabled className="h-12 bg-slate-100 text-slate-500" />
+                          <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Email</Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                            <Input value={formData.email} disabled className="h-12 pl-10 bg-slate-50 border-slate-200 text-slate-400 rounded-xl cursor-not-allowed" />
+                          </div>
+                          <p className="text-[11px] text-emerald-600 flex items-center gap-1"><Check className="w-3 h-3" /> Verified via authentication</p>
                         </div>
                         <div className="space-y-2">
-                          <Label>Phone</Label>
-                          <Input value={formData.phone} onChange={(e) => handleInputChange("phone", e.target.value)} className="h-12 bg-slate-50" placeholder="+1..." />
-                          {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                          <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Phone</Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input value={formData.phone} onChange={(e) => handleInputChange("phone", e.target.value)} className={`h-12 pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl ${errors.phone ? 'border-red-400' : ''}`} placeholder="+91 98765 43210" />
+                          </div>
+                          {errors.phone && <p className="text-xs text-red-500">⚠ {errors.phone}</p>}
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label>LinkedIn Profile <span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">LinkedIn Profile <span className="text-amber-500">*</span></Label>
                         <div className="relative">
-                          <Linkedin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-600" />
-                          <Input value={formData.linkedinProfile} onChange={(e) => handleInputChange("linkedinProfile", e.target.value)} className="h-12 pl-12 bg-slate-50" placeholder="https://linkedin.com/in/..." />
+                          <Linkedin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                          <Input value={formData.linkedinProfile} onChange={(e) => handleInputChange("linkedinProfile", e.target.value)} className={`h-12 pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-400 rounded-xl ${errors.linkedinProfile ? 'border-red-400' : ''}`} placeholder="https://linkedin.com/in/yourprofile" />
                         </div>
-                        {errors.linkedinProfile && <p className="text-sm text-destructive">{errors.linkedinProfile}</p>}
+                        {errors.linkedinProfile && <p className="text-xs text-red-500">⚠ {errors.linkedinProfile}</p>}
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Website (Optional)</Label>
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Website <span className="text-slate-400 font-normal normal-case">(Optional)</span></Label>
                         <div className="relative">
-                          <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                          <Input value={formData.website} onChange={(e) => handleInputChange("website", e.target.value)} className="h-12 pl-12 bg-slate-50" placeholder="https://..." />
+                          <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input value={formData.website} onChange={(e) => handleInputChange("website", e.target.value)} className="h-12 pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl" placeholder="https://yourstartup.com" />
                         </div>
                       </div>
                     </div>
@@ -622,35 +694,35 @@ const ProfileSetup = () => {
 
                 {/* --- STEP 4: STARTUP CONTEXT --- */}
                 {step === 4 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
-                      <h2 className="text-2xl font-black text-foreground">Tell us about your startup</h2>
-                      <p className="text-muted-foreground mt-2">Take 60 seconds to personalise your experience. You can update this anytime.</p>
+                      <h2 className="text-2xl font-black text-slate-900">Tell us about your startup</h2>
+                      <p className="text-slate-500 mt-1.5 text-sm">Takes 60 seconds. You can update this anytime later.</p>
                     </div>
 
                     {/* Company Name + Team Size */}
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label className="font-bold text-slate-700 flex items-center gap-2">
-                          <Building className="w-4 h-4 text-slate-400" /> Company / Startup Name
+                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
+                          <Building className="w-3.5 h-3.5" /> Company / Startup Name
                         </Label>
                         <Input
                           value={formData.companyName}
                           onChange={(e) => handleInputChange("companyName", e.target.value)}
-                          className="h-12 bg-slate-50 border-slate-200 focus:bg-white"
+                          className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-brand-yellow/40 rounded-xl"
                           placeholder="e.g. Acme Corp"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="font-bold text-slate-700 flex items-center gap-2">
-                          <User className="w-4 h-4 text-slate-400" /> Team Size
+                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
+                          <User className="w-3.5 h-3.5" /> Team Size
                         </Label>
                         <Input
                           type="number"
                           min="1"
                           value={formData.teamSize}
                           onChange={(e) => handleInputChange("teamSize", e.target.value)}
-                          className="h-12 bg-slate-50 border-slate-200 focus:bg-white"
+                          className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-brand-yellow/40 rounded-xl"
                           placeholder="e.g. 3"
                         />
                       </div>
@@ -658,20 +730,20 @@ const ProfileSetup = () => {
 
                     {/* Startup Stage */}
                     <div className="space-y-3">
-                      <Label className="font-bold text-slate-700">What stage is your startup?</Label>
+                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What stage is your startup?</Label>
                       <div className="space-y-2">
                         {STARTUP_STAGES.map((s) => (
                           <button
                             key={s.value}
                             type="button"
                             onClick={() => handleInputChange("startupStage", s.value)}
-                            className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${formData.startupStage === s.value
-                                ? "border-brand-yellow bg-brand-yellow/10"
-                                : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
+                            className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${formData.startupStage === s.value
+                              ? "border-brand-yellow/50 bg-brand-yellow/10"
+                              : "border-white/8 bg-white/4 hover:border-white/15 hover:bg-white/7"
                               }`}
                           >
-                            <p className={`font-semibold text-sm ${formData.startupStage === s.value ? "text-brand-charcoal" : "text-slate-700"}`}>{s.label}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">{s.sub}</p>
+                            <p className={`font-semibold text-sm ${formData.startupStage === s.value ? "text-brand-yellow" : "text-white/80"}`}>{s.label}</p>
+                            <p className={`text-xs mt-0.5 ${formData.startupStage === s.value ? "text-brand-yellow/60" : "text-white/35"}`}>{s.sub}</p>
                           </button>
                         ))}
                       </div>
@@ -679,7 +751,7 @@ const ProfileSetup = () => {
 
                     {/* How did you hear? */}
                     <div className="space-y-3">
-                      <Label className="font-bold text-slate-700">How did you hear about INNOVESTOR?</Label>
+                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">How did you hear about INNOVESTOR?</Label>
                       <div className="flex flex-wrap gap-2">
                         {DISCOVERY_OPTIONS.map((opt) => (
                           <button
@@ -687,8 +759,8 @@ const ProfileSetup = () => {
                             type="button"
                             onClick={() => handleInputChange("discoverySource", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.discoverySource === opt
-                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
+                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
                               }`}
                           >
                             {opt}
@@ -699,7 +771,7 @@ const ProfileSetup = () => {
 
                     {/* Primary Goal */}
                     <div className="space-y-3">
-                      <Label className="font-bold text-slate-700">What is your primary goal right now?</Label>
+                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What is your primary goal right now?</Label>
                       <div className="flex flex-wrap gap-2">
                         {PRIMARY_GOALS.map((opt) => (
                           <button
@@ -707,8 +779,8 @@ const ProfileSetup = () => {
                             type="button"
                             onClick={() => handleInputChange("primaryGoal", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.primaryGoal === opt
-                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
+                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
                               }`}
                           >
                             {opt}
@@ -719,7 +791,7 @@ const ProfileSetup = () => {
 
                     {/* Biggest Challenge */}
                     <div className="space-y-3">
-                      <Label className="font-bold text-slate-700">What is your biggest challenge today?</Label>
+                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What is your biggest challenge today?</Label>
                       <div className="flex flex-wrap gap-2">
                         {BIGGEST_CHALLENGES.map((opt) => (
                           <button
@@ -727,8 +799,8 @@ const ProfileSetup = () => {
                             type="button"
                             onClick={() => handleInputChange("biggestChallenge", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.biggestChallenge === opt
-                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
+                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
                               }`}
                           >
                             {opt}
@@ -738,9 +810,9 @@ const ProfileSetup = () => {
                     </div>
 
                     {/* Decision Timeline + Funding Status side by side */}
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label className="font-bold text-slate-700">Decision timeline</Label>
+                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">Decision timeline</Label>
                         <div className="flex flex-wrap gap-2">
                           {DECISION_TIMELINES.map((opt) => (
                             <button
@@ -748,8 +820,8 @@ const ProfileSetup = () => {
                               type="button"
                               onClick={() => handleInputChange("decisionTimeline", opt)}
                               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.decisionTimeline === opt
-                                  ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
-                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                                ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
+                                : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
                                 }`}
                             >
                               {opt}
@@ -758,7 +830,7 @@ const ProfileSetup = () => {
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <Label className="font-bold text-slate-700">Funding status</Label>
+                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">Funding status</Label>
                         <div className="flex flex-wrap gap-2">
                           {FUNDING_STATUS_OPTIONS.map((opt) => (
                             <button
@@ -766,8 +838,8 @@ const ProfileSetup = () => {
                               type="button"
                               onClick={() => handleInputChange("fundingStatus", opt)}
                               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.fundingStatus === opt
-                                  ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
-                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                                ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
+                                : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
                                 }`}
                             >
                               {opt}
@@ -780,20 +852,24 @@ const ProfileSetup = () => {
                 )}
 
                 {/* --- FOOTER --- */}
-                <div className="mt-10 flex justify-end gap-3 pt-6 border-t border-border/30">
-                  {step > 1 && (
-                    <Button variant="ghost" onClick={() => setStep(prev => prev - 1)} className="text-muted-foreground hover:text-foreground">
+                <div className="mt-10 flex justify-between items-center pt-5 border-t border-slate-100">
+                  {step > 1 ? (
+                    <Button variant="ghost" onClick={() => setStep(prev => prev - 1)} className="text-slate-400 hover:text-slate-700 hover:bg-slate-100">
                       ← Back
                     </Button>
-                  )}
+                  ) : <div />}
                   <Button
                     onClick={step === 4 ? handleSubmit : handleNext}
-                    variant="gradient"
-                    className="h-12 px-8 font-bold"
                     disabled={isLoading}
+                    className="h-11 px-8 font-bold text-sm bg-brand-yellow hover:bg-amber-400 text-brand-charcoal rounded-xl transition-all shadow-md shadow-amber-200 hover:shadow-amber-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
                   >
-                    {isLoading ? "Saving..." : step === 4 ? (mode === 'edit' ? "Save Changes" : "Complete") : "Continue"}
-                    {!isLoading && <ChevronRight className="w-4 h-4 ml-2" />}
+                    {isLoading ? (
+                      <><div className="w-4 h-4 border-2 border-brand-charcoal/30 border-t-brand-charcoal rounded-full animate-spin mr-2" />Saving…</>
+                    ) : step === 4 ? (
+                      <>{mode === 'edit' ? 'Save Changes' : '🎉 Complete Setup'}</>
+                    ) : (
+                      <>Continue <ChevronRight className="w-4 h-4 ml-1" /></>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1294,8 +1370,7 @@ const ProfileSetup = () => {
                 <Button
                   onClick={step === 4 ? handleInvestorSubmit : handleInvestorNext}
                   disabled={isLoading}
-                  variant="gradient"
-                  className="h-12 px-8 font-bold"
+                  className="h-12 px-8 font-bold bg-brand-yellow hover:bg-amber-400 text-brand-charcoal rounded-xl shadow-md shadow-amber-200 hover:scale-[1.02] transition-all"
                 >
                   {isLoading ? (
                     <>

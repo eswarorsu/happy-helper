@@ -62,7 +62,7 @@ const Profile = () => {
 
             // Fetch Trust Score for Investors
             if (data.user_type === "investor") {
-                const { data: ratingsData } = await supabase
+                const { data: ratingsData } = await (supabase as any)
                     .from("investor_ratings")
                     .select("rating")
                     .eq("investor_id", data.id);

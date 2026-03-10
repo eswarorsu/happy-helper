@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, TrendingUp, Shield, Users, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, TrendingUp, Shield, Users, Eye, EyeOff, Mail, RefreshCw, CheckCircle2 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { z } from "zod";
 import { connectFirebase } from "@/lib/firebase";
@@ -29,6 +29,157 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+// ─── Email Verification Screen ─────────────────────────────────────────────────
+
+interface EmailVerificationScreenProps {
+  email: string;
+  userType: "founder" | "investor";
+  onResend: () => Promise<void>;
+  onBack: () => void;
+}
+
+const EmailVerificationScreen = ({ email, userType, onResend, onBack }: EmailVerificationScreenProps) => {
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendCount, setResendCount] = useState(0);
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResend = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setResending(true);
+    try {
+      await onResend();
+      setResendCount(c => c + 1);
+      // Exponential backoff: 60s, 120s, 180s …
+      setResendCooldown(60 * Math.min(resendCount + 1, 3));
+    } finally {
+      setResending(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-5">
+      {/* Background blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-yellow/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-brand-charcoal/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Back button */}
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to sign in
+        </button>
+
+        {/* Brand */}
+        <div className="flex items-center gap-3 mb-8">
+          <Logo size="sm" />
+          <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
+        </div>
+
+        <Card className="bg-white/80 backdrop-blur-sm border-border/50 shadow-xl shadow-black/[0.03]">
+          <CardContent className="p-7 sm:p-8">
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-brand-yellow/10 border-2 border-brand-yellow/30 flex items-center justify-center">
+                <Mail className="w-9 h-9 text-brand-yellow" />
+              </div>
+            </div>
+
+            <h1 className="text-2xl font-bold text-center tracking-tight mb-2">Check your inbox</h1>
+            <p className="text-muted-foreground text-center text-sm mb-6">
+              We've sent a verification link to
+            </p>
+
+            {/* Email display */}
+            <div className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-6">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span className="font-semibold text-slate-800 text-sm break-all">{email}</span>
+            </div>
+
+            {/* Instructions */}
+            <ol className="space-y-3 mb-8">
+              {[
+                "Open your email app (Gmail, Outlook, etc.)",
+                "Find the email from INNOVESTOR — check Spam / Junk too",
+                "Click the \"Confirm your email\" button inside",
+                `You'll be logged in as a ${userType} automatically`,
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-brand-yellow/20 text-brand-charcoal text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-slate-600">{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            {/* Resend button */}
+            <Button
+              className="w-full h-11"
+              variant="outline"
+              onClick={handleResend}
+              disabled={resending || resendCooldown > 0}
+            >
+              {resending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Sending…
+                </>
+              ) : resendCooldown > 0 ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Resend in {resendCooldown}s
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Resend verification email
+                </>
+              )}
+            </Button>
+
+            {resendCount > 0 && (
+              <p className="text-center text-xs text-emerald-600 mt-3 flex items-center justify-center gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Verification email resent! Check your inbox.
+              </p>
+            )}
+
+            {/* Spam tip */}
+            <div className="mt-5 p-3 rounded-xl bg-amber-50 border border-amber-200">
+              <p className="text-xs text-amber-700 text-center">
+                <strong>Don't see it?</strong> It can take 1–2 minutes. Also check your{" "}
+                <strong>Spam</strong> or <strong>Junk</strong> folder. If still missing,
+                click "Resend" above.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Already verified link */}
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Already verified?{" "}
+          <Link to="/auth?mode=login" className="font-semibold text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Auth Component ───────────────────────────────────────────────────────
+
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") || "login";
@@ -38,6 +189,13 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // ── Verification screen state ──────────────────────────────────────────────
+  const [pendingVerification, setPendingVerification] = useState<{
+    email: string;
+    userType: "founder" | "investor";
+  } | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -102,8 +260,6 @@ const Auth = () => {
 
     // Check if there was a query error (not "no rows found")
     if (error && error.code !== 'PGRST116') {
-      // PGRST116 = "No rows found" - that's expected if no profile
-      // Any other error means the query failed
       console.error("❌ Profile query error:", error);
       toast({
         title: "Error checking profile",
@@ -114,7 +270,6 @@ const Auth = () => {
     }
 
     if (profile) {
-      // ✅ Profile exists - go to appropriate dashboard
       console.log("✅ Profile found, redirecting to dashboard");
       if ((profile as { is_admin?: boolean }).is_admin) {
         navigate("/admin-innovestor");
@@ -122,7 +277,6 @@ const Auth = () => {
         navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
       }
     } else {
-      // ❌ No profile found (PGRST116 error or null data)
       console.log("⚠️ No profile found, redirecting to profile setup");
       const { data: { session } } = await supabase.auth.getSession();
       const userType = session?.user?.user_metadata?.user_type || 'founder';
@@ -139,7 +293,6 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side rate limit (belt-and-suspenders; real limit is on the backend)
     if (!authLimiter.allow()) {
       toast({
         title: "Too many attempts",
@@ -159,21 +312,24 @@ const Auth = () => {
       });
 
       if (error) {
+        // Surface a clear message for unverified users
+        if (error.message?.toLowerCase().includes("email not confirmed")) {
+          setPendingVerification({
+            email: formData.email,
+            userType: "founder",
+          });
+          return;
+        }
         throw error;
       }
 
-      // ✅ SUPABASE LOGIN SUCCESS
-      toast({
-        title: "Welcome back!",
-        description: "Login successful",
-      });
+      toast({ title: "Welcome back!", description: "Login successful" });
 
       // 🔥 CONNECT FIREBASE (non-blocking)
       try {
         await connectFirebase();
       } catch (firebaseError: any) {
         console.error("Firebase connection failed:", firebaseError);
-        // Only show warning if it's the specific restricted operation error
         if (firebaseError.code === 'auth/admin-restricted-operation') {
           toast({
             title: "Chat Unavailable",
@@ -198,7 +354,6 @@ const Auth = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side rate limit
     if (!authLimiter.allow()) {
       toast({
         title: "Too many attempts",
@@ -240,7 +395,7 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.session) {
-
+        // Email confirmation is DISABLED in Supabase — user is auto-logged in.
         const userType = validated.userType;
         navigate(`/profile-setup?type=${userType}`);
         toast({
@@ -248,13 +403,11 @@ const Auth = () => {
           description: "Please complete your profile to get started",
         });
       } else if (data.user && !data.session) {
-        // Email confirmation required
-        toast({
-          title: "Please verify your email",
-          description: "We've sent you a verification link. Check your inbox and click the link to activate your account.",
-          duration: 8000
+        // ✅ Email confirmation IS enabled — show the verification screen.
+        setPendingVerification({
+          email: validated.email,
+          userType: validated.userType,
         });
-        // Stay on registration page or show a confirmation message
       }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -274,6 +427,38 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  // ── Resend handler ─────────────────────────────────────────────────────────
+  const handleResendVerification = async () => {
+    if (!pendingVerification) return;
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: pendingVerification.email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+      },
+    });
+    if (error) {
+      toast({
+        title: "Resend failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error; // Let the screen handle the cooldown reset
+    }
+  };
+
+  // ── Show verification screen if waiting for email confirm ─────────────────
+  if (pendingVerification) {
+    return (
+      <EmailVerificationScreen
+        email={pendingVerification.email}
+        userType={pendingVerification.userType}
+        onResend={handleResendVerification}
+        onBack={() => setPendingVerification(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
