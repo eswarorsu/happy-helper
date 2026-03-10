@@ -6,6 +6,16 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // In local dev, forward /supabase/* → real Supabase URL
+      // This mirrors what the Cloudflare Worker does in production.
+      "/supabase": {
+        target: "https://wxnxmglyularlfughmen.supabase.co",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/supabase/, ""),
+        secure: true,
+      },
+    },
   },
   plugins: [
     react(),

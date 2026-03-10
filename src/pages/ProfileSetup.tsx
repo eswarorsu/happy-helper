@@ -18,6 +18,35 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const STATUS_OPTIONS = ["Student", "Final Year Student", "Graduate", "Working Professional"];
 
+// --- FOUNDER STEP 4 CONSTANTS ---
+const STARTUP_STAGES = [
+  { value: "idea", label: "Idea Stage", sub: "Just starting, validating the concept" },
+  { value: "mvp", label: "MVP / Prototype", sub: "Built something, gathering feedback" },
+  { value: "traction", label: "Early Traction", sub: "Have users or first revenue" },
+  { value: "growth", label: "Growth Stage", sub: "Scaling with consistent revenue" },
+  { value: "scaling", label: "Scaling Up", sub: "Expanding team & markets" },
+];
+
+const DISCOVERY_OPTIONS = [
+  "Google / Search", "LinkedIn", "Twitter / X", "Friend or colleague referral",
+  "Blog / Article", "YouTube", "Product Hunt", "Business school / Accelerator",
+  "VC / Investor recommendation", "Other",
+];
+
+const PRIMARY_GOALS = [
+  "Validate idea", "Improve investor readiness", "Get mentor feedback",
+  "Benchmark competition", "Build reporting discipline",
+];
+
+const BIGGEST_CHALLENGES = [
+  "Finding PMF", "Customer acquisition", "Fundraising narrative",
+  "Unit economics", "Team execution", "Go-to-market clarity",
+];
+
+const DECISION_TIMELINES = ["This week", "2-4 weeks", "1-3 months", "Quarter+"];
+
+const FUNDING_STATUS_OPTIONS = ["Bootstrapped", "Pre-seed", "Seed", "Series A+", "Revenue-funded"];
+
 const founderSchema = z.object({
   name: z.string().min(2, "Name is required"),
   status: z.string().min(1, "Current status is required"),
@@ -114,6 +143,16 @@ const ProfileSetup = () => {
     website: "",
     upiId: "",
 
+    // Founder Step 4 — Startup Context
+    companyName: "",
+    teamSize: "",
+    startupStage: "",
+    discoverySource: "",   // single-select chip
+    primaryGoal: "",       // single-select chip
+    biggestChallenge: "",  // single-select chip
+    decisionTimeline: "",  // single-select chip
+    fundingStatus: "",     // single-select chip
+
     // Investor fields
     dob: "",
     nationality: "",
@@ -158,6 +197,7 @@ const ProfileSetup = () => {
         if (mode === "edit") {
           // Pre-fill form for editing
           setUserId(session.user.id);
+          const ctx = existingProfile.founder_context || {};
           setFormData(prev => ({
             ...prev,
             name: existingProfile.name || "",
@@ -175,8 +215,18 @@ const ProfileSetup = () => {
             website: existingProfile.website_url || "",
             upiId: existingProfile.upi_id || "",
 
+            // Founder Step 4
+            companyName: ctx.company_name || "",
+            teamSize: ctx.team_size || "",
+            startupStage: ctx.startup_stage || "",
+            discoverySource: ctx.discovery_source || "",
+            primaryGoal: ctx.primary_goal || "",
+            biggestChallenge: ctx.biggest_challenge || "",
+            decisionTimeline: ctx.decision_timeline || "",
+            fundingStatus: ctx.funding_status || "",
+
             // Investor
-            dob: existingProfile.date_of_birth || "", // Fix: Use correct DB column names if different
+            dob: existingProfile.date_of_birth || "",
             nationality: existingProfile.nationality || "",
             city: existingProfile.city || "",
             investorType: existingProfile.investor_type || "",
@@ -244,6 +294,8 @@ const ProfileSetup = () => {
           try { z.string().url().parse(formData.linkedinProfile); }
           catch { newErrors.linkedinProfile = "Invalid URL"; }
         }
+      } else if (currentStep === 4) {
+        // Step 4 fields are all optional — no blocking validation
       }
     }
 
@@ -296,6 +348,17 @@ const ProfileSetup = () => {
         profileData.linkedin_profile = formData.linkedinProfile;
         profileData.website_url = formData.website || null;
         profileData.upi_id = formData.upiId || null;
+        // Step 4 — Startup Context stored as JSONB
+        profileData.founder_context = {
+          company_name: formData.companyName || null,
+          team_size: formData.teamSize || null,
+          startup_stage: formData.startupStage || null,
+          discovery_source: formData.discoverySource || null,
+          primary_goal: formData.primaryGoal || null,
+          biggest_challenge: formData.biggestChallenge || null,
+          decision_timeline: formData.decisionTimeline || null,
+          funding_status: formData.fundingStatus || null,
+        };
       } else {
         // Enhanced investor profile data
         profileData.upi_id = formData.upiId || null; // Ensure investors also save UPI ID
@@ -361,7 +424,8 @@ const ProfileSetup = () => {
     const steps = [
       { id: 1, label: "Basic Details" },
       { id: 2, label: "Professional Info" },
-      { id: 3, label: "Contact & Socials" }
+      { id: 3, label: "Contact & Socials" },
+      { id: 4, label: "Startup Context" },
     ];
 
     return (
@@ -406,17 +470,17 @@ const ProfileSetup = () => {
             {/* Mobile Progress */}
             <div className="lg:hidden mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-foreground">Step {step} of 3</span>
+                <span className="text-sm font-bold text-foreground">Step {step} of 4</span>
                 <span className="text-xs text-muted-foreground">{steps[step - 1].label}</span>
               </div>
               <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-brand-yellow transition-all duration-500 rounded-full" style={{ width: `${(step / 3) * 100}%` }} />
+                <div className="h-full bg-brand-yellow transition-all duration-500 rounded-full" style={{ width: `${(step / 4) * 100}%` }} />
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden text-slate-900">
               <div className="hidden lg:block p-1 h-1 bg-secondary/50">
-                <div className="h-full bg-brand-yellow transition-all duration-500 ease-out rounded-full" style={{ width: `${(step / 3) * 100}%` }} />
+                <div className="h-full bg-brand-yellow transition-all duration-500 ease-out rounded-full" style={{ width: `${(step / 4) * 100}%` }} />
               </div>
 
               <div className="p-5 sm:p-8 lg:p-12 min-h-[500px] flex flex-col justify-between">
@@ -556,6 +620,165 @@ const ProfileSetup = () => {
                   </div>
                 )}
 
+                {/* --- STEP 4: STARTUP CONTEXT --- */}
+                {step === 4 && (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div>
+                      <h2 className="text-2xl font-black text-foreground">Tell us about your startup</h2>
+                      <p className="text-muted-foreground mt-2">Take 60 seconds to personalise your experience. You can update this anytime.</p>
+                    </div>
+
+                    {/* Company Name + Team Size */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 flex items-center gap-2">
+                          <Building className="w-4 h-4 text-slate-400" /> Company / Startup Name
+                        </Label>
+                        <Input
+                          value={formData.companyName}
+                          onChange={(e) => handleInputChange("companyName", e.target.value)}
+                          className="h-12 bg-slate-50 border-slate-200 focus:bg-white"
+                          placeholder="e.g. Acme Corp"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 flex items-center gap-2">
+                          <User className="w-4 h-4 text-slate-400" /> Team Size
+                        </Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={formData.teamSize}
+                          onChange={(e) => handleInputChange("teamSize", e.target.value)}
+                          className="h-12 bg-slate-50 border-slate-200 focus:bg-white"
+                          placeholder="e.g. 3"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Startup Stage */}
+                    <div className="space-y-3">
+                      <Label className="font-bold text-slate-700">What stage is your startup?</Label>
+                      <div className="space-y-2">
+                        {STARTUP_STAGES.map((s) => (
+                          <button
+                            key={s.value}
+                            type="button"
+                            onClick={() => handleInputChange("startupStage", s.value)}
+                            className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${formData.startupStage === s.value
+                                ? "border-brand-yellow bg-brand-yellow/10"
+                                : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
+                              }`}
+                          >
+                            <p className={`font-semibold text-sm ${formData.startupStage === s.value ? "text-brand-charcoal" : "text-slate-700"}`}>{s.label}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{s.sub}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* How did you hear? */}
+                    <div className="space-y-3">
+                      <Label className="font-bold text-slate-700">How did you hear about INNOVESTOR?</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {DISCOVERY_OPTIONS.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleInputChange("discoverySource", opt)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.discoverySource === opt
+                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Primary Goal */}
+                    <div className="space-y-3">
+                      <Label className="font-bold text-slate-700">What is your primary goal right now?</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {PRIMARY_GOALS.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleInputChange("primaryGoal", opt)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.primaryGoal === opt
+                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Biggest Challenge */}
+                    <div className="space-y-3">
+                      <Label className="font-bold text-slate-700">What is your biggest challenge today?</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {BIGGEST_CHALLENGES.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleInputChange("biggestChallenge", opt)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.biggestChallenge === opt
+                                ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                              }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Decision Timeline + Funding Status side by side */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <Label className="font-bold text-slate-700">Decision timeline</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {DECISION_TIMELINES.map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => handleInputChange("decisionTimeline", opt)}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.decisionTimeline === opt
+                                  ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
+                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                                }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="font-bold text-slate-700">Funding status</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {FUNDING_STATUS_OPTIONS.map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => handleInputChange("fundingStatus", opt)}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.fundingStatus === opt
+                                  ? "bg-brand-charcoal text-white border-brand-charcoal shadow-md"
+                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                                }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* --- FOOTER --- */}
                 <div className="mt-10 flex justify-end gap-3 pt-6 border-t border-border/30">
                   {step > 1 && (
@@ -564,12 +787,12 @@ const ProfileSetup = () => {
                     </Button>
                   )}
                   <Button
-                    onClick={step === 3 ? handleSubmit : handleNext}
+                    onClick={step === 4 ? handleSubmit : handleNext}
                     variant="gradient"
                     className="h-12 px-8 font-bold"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Saving..." : step === 3 ? (mode === 'edit' ? "Save Changes" : "Complete") : "Continue"}
+                    {isLoading ? "Saving..." : step === 4 ? (mode === 'edit' ? "Save Changes" : "Complete") : "Continue"}
                     {!isLoading && <ChevronRight className="w-4 h-4 ml-2" />}
                   </Button>
                 </div>
