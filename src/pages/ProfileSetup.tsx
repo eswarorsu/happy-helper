@@ -295,7 +295,12 @@ const ProfileSetup = () => {
           catch { newErrors.linkedinProfile = "Invalid URL"; }
         }
       } else if (currentStep === 4) {
-        // Step 4 fields are all optional — no blocking validation
+        if (!formData.startupStage) newErrors.startupStage = "Please select your startup stage";
+        if (!formData.discoverySource) newErrors.discoverySource = "Please tell us how you heard about us";
+        if (!formData.primaryGoal) newErrors.primaryGoal = "Please select your primary goal";
+        if (!formData.biggestChallenge) newErrors.biggestChallenge = "Please select your biggest challenge";
+        if (!formData.decisionTimeline) newErrors.decisionTimeline = "Please select a decision timeline";
+        if (!formData.fundingStatus) newErrors.fundingStatus = "Please select your funding status";
       }
     }
 
@@ -703,18 +708,18 @@ const ProfileSetup = () => {
                     {/* Company Name + Team Size */}
                     <div className="grid md:grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                           <Building className="w-3.5 h-3.5" /> Company / Startup Name
                         </Label>
                         <Input
                           value={formData.companyName}
                           onChange={(e) => handleInputChange("companyName", e.target.value)}
-                          className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-brand-yellow/40 rounded-xl"
+                          className="h-12 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl"
                           placeholder="e.g. Acme Corp"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                           <User className="w-3.5 h-3.5" /> Team Size
                         </Label>
                         <Input
@@ -722,7 +727,7 @@ const ProfileSetup = () => {
                           min="1"
                           value={formData.teamSize}
                           onChange={(e) => handleInputChange("teamSize", e.target.value)}
-                          className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-brand-yellow/40 rounded-xl"
+                          className="h-12 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 rounded-xl"
                           placeholder="e.g. 3"
                         />
                       </div>
@@ -730,28 +735,29 @@ const ProfileSetup = () => {
 
                     {/* Startup Stage */}
                     <div className="space-y-3">
-                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What stage is your startup?</Label>
-                      <div className="space-y-2">
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">What stage is your startup? <span className="text-red-500">*</span></Label>
+                      <div className={`space-y-2 rounded-xl transition-all ${errors.startupStage ? 'ring-1 ring-red-300 ring-offset-2' : ''}`}>
                         {STARTUP_STAGES.map((s) => (
                           <button
                             key={s.value}
                             type="button"
                             onClick={() => handleInputChange("startupStage", s.value)}
                             className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${formData.startupStage === s.value
-                              ? "border-brand-yellow/50 bg-brand-yellow/10"
-                              : "border-white/8 bg-white/4 hover:border-white/15 hover:bg-white/7"
+                              ? "border-amber-400 bg-amber-50"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                               }`}
                           >
-                            <p className={`font-semibold text-sm ${formData.startupStage === s.value ? "text-brand-yellow" : "text-white/80"}`}>{s.label}</p>
-                            <p className={`text-xs mt-0.5 ${formData.startupStage === s.value ? "text-brand-yellow/60" : "text-white/35"}`}>{s.sub}</p>
+                            <p className={`font-semibold text-sm ${formData.startupStage === s.value ? "text-amber-700" : "text-slate-800"}`}>{s.label}</p>
+                            <p className={`text-xs mt-0.5 ${formData.startupStage === s.value ? "text-amber-500" : "text-slate-400"}`}>{s.sub}</p>
                           </button>
                         ))}
                       </div>
+                      {errors.startupStage && <p className="text-xs text-red-500 flex items-center gap-1">⚠ {errors.startupStage}</p>}
                     </div>
 
                     {/* How did you hear? */}
                     <div className="space-y-3">
-                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">How did you hear about INNOVESTOR?</Label>
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">How did you hear about INNOVESTOR? <span className="text-red-500">*</span></Label>
                       <div className="flex flex-wrap gap-2">
                         {DISCOVERY_OPTIONS.map((opt) => (
                           <button
@@ -760,18 +766,19 @@ const ProfileSetup = () => {
                             onClick={() => handleInputChange("discoverySource", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.discoverySource === opt
                               ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
-                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                               }`}
                           >
                             {opt}
                           </button>
                         ))}
                       </div>
+                      {errors.discoverySource && <p className="text-xs text-red-500 flex items-center gap-1">⚠ {errors.discoverySource}</p>}
                     </div>
 
                     {/* Primary Goal */}
                     <div className="space-y-3">
-                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What is your primary goal right now?</Label>
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">What is your primary goal right now? <span className="text-red-500">*</span></Label>
                       <div className="flex flex-wrap gap-2">
                         {PRIMARY_GOALS.map((opt) => (
                           <button
@@ -780,18 +787,19 @@ const ProfileSetup = () => {
                             onClick={() => handleInputChange("primaryGoal", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.primaryGoal === opt
                               ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
-                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                               }`}
                           >
                             {opt}
                           </button>
                         ))}
                       </div>
+                      {errors.primaryGoal && <p className="text-xs text-red-500 flex items-center gap-1">⚠ {errors.primaryGoal}</p>}
                     </div>
 
                     {/* Biggest Challenge */}
                     <div className="space-y-3">
-                      <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">What is your biggest challenge today?</Label>
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">What is your biggest challenge today? <span className="text-red-500">*</span></Label>
                       <div className="flex flex-wrap gap-2">
                         {BIGGEST_CHALLENGES.map((opt) => (
                           <button
@@ -800,19 +808,20 @@ const ProfileSetup = () => {
                             onClick={() => handleInputChange("biggestChallenge", opt)}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.biggestChallenge === opt
                               ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
-                              : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                               }`}
                           >
                             {opt}
                           </button>
                         ))}
                       </div>
+                      {errors.biggestChallenge && <p className="text-xs text-red-500 flex items-center gap-1">⚠ {errors.biggestChallenge}</p>}
                     </div>
 
                     {/* Decision Timeline + Funding Status side by side */}
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">Decision timeline</Label>
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Decision timeline</Label>
                         <div className="flex flex-wrap gap-2">
                           {DECISION_TIMELINES.map((opt) => (
                             <button
@@ -821,7 +830,7 @@ const ProfileSetup = () => {
                               onClick={() => handleInputChange("decisionTimeline", opt)}
                               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.decisionTimeline === opt
                                 ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
-                                : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                                 }`}
                             >
                               {opt}
@@ -830,7 +839,7 @@ const ProfileSetup = () => {
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <Label className="text-xs font-bold text-white/50 uppercase tracking-widest">Funding status</Label>
+                        <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Funding status</Label>
                         <div className="flex flex-wrap gap-2">
                           {FUNDING_STATUS_OPTIONS.map((opt) => (
                             <button
@@ -839,7 +848,7 @@ const ProfileSetup = () => {
                               onClick={() => handleInputChange("fundingStatus", opt)}
                               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${formData.fundingStatus === opt
                                 ? "bg-brand-yellow text-brand-charcoal border-brand-yellow shadow-md shadow-brand-yellow/20"
-                                : "bg-white/5 text-white/60 border-white/10 hover:border-white/25 hover:text-white"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                                 }`}
                             >
                               {opt}
