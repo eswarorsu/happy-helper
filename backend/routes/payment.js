@@ -121,7 +121,7 @@ router.post(
         customer_details: {
           customer_id: req.user.id,
           customer_email: req.user.email || "customer@example.com",
-          customer_phone: "+919876543210"
+          customer_phone: "9876543210"
         }
       };
 
