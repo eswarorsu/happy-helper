@@ -1,19 +1,15 @@
-console.log("🚀 INDEX.JS STARTED");
-
+import "./loadEnv.js";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import dotenv from "dotenv";
 import paymentRoutes from "./routes/payment.js";
-
-dotenv.config();
 
 // ============================================================================
 // SECURITY: Validate required environment variables at startup
 // OWASP ASVS 2.10.1 – fail fast if secrets are missing
 // ============================================================================
-const REQUIRED_ENV = ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "SUPABASE_URL", "SUPABASE_SERVICE_KEY"];
+const REQUIRED_ENV = ["CASHFREE_APP_ID", "CASHFREE_SECRET_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_KEY"];
 const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missingEnv.length > 0) {
   console.error(`❌ Missing required environment variables: ${missingEnv.join(", ")}`);
@@ -102,6 +98,8 @@ app.use((err, req, res, next) => {
 // ✅ CORRECT PORT HANDLING FOR RENDER
 const PORT = process.env.PORT || 5050;
 
+console.log(`📡 Attempting to start server on port ${PORT}...`);
+
 const server = app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
@@ -110,6 +108,3 @@ const server = app.listen(PORT, () => {
 server.on("error", (err) => {
   console.error("❌ SERVER ERROR:", err);
 });
-
-
-

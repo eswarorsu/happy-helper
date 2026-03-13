@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -1164,14 +1164,6 @@ const FounderDashboard = () => {
                 description: "Your profile must be verified first.",
                 variant: "destructive"
             });
-            return;
-        }
-
-        await ensurePremiumFlag(profile.user_id);
-
-        const access = await evaluateFounderSubmitAccess(profile);
-        if (access.allowed) {
-            navigate("/submit-idea");
             return;
         }
 

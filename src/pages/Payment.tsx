@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { couponLimiter, orderLimiter } from "@/lib/rateLimiter";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://happy-helper.onrender.com";
-// const VALID_COUPONS = ["FREEIDEA", "INNOVATE50"]; // Deprecated in favor of DB check
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -26,6 +25,38 @@ const Payment = () => {
     const [couponCode, setCouponCode] = useState("");
     const [isCouponValid, setIsCouponValid] = useState(false);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+    // Initialise Cashfree
+    const [cashfree, setCashfree] = useState<any>(null);
+
+    useEffect(() => {
+        const initCashfree = () => {
+            if ((window as any).Cashfree) {
+                // Use VITE_ prefix for frontend, or fallback to the non-VITE one if available (though VITE will only expose VITE_ ones)
+                const appId = import.meta.env.VITE_CASHFREE_APP_ID || "122873434dc75ad61ff8d7406124378221";
+                console.log("Initializing Cashfree with AppID:", appId);
+                setCashfree((window as any).Cashfree({ mode: "production" }));
+            } else {
+                console.warn("Cashfree window object not found yet, retrying...");
+            }
+        };
+
+        // Try immediately
+        initCashfree();
+
+        // Also try on a small delay in case script is still loading
+        const timer = setTimeout(initCashfree, 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        // Handle return from Cashfree
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get("order_id");
+        if (orderId) {
+            verifyPayment(orderId);
+        }
+    }, []);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -56,8 +87,7 @@ const Payment = () => {
         };
     };
 
-    // FORMAT CHECK ONLY — not real bank verification.
-    // We validate the UPI VPA pattern: alphanum/dots/hyphens @ provider handle (2–30 chars, no spaces).
+    // FORMAT CHECK ONLY 
     const UPI_REGEX = /^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,30}$/;
 
     const handleVerify = () => {
@@ -69,7 +99,6 @@ const Payment = () => {
             });
             return;
         }
-        // Instantly mark as format-valid (no live bank ping)
         setIsVerified(true);
         toast({
             title: "UPI Format Accepted",
@@ -80,27 +109,21 @@ const Payment = () => {
     const handleValidateCoupon = async () => {
         if (!couponCode.trim()) return;
 
-        // Client-side rate limit – real limit enforced server-side
         if (!couponLimiter.allow()) {
             toast({ title: "Too many attempts", description: couponLimiter.retryMessage(), variant: "destructive" });
             return;
         }
 
         setIsValidatingCoupon(true);
-
-        // Optional: Artificial delay for UX
         await new Promise(resolve => setTimeout(resolve, 500));
-
         const code = couponCode.toUpperCase().trim();
 
         try {
-            // Call RPC to check limit and redeem
             // @ts-ignore
             const { data: success, error } = await supabase.rpc('redeem_coupon', { coupon_code: code });
 
             if (error) {
                 console.error("Coupon RPC Error:", error);
-                // Fallback for development/testing if RPC is missing
                 toast({ title: "System Error", description: "Could not verify coupon limit. Please contact support.", variant: "destructive" });
                 setIsValidatingCoupon(false);
                 return;
@@ -115,8 +138,6 @@ const Payment = () => {
                 try {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session?.user) {
-                        // Insert ONE payment record for the successful redemption
-                        // payments table exists in DB but not in generated types
                         await (supabase as any).from("payments").insert({
                             user_id: session.user.id,
                             razorpay_order_id: `COUPON_${code}_${Date.now()}`,
@@ -149,11 +170,51 @@ const Payment = () => {
         }
     };
 
-    // SEC-002 FIX: Payment now includes auth headers
+    const verifyPayment = async (orderId: string) => {
+        setIsProcessing(true);
+        try {
+            const verifyHeaders = await getAuthHeaders();
+            const verifyRes = await fetch(`${BACKEND_URL}/api/payment/verify`, {
+                method: "POST",
+                headers: verifyHeaders,
+                body: JSON.stringify({ order_id: orderId }),
+            });
+
+            const result = await verifyRes.json();
+
+            if (result.success) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    await (supabase as any).from("payments").insert({
+                        user_id: session.user.id,
+                        order_id: orderId,
+                        amount: 1,
+                        status: "success",
+                        payment_gateway: "cashfree",
+                        verified_at: new Date().toISOString()
+                    });
+
+                    await (supabase as any)
+                        .from("profiles")
+                        .update({ is_premium: true })
+                        .eq("user_id", session.user.id);
+                }
+                toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
+                navigate("/submit-idea?order_id=" + orderId);
+            } else {
+                toast({ title: "Payment Failed", description: "Verification failed or payment pending", variant: "destructive" });
+            }
+        } catch (error) {
+            console.error("Payment verification error:", error);
+            toast({ title: "Verification Error", description: "Please contact support", variant: "destructive" });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const handlePayment = async () => {
         if (!isVerified) return;
 
-        // Client-side rate limit
         if (!orderLimiter.allow()) {
             toast({ title: "Too many attempts", description: orderLimiter.retryMessage(), variant: "destructive" });
             return;
@@ -167,7 +228,7 @@ const Payment = () => {
             const res = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
                 method: "POST",
                 headers,
-                body: JSON.stringify({ amount: 499 }),
+                body: JSON.stringify({ amount: 1 }), // ₹1 as requested
             });
 
             if (!res.ok) {
@@ -177,69 +238,19 @@ const Payment = () => {
 
             const order = await res.json();
 
-            if (!order.id) {
-                throw new Error("Invalid order response from server");
+            if (!order.payment_session_id) {
+                throw new Error("Invalid order response from server: missing payment_session_id");
             }
 
-            const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
-            if (!razorpayKey) {
-                throw new Error("Razorpay Key ID is missing in configuration");
+            if (cashfree) {
+                cashfree.checkout({
+                    paymentSessionId: order.payment_session_id,
+                    redirectTarget: "_self" 
+                });
+            } else {
+                throw new Error("Cashfree SDK not loaded. Please refresh the page.");
             }
 
-            const options = {
-                key: razorpayKey,
-                amount: order.amount,
-                currency: order.currency,
-                name: "INNOVESTOR",
-                description: "Founder Access Plan",
-                order_id: order.id,
-                handler: async function (response: any) {
-                    try {
-                        const verifyHeaders = await getAuthHeaders();
-
-                        const verifyRes = await fetch(`${BACKEND_URL}/api/payment/verify`, {
-                            method: "POST",
-                            headers: verifyHeaders,
-                            body: JSON.stringify(response),
-                        });
-
-                        const result = await verifyRes.json();
-
-                        if (result.success) {
-                            const { data: { session } } = await supabase.auth.getSession();
-                            if (session?.user) {
-                                // payments table exists in DB but not in generated types
-                                await (supabase as any).from("payments").insert({
-                                    user_id: session.user.id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    amount: 499,
-                                    status: "success",
-                                    verified_at: new Date().toISOString()
-                                });
-
-                                await (supabase as any)
-                                    .from("profiles")
-                                    .update({ is_premium: true })
-                                    .eq("user_id", session.user.id);
-                            }
-                            toast({ title: "Payment Successful 🎉", description: "Redirecting to submit your idea..." });
-                            navigate("/submit-idea?payment_id=" + response.razorpay_payment_id);
-                        } else {
-                            toast({ title: "Payment Failed", description: "Verification failed", variant: "destructive" });
-                        }
-                    } catch (error) {
-                        console.error("Payment verification error:", error);
-                        toast({ title: "Verification Error", description: "Please contact support", variant: "destructive" });
-                    }
-                },
-                theme: { color: "#0f172a" },
-            };
-
-            const razorpay = new (window as any).Razorpay(options);
-            razorpay.open();
-            setIsProcessing(false);
         } catch (error) {
             console.error("Payment error:", error);
             toast({
@@ -312,12 +323,12 @@ const Payment = () => {
                                             Special Offer
                                         </Badge>
                                     </div>
-                                    <p className="text-slate-400 text-sm font-medium line-through mb-1">₹1999/-</p>
+                                    <p className="text-slate-400 text-sm font-medium line-through mb-1">₹499/-</p>
                                     <div className="flex items-center justify-center gap-1 mb-2">
-                                        <span className="text-4xl font-bold text-[#111827]">₹499</span>
+                                        <span className="text-4xl font-bold text-[#111827]">₹1</span>
                                         <span className="text-slate-500 font-medium text-lg">/-</span>
                                     </div>
-                                    <p className="text-slate-500 font-medium text-xs uppercase tracking-wider">One-time payment</p>
+                                    <p className="text-slate-500 font-medium text-xs uppercase tracking-wider">Launch fee</p>
                                 </div>
 
                                 {/* Features */}
