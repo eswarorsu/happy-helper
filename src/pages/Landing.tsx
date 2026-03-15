@@ -889,6 +889,75 @@ const Landing = () => {
       </section>
 
       {/* ================================================================ */}
+      {/* MOBILE EXPERIENCE SHOWCASE */}
+      {/* ================================================================ */}
+      <section className="py-10 sm:py-20 px-4 sm:px-6 bg-black overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
+              Mobile First
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
+              Use our platform <span className="text-brand-yellow">comfortably</span> on your mobile
+            </h2>
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need — dashboards, messaging, and deal-making — designed for a seamless mobile experience.
+            </p>
+          </div>
+
+          {/* Horizontal Scroll Showcase */}
+          <div className="relative">
+            {/* Gradient edges for scroll hint */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+
+            <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide px-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {[
+                { src: "/images/mobile-dashboard.png", label: "Founder Dashboard", desc: "Track investments & ventures at a glance" },
+                { src: "/images/mobile-marketplace.png", label: "Investor Marketplace", desc: "Browse and discover promising startups" },
+                { src: "/images/mobile-chat.png", label: "Secure Messaging", desc: "Negotiate deals in encrypted DealCenter" },
+              ].map((screen, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 snap-center group"
+                  style={{ width: 'min(280px, 72vw)' }}
+                >
+                  {/* Phone frame */}
+                  <div className="relative rounded-[2rem] border-2 border-slate-700/60 bg-slate-900 p-2 shadow-2xl shadow-brand-yellow/5 transition-transform duration-300 group-hover:scale-[1.03]">
+                    {/* Status bar */}
+                    <div className="flex items-center justify-center py-1.5 mb-1">
+                      <div className="w-20 h-1 rounded-full bg-slate-700" />
+                    </div>
+                    {/* Screenshot */}
+                    <img
+                      src={screen.src}
+                      alt={screen.label}
+                      className="w-full rounded-2xl object-cover aspect-[9/18]"
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* Label */}
+                  <div className="text-center mt-4">
+                    <h4 className="text-sm font-bold text-white">{screen.label}</h4>
+                    <p className="text-xs text-slate-400 mt-1">{screen.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <ChevronRight className="w-3.5 h-3.5 animate-pulse" />
+                <span>Swipe to explore</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================ */}
       {/* TESTIMONIALS */}
       {/* ================================================================ */}
       <section className="py-10 sm:py-20 px-4 sm:px-6 bg-brand-charcoal">

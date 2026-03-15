@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-    Menu, X, LayoutDashboard, Store, Receipt,
-    User, LogOut, MessageSquare, FileText, PlusCircle,
-    Search, Handshake
+    Home, Receipt, User, MessageSquare, Rocket, Store
 } from "lucide-react";
-import Logo from "@/components/ui/Logo";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface MobileNavProps {
     userType?: "founder" | "investor";
@@ -18,168 +13,138 @@ interface MobileNavProps {
     onMessagesClick?: () => void;
 }
 
-const MobileNav = ({ userType, userName, onLogout, unreadCount = 0, onMessagesClick }: MobileNavProps) => {
-    const [isOpen, setIsOpen] = useState(false);
+const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProps) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = previousOverflow;
-        };
-    }, [isOpen]);
+    const isFounder = userType === "founder";
 
-    useEffect(() => {
-        setIsOpen(false);
-    }, [location.pathname]);
-
-    const handleNavigate = (path: string) => {
-        navigate(path);
-        setIsOpen(false);
-    };
-
-    const founderLinks = [
-        { label: "Dashboard", icon: LayoutDashboard, path: "/founder-dashboard" },
-        { label: "Submit Idea", icon: PlusCircle, path: "/submit-idea" },
-        { label: "Transactions", icon: Receipt, path: "/transactions" },
-        { label: "Profile", icon: User, path: "/profile" },
+    const navItems = [
+        {
+            label: "Home",
+            icon: Home,
+            path: isFounder ? "/founder-dashboard" : "/investor-dashboard",
+        },
+        {
+            label: "Messages",
+            icon: MessageSquare,
+            onClick: onMessagesClick,
+            badge: unreadCount,
+        },
+        {
+            label: isFounder ? "Launch" : "Explore",
+            icon: isFounder ? Rocket : Store,
+            path: isFounder ? "/payment" : "/marketplace",
+            isCentral: true,
+        },
+        {
+            label: "Txns",
+            icon: Receipt,
+            path: "/transactions",
+        },
+        {
+            label: "Profile",
+            icon: User,
+            path: "/profile",
+        },
     ];
-
-    const investorLinks = [
-        { label: "Dashboard", icon: LayoutDashboard, path: "/investor-dashboard" },
-        { label: "Marketplace", icon: Store, path: "/marketplace" },
-        { label: "Transactions", icon: Receipt, path: "/transactions" },
-        { label: "Profile", icon: User, path: "/profile" },
-    ];
-
-    const links = userType === "founder" ? founderLinks : investorLinks;
 
     return (
-        <>
-            {/* Hamburger Trigger — visible only below lg */}
-            <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden h-10 w-10 rounded-full hover:bg-black/5"
-                onClick={() => setIsOpen(true)}
-                aria-label="Open menu"
-            >
-                <Menu className="w-5 h-5 text-brand-charcoal" />
-            </Button>
+        <motion.div
+            className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32, delay: 0.15 }}
+        >
+            {/* Floating frosted-glass pill */}
+            <div className="mx-3 mb-3 bg-white/95 backdrop-blur-xl border border-slate-200/70 rounded-2xl shadow-2xl shadow-black/[0.08] px-1 py-1">
+                <div className="flex items-center justify-around">
+                    {navItems.map((item, idx) => {
+                        const isActive = item.path
+                            ? location.pathname === item.path
+                            : false;
 
-            {/* Portal: render drawer + backdrop directly on document.body to escape
-                any parent overflow / transform / stacking-context issues */}
-            {createPortal(
-                <AnimatePresence>
-                    {isOpen && (
-                        <>
-                            {/* Backdrop */}
-                            <motion.div
-                                className="fixed inset-0 bg-black/55 backdrop-blur-sm"
-                                style={{ zIndex: 9998 }}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setIsOpen(false)}
-                            />
-
-                            {/* Drawer */}
-                            <motion.nav
-                                className="fixed top-0 left-0 bottom-0 w-[85vw] max-w-[320px] bg-brand-yellow shadow-2xl flex flex-col border-r border-black/10"
-                                style={{ zIndex: 9999 }}
-                                initial={{ x: "-100%" }}
-                                animate={{ x: 0 }}
-                                exit={{ x: "-100%" }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            >
-                                {/* Header */}
-                                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-                                    <div className="flex items-center gap-2.5">
-                                        <Logo size="sm" />
-                                        <span className="text-lg font-bold tracking-tight text-brand-charcoal">INNOVESTOR</span>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-9 w-9 rounded-full hover:bg-black/5"
-                                        onClick={() => setIsOpen(false)}
+                        /* ── Central action button ── */
+                        if (item.isCentral) {
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => item.path && navigate(item.path)}
+                                    className="flex flex-col items-center gap-0.5 px-3 py-1 group"
+                                >
+                                    <div
+                                        className={cn(
+                                            "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 active:scale-90",
+                                            isActive
+                                                ? "bg-brand-yellow text-brand-charcoal shadow-md shadow-brand-yellow/40"
+                                                : "bg-brand-yellow/20 text-brand-charcoal group-hover:bg-brand-yellow/40"
+                                        )}
                                     >
-                                        <X className="w-5 h-5 text-brand-charcoal" />
-                                    </Button>
-                                </div>
-
-                                {/* User Info */}
-                                {userName && (
-                                    <div className="px-5 py-4 border-b border-border/60">
-                                        <p className="text-sm font-semibold text-brand-charcoal">{userName}</p>
-                                        <p className="text-xs text-brand-charcoal/70 capitalize">{userType} Account</p>
+                                        <item.icon className="w-[18px] h-[18px]" strokeWidth={2.5} />
                                     </div>
-                                )}
+                                    <span
+                                        className={cn(
+                                            "text-[9px] font-bold tracking-wide",
+                                            isActive ? "text-brand-yellow" : "text-brand-charcoal/55"
+                                        )}
+                                    >
+                                        {item.label}
+                                    </span>
+                                </button>
+                            );
+                        }
 
-                                {/* Nav Links */}
-                                <div className="flex-1 overflow-y-auto py-3 px-3 overscroll-contain">
-                                    {links.map((link) => {
-                                        const isActive = location.pathname === link.path;
-                                        return (
-                                            <button
-                                                key={link.path}
-                                                onClick={() => handleNavigate(link.path)}
-                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-sm font-medium transition-all ${isActive
-                                                    ? "bg-brand-charcoal text-brand-yellow"
-                                                    : "text-brand-charcoal/80 hover:bg-black/5 hover:text-brand-charcoal"
-                                                    }`}
-                                            >
-                                                <link.icon className="w-5 h-5 shrink-0" />
-                                                {link.label}
-                                            </button>
-                                        );
-                                    })}
-
-                                    {/* Messages Button */}
-                                    {onMessagesClick && (
-                                        <button
-                                            onClick={() => {
-                                                setIsOpen(false);
-                                                onMessagesClick();
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-sm font-medium text-brand-charcoal/80 hover:bg-black/5 hover:text-brand-charcoal transition-all"
-                                        >
-                                            <MessageSquare className="w-5 h-5 shrink-0" />
-                                            Messages
-                                            {unreadCount > 0 && (
-                                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                    {unreadCount}
-                                                </span>
-                                            )}
-                                        </button>
+                        /* ── Regular tab button ── */
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => {
+                                    if (item.onClick) item.onClick();
+                                    else if (item.path) navigate(item.path);
+                                }}
+                                className="flex flex-col items-center gap-0.5 px-3 py-1 group"
+                            >
+                                <div className="relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 active:scale-90">
+                                    <item.icon
+                                        className={cn(
+                                            "w-[18px] h-[18px] transition-colors",
+                                            isActive
+                                                ? "text-brand-yellow"
+                                                : "text-slate-400 group-hover:text-slate-600"
+                                        )}
+                                        strokeWidth={isActive ? 2.5 : 2}
+                                    />
+                                    {/* Tiny active dot */}
+                                    {isActive && (
+                                        <motion.span
+                                            layoutId="mobile-nav-dot"
+                                            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-yellow"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
+                                    {/* Unread badge */}
+                                    {item.badge != null && item.badge > 0 && (
+                                        <span className="absolute -top-0.5 -right-1 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-4 flex items-center justify-center rounded-full border border-white px-1 leading-none">
+                                            {item.badge > 99 ? "99+" : item.badge}
+                                        </span>
                                     )}
                                 </div>
-
-                                {/* Bottom Actions */}
-                                <div className="border-t border-border p-3">
-                                    {onLogout && (
-                                        <button
-                                            onClick={() => {
-                                                setIsOpen(false);
-                                                onLogout();
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
-                                        >
-                                            <LogOut className="w-5 h-5 shrink-0" />
-                                            Logout
-                                        </button>
+                                <span
+                                    className={cn(
+                                        "text-[9px] font-semibold transition-colors",
+                                        isActive
+                                            ? "text-brand-yellow"
+                                            : "text-slate-400 group-hover:text-slate-600"
                                     )}
-                                </div>
-                            </motion.nav>
-                        </>
-                    )}
-                </AnimatePresence>,
-                document.body
-            )}
-        </>
+                                >
+                                    {item.label}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </motion.div>
     );
 };
 

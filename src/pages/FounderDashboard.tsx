@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import {
     Rocket, Plus, LogOut, MessageSquare, DollarSign, Lightbulb,
-    User, ExternalLink, Pin, Search, Bell, ChevronRight,
+    User, ExternalLink, Pin, Search, Bell, ChevronRight, X,
     ArrowUpRight, Building2, Users, Target, CheckCircle2, ChevronLeft,
     Activity, LucideIcon, ThumbsUp, ThumbsDown, Receipt, Share2, Store
 } from "lucide-react";
@@ -1232,7 +1232,7 @@ const FounderDashboard = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Logo size="sm" />
-                        <span className="font-bold text-xl tracking-tight text-foreground hidden md:block">
+                        <span className="font-bold text-xl tracking-tight text-foreground">
                             INNOVESTOR
                         </span>
                     </div>
@@ -1300,7 +1300,7 @@ const FounderDashboard = () => {
                                 />
                             </div>
                         )}
-                        <div className="h-8 w-px bg-border/60 mx-2" />
+                        <div className="h-8 w-px bg-border/60 mx-2 hidden md:block" />
                         <Popover>
                             <PopoverTrigger asChild>
                                 <button className="flex items-center gap-3 hover:bg-secondary/50 p-1.5 rounded-xl transition-all">
@@ -1327,76 +1327,61 @@ const FounderDashboard = () => {
                                 </div>
                             </PopoverContent>
                         </Popover>
-                        <div className="lg:hidden">
-                            <MobileNav
-                                userType="founder"
-                                userName={profile?.name}
-                                onLogout={handleLogout}
-                                onMessagesClick={() => setIsSidebarOpen(true)}
-                            />
-                        </div>
                     </div>
                 </div>
             </motion.header>
+
+            <MobileNav
+                userType="founder"
+                userName={profile?.name}
+                onLogout={handleLogout}
+                onMessagesClick={() => setIsSidebarOpen(true)}
+            />
 
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 flex overflow-hidden">
                 {/* LEFT SIDEBAR */}
                 <motion.aside
-                    className={`${isMobile ? "fixed left-0 top-[73px] bottom-0 z-30 shadow-2xl" : "relative"} bg-slate-50/80 border-r border-slate-100 flex flex-col shrink-0 h-full overflow-hidden`}
+                    className={`${isMobile ? "fixed left-0 top-[73px] bottom-0 z-30 shadow-2xl" : "relative"} bg-white border-r border-slate-100 flex flex-col shrink-0 h-full overflow-hidden`}
                     initial={{ width: 320 }}
                     animate={{ width: isMobile ? (isSidebarOpen ? "88vw" : 0) : (isSidebarOpen ? 320 : 80) }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                    <div className={`${isSidebarOpen ? 'p-4' : 'py-3 px-2'} border-b border-slate-100 ${!isSidebarOpen && "flex justify-center"}`}>
-                        <div className={`flex items-center ${isSidebarOpen ? "justify-between" : "justify-center"} ${isSidebarOpen ? 'mb-4' : 'mb-0'}`}>
-                            {isSidebarOpen && (
-                                <div className="flex items-center gap-2.5">
-                                    <h2 className="text-sm font-bold text-slate-800 uppercase tracking-widest whitespace-nowrap">Connections</h2>
-                                    {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
-                                        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
-                                            className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-md shadow-red-500/30">
-                                            {chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0)}
-                                        </motion.span>
-                                    )}
-                                </div>
-                            )}
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100 rounded-full text-slate-400"
-                                aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                                <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${!isSidebarOpen ? "rotate-180" : ""}`} />
-                            </Button>
+                    <div className="p-3 sm:p-4 border-b border-border/60 bg-white sticky top-0 z-10 hidden md:block">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search investors..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-9 h-10 bg-secondary/50 border-transparent rounded-xl focus-visible:ring-brand-yellow/50 transition-all font-medium text-sm"
+                            />
                         </div>
-                        {isSidebarOpen && (
-                            <div className="relative mb-3">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <Input placeholder="Search connections..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 h-10 bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-yellow/40 transition-all rounded-xl text-sm placeholder:text-slate-400" />
-                            </div>
-                        )}
-                        {isSidebarOpen && (
-                            <div className="flex gap-1.5 p-1 bg-slate-50 rounded-xl border border-slate-100">
-                                <Button variant={messageFilter === "all" ? "default" : "ghost"} size="sm" onClick={() => setMessageFilter("all")}
-                                    className={`flex-1 h-8 text-xs rounded-lg font-semibold ${messageFilter === 'all' ? 'bg-white shadow-sm text-slate-800 border border-slate-200' : 'text-slate-500 hover:bg-white/60'}`}>All</Button>
-                                <Button variant={messageFilter === "unread" ? "default" : "ghost"} size="sm" onClick={() => setMessageFilter("unread")}
-                                    className={`flex-1 h-8 text-xs rounded-lg font-semibold ${messageFilter === 'unread' ? 'bg-white shadow-sm text-slate-800 border border-slate-200' : 'text-slate-500 hover:bg-white/60'}`}>Unread</Button>
-                                <Button variant="ghost" size="icon" onClick={() => setSoundEnabled(!soundEnabled)}
-                                    className={`h-8 w-8 rounded-lg ${soundEnabled ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:bg-white/60'}`}
-                                    aria-label={soundEnabled ? "Mute notifications" : "Unmute notifications"}
-                                    title={soundEnabled ? "Mute" : "Unmute"}>
-                                    <Activity className="w-3.5 h-3.5" />
-                                </Button>
-                            </div>
-                        )}
-                        {isSidebarOpen && chatRequests.reduce((sum, r) => sum + (r.unread_count || 0), 0) > 0 && (
-                            <Button variant="ghost" size="sm"
-                                onClick={() => { setChatRequests(prev => prev.map(r => ({ ...r, unread_count: 0 }))); toast({ title: "All messages marked as read", duration: 2000 }); }}
-                                className="mt-3 w-full text-xs text-slate-500 hover:text-brand-yellow hover:bg-brand-yellow/10 rounded-lg h-8">
-                                Mark all as read
-                            </Button>
-                        )}
+                    </div>
+                    {/* Active Connections */}
+                    <div className="flex items-center justify-between px-4 py-2 bg-secondary/30 mt-2">
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active</span>
+                        <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => setMessageFilter("all")} className={`h-6 px-2 text-[10px] font-bold ${messageFilter === "all" ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/50"}`}>All</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setMessageFilter("unread")} className={`h-6 px-2 text-[10px] font-bold ${messageFilter === "unread" ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/50"}`}>Unread</Button>
+                        </div>
                     </div>
                     <ScrollArea className="flex-1">
+                        <div className="lg:hidden p-3 pt-4 bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-slate-100 mb-2">
+                            <div className="flex justify-between items-center mb-3 px-1">
+                                <h3 className="font-bold text-brand-charcoal text-lg">Messages</h3>
+                                <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200"><X className="h-4 w-4" /></Button>
+                            </div>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search investors..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9 h-10 bg-secondary/50 border-transparent rounded-xl focus-visible:ring-brand-yellow/50 transition-all font-medium text-sm"
+                                />
+                            </div>
+                        </div>
                         <motion.div className="p-3 space-y-1" variants={containerVariants} initial="hidden" animate="visible">
                             {activeConnections.length > 0 ? (
                                 activeConnections
@@ -1454,7 +1439,7 @@ const FounderDashboard = () => {
                 </motion.aside>
 
                 {/* MAIN CONTENT */}
-                <main className={`flex-1 overflow-y-auto bg-background transition-all duration-300 ${selectedChat ? "lg:mr-96" : ""}`}>
+                <main className={`flex-1 overflow-y-auto bg-background transition-all duration-300 pb-20 md:pb-0 ${selectedChat ? "lg:mr-96" : ""}`}>
                     <motion.div className="max-w-[1600px] mx-auto p-3 sm:p-4 md:p-8" variants={containerVariants} initial="hidden" animate="visible">
                         {/* Page Header */}
                         <motion.div className="flex flex-col md:flex-row md:items-end justify-between mb-4 sm:mb-8 gap-4" variants={itemVariants}>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, Search, LogOut, MessageSquare, TrendingUp, DollarSign, Lightbulb, MapPin, Globe, Filter, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, Activity, Zap, Heart, ShieldCheck, X, ThumbsUp, Users, Handshake, Store, Receipt, User, Bell } from "lucide-react";
 import Logo from "@/components/ui/Logo";
@@ -752,7 +753,7 @@ const InvestorDashboard = () => {
         <header className="lg:hidden sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md py-3 px-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Logo size="sm" />
-            <span className="text-base font-black tracking-tight text-foreground uppercase">Innovestor</span>
+            <span className="text-xl font-bold tracking-tight text-foreground uppercase">INNOVESTOR</span>
           </div>
           <div className="flex items-center gap-2">
             <Popover>
@@ -804,17 +805,39 @@ const InvestorDashboard = () => {
                 </div>
               </PopoverContent>
             </Popover>
-            <MobileNav
-              userType="investor"
-              userName={profile?.name}
-              onLogout={handleLogout}
-              unreadCount={totalUnreadCount}
-              onMessagesClick={() => setShowChatList(!showChatList)}
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center hover:bg-secondary/50 p-1 rounded-full transition-all">
+                  <Avatar className="h-8 w-8 ring-2 ring-brand-yellow/10">
+                    <AvatarImage src={profile?.avatar_url} />
+                    <AvatarFallback className="bg-brand-yellow/20 text-brand-charcoal font-bold">{profile?.name?.charAt(0) || 'I'}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2 rounded-2xl border-border bg-white shadow-xl mr-2">
+                <div className="space-y-1">
+                  <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground rounded-xl" onClick={() => navigate("/profile")}>
+                    <User className="w-4 h-4 mr-2" /> Profile
+                  </Button>
+                  <div className="h-px bg-border my-1" />
+                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl" onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" /> Logout
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </header>
 
-        <main className="relative z-10 max-w-6xl mx-auto px-3 sm:px-4 sm:px-6 lg:px-10 py-4 sm:py-6 sm:py-8">
+        <MobileNav
+          userType="investor"
+          userName={profile?.name}
+          onLogout={handleLogout}
+          unreadCount={totalUnreadCount}
+          onMessagesClick={() => setShowChatList(!showChatList)}
+        />
+
+        <main className="relative z-10 max-w-6xl mx-auto px-3 sm:px-4 sm:px-6 lg:px-10 py-4 sm:py-6 sm:py-8 pb-20 md:pb-8">
           {/* ===== Company Header Card ===== */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
