@@ -376,7 +376,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
   // LIGHT MODE UI COMPONENT
   // ============================================================================
   const Content = (
-    <div className={`flex flex-col h-full overflow-hidden bg-background ${className}`}>
+    <div className={`flex flex-col h-full overflow-hidden bg-background ${className}`} style={{ paddingBottom: variant === 'embedded' ? 'env(safe-area-inset-bottom, 0px)' : undefined }}>
       {/* Light Glassmorphic Header */}
       <div className="px-4 py-3 bg-background/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-3">
@@ -491,7 +491,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
       </AnimatePresence>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-4 py-3 bg-background">
+      <ScrollArea className="flex-1 px-3 sm:px-4 py-3 bg-background">
         <div className="space-y-4 pb-4">
           <AnimatePresence initial={false}>
             {messages.map((message, index) => {
@@ -512,7 +512,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
                     </Avatar>
                   ) : !isSent && <div className="w-8" />}
 
-                  <div className={`flex flex-col max-w-[75%] ${isSent ? "items-end" : "items-start"}`}>
+                  <div className={`flex flex-col max-w-[80%] sm:max-w-[75%] ${isSent ? "items-end" : "items-start"}`}>
                     <div className={`px-4 py-2.5 shadow-sm ${isSent
                       ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl rounded-br-none"
                       : "bg-white text-slate-800 border border-slate-100 rounded-2xl rounded-bl-none"
@@ -535,7 +535,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
       </ScrollArea>
 
       {/* Light Footer Input */}
-      <div className="p-4 bg-background border-t border-slate-200/60 shrink-0">
+      <div className="p-3 sm:p-4 bg-background border-t border-slate-200/60 shrink-0 pb-4 md:pb-4">
         <form onSubmit={handleSendMessage} className="flex gap-2 items-end">
           <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.gif" />
 
@@ -553,7 +553,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
             </Button>
           )}
 
-          <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-300 transition-all flex items-center px-2">
+          <div className="flex-1 min-w-0 bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-300 transition-all flex items-center px-2">
             <input
               ref={inputRef}
               value={newMessage}

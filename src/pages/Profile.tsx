@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -98,7 +99,7 @@ const Profile = () => {
     const isFounder = profile.user_type === "founder";
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -335,6 +336,7 @@ const Profile = () => {
                     </div>
                 </div>
             </main>
+            <MobileNav userType={isFounder ? "founder" : "investor"} />
         </div>
     );
 };

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { evaluateFounderSubmitAccess, ensurePremiumFlag, type SubmitAccessResult } from "@/lib/founderAccess";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 const DOMAINS = [
     "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
@@ -205,7 +206,7 @@ const SubmitIdea = () => {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900">
+        <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 md:pb-0">
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-4 transition-all">
                 <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -585,6 +586,7 @@ const SubmitIdea = () => {
                     </div>
                 </div>
             </main>
+            <MobileNav userType="founder" />
         </div>
     );
 };

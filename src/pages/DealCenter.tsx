@@ -26,6 +26,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import PaymentQR from "@/components/PaymentQR";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 interface DealData {
     chatRequest: any;
@@ -622,7 +623,7 @@ const DealCenter = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground relative selection:bg-brand-yellow/30">
+        <div className="min-h-screen bg-background text-foreground relative selection:bg-brand-yellow/30 pb-20 md:pb-0">
             {/* Ambient Background */}
             <div className="fixed inset-0 z-0">
                 <div className="absolute top-0 -left-40 w-96 h-96 bg-brand-yellow/20 rounded-full blur-[128px] opacity-20" />
@@ -1506,6 +1507,7 @@ const DealCenter = () => {
                 </Dialog>
 
             </div>
+            <MobileNav userType={data?.isFounder ? "founder" : "investor"} />
         </div>
     );
 };

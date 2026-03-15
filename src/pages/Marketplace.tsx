@@ -18,6 +18,7 @@ import Logo from "@/components/ui/Logo";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 // Types
 interface Idea {
@@ -545,7 +546,7 @@ const Marketplace = () => {
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-10"
+                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-24 md:pb-10"
                                 >
                                     {filteredIdeas.map(idea => {
                                         const status = chatRequests[idea.id];
@@ -662,6 +663,7 @@ const Marketplace = () => {
                     </div>
                 </div>
             </div>
+            <MobileNav userType="investor" />
         </div>
     );
 };

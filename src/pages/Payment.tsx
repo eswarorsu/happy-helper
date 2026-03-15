@@ -10,6 +10,7 @@ import { Rocket, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, W
 import Logo from "@/components/ui/Logo";
 import { useToast } from "@/hooks/use-toast";
 import { couponLimiter, orderLimiter } from "@/lib/rateLimiter";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://happy-helper.onrender.com";
 
@@ -263,7 +264,7 @@ const Payment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 pb-24 md:pb-6">
             <div className="w-full max-w-lg relative z-10">
                 {/* Back Button */}
                 <Button
@@ -451,6 +452,7 @@ const Payment = () => {
                     <a href="/refund" className="underline hover:text-slate-600">Refund Policy</a>.
                 </p>
             </div>
+            <MobileNav userType="founder" />
         </div>
     );
 };

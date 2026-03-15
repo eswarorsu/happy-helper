@@ -14,6 +14,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 
 interface Transaction {
@@ -243,7 +244,7 @@ const Transactions = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
             <div className="min-h-screen">
                 {/* Header */}
                 <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
@@ -545,6 +546,7 @@ const Transactions = () => {
                     )}
                 </DialogContent>
             </Dialog>
+            <MobileNav userType={profile?.user_type as any} />
         </div >
     );
 };

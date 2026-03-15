@@ -1662,7 +1662,7 @@ const FounderDashboard = () => {
                             <motion.aside initial={{ x: "100%", opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: "100%", opacity: 0 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 style={{ width: isMobile ? "100vw" : chatWidth }}
-                                className={`fixed right-0 ${isMobile ? "top-0" : "top-[73px]"} bottom-0 w-full md:w-auto bg-background/95 backdrop-blur-md border-l border-border shadow-2xl z-40 flex`}>
+                                className={`fixed right-0 ${isMobile ? "top-0 bottom-[72px]" : "top-[73px] bottom-0"} w-full md:w-auto bg-background/95 backdrop-blur-md border-l border-border shadow-2xl z-40 flex`}>
                                 <div className="hidden md:flex w-1.5 h-full cursor-ew-resize hover:bg-indigo-500/50 transition-colors items-center justify-center group"
                                     onMouseDown={(e) => { if (isMobile) return; e.preventDefault(); setIsResizing(true); }}>
                                     <div className="w-0.5 h-8 bg-border group-hover:bg-indigo-500 rounded-full" />
