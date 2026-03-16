@@ -194,7 +194,7 @@ const ProductMarketplace = () => {
                                 placeholder="Search products, founders..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="pl-10 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-none"
+                                className="pl-10 rounded-2xl border-slate-200 bg-slate-50 placeholder:text-slate-500 focus:bg-white focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all shadow-none"
                             />
                         </div>
                     </div>
@@ -249,7 +249,7 @@ const ProductMarketplace = () => {
                     >
                         {filteredProducts.map(product => (
                             <motion.div key={product.id} variants={itemVariants}>
-                                <Card className="group h-full flex flex-col bg-white border-slate-200 rounded-[32px] overflow-hidden hover:shadow-2xl hover:border-brand-yellow/30 transition-all duration-500">
+                                <Card className="group h-full flex flex-col bg-white border-slate-200 rounded-[32px] overflow-hidden hover:shadow-2xl hover:shadow-brand-yellow/10 hover:border-brand-yellow/50 transition-all duration-500">
                                     <div className="relative h-56 bg-slate-100 overflow-hidden">
                                         {product.image_url ? (
                                             <img
@@ -321,10 +321,10 @@ const ProductMarketplace = () => {
                                             </Button>
                                         )}
                                         <Button
-                                            variant="outline" size="icon" className="w-11 h-11 rounded-2xl border-slate-200 hover:bg-slate-50"
+                                            variant="outline" size="icon" className="w-11 h-11 rounded-2xl border-slate-200 hover:bg-brand-yellow/10 hover:text-brand-yellow hover:border-brand-yellow/50 transition-colors group/btn"
                                             onClick={() => setSelectedFounder(product.founder)}
                                         >
-                                            <User className="w-4 h-4 text-slate-600" />
+                                            <User className="w-4 h-4 text-slate-600 group-hover/btn:text-brand-yellow transition-colors" />
                                         </Button>
                                     </CardFooter>
                                 </Card>

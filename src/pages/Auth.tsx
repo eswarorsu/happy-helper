@@ -474,7 +474,7 @@ const Auth = () => {
           {/* Back link */}
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors text-sm"
+            className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-yellow mb-8 transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to home
@@ -540,7 +540,7 @@ const Auth = () => {
                           onClick={() => setFormData((prev) => ({ ...prev, userType: "founder" }))}
                           className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${formData.userType === "founder"
                             ? "bg-brand-charcoal text-white shadow-md border-2 border-brand-charcoal"
-                            : "text-slate-600 hover:text-foreground hover:bg-white/50"
+                            : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                             }`}
                         >
                           🚀 Founder
@@ -550,7 +550,7 @@ const Auth = () => {
                           onClick={() => setFormData((prev) => ({ ...prev, userType: "investor" }))}
                           className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${formData.userType === "investor"
                             ? "bg-brand-charcoal text-white shadow-md border-2 border-brand-charcoal"
-                            : "text-slate-600 hover:text-foreground hover:bg-white/50"
+                            : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                             }`}
                         >
                           💰 Investor
@@ -611,13 +611,13 @@ const Auth = () => {
                         onChange={(e) => setAgreedToTerms(e.target.checked)}
                         className="mt-0.5 h-4 w-4 rounded border-border accent-brand-charcoal cursor-pointer shrink-0"
                       />
-                      <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+                        <label htmlFor="terms" className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
                         I have read and agree to the{" "}
-                        <Link to="/terms-and-conditions" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
+                        <Link to="/terms-and-conditions" target="_blank" className="font-semibold text-slate-700 underline underline-offset-2 hover:text-brand-yellow transition-colors">
                           Terms &amp; Conditions
                         </Link>
                         {" "}and{" "}
-                        <Link to="/privacy-policy" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
+                        <Link to="/privacy-policy" target="_blank" className="font-semibold text-slate-700 underline underline-offset-2 hover:text-brand-yellow transition-colors">
                           Privacy Policy
                         </Link>
                         , including the High Risk Investment Warning and SEBI disclaimer.
@@ -665,14 +665,14 @@ const Auth = () => {
                 {mode === "login" ? (
                   <Link
                     to="/auth?mode=register"
-                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-border/60 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
                   >
                     Create a free account
                   </Link>
                 ) : (
                   <Link
                     to="/auth?mode=login"
-                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-border/60 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
                   >
                     Sign in instead
                   </Link>

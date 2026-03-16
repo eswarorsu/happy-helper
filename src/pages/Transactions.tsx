@@ -259,7 +259,7 @@ const Transactions = () => {
                                 <ArrowLeft className="w-4 h-4 mr-1" /> Back
                             </Button>
                             <div className="flex items-center gap-2">
-                                <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                                <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200">
                                     <Receipt className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
@@ -277,7 +277,7 @@ const Transactions = () => {
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 w-28 sm:w-64 h-10 bg-white border-slate-200 focus:border-indigo-500"
+                                    className="pl-10 w-28 sm:w-64 h-10 bg-white border-slate-200 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
                                 />
                             </div>
                         </div>
@@ -300,8 +300,8 @@ const Transactions = () => {
                                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total {profile?.user_type === "investor" ? "Invested" : "Raised"}</p>
                                             <p className="text-2xl font-bold mt-1 text-slate-900">₹{totalAmount.toLocaleString()}</p>
                                         </div>
-                                        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
-                                            <TrendingUp className="w-6 h-6 text-indigo-600" />
+                                        <div className="w-12 h-12 rounded-xl bg-brand-yellow/10 flex items-center justify-center">
+                                            <TrendingUp className="w-6 h-6 text-brand-yellow" />
                                         </div>
                                     </div>
                                 </CardContent>
@@ -394,7 +394,7 @@ const Transactions = () => {
                                                         <div className="flex items-start justify-between gap-2">
                                                             <div className="min-w-0">
                                                                 <div className="flex flex-wrap items-center gap-2">
-                                                                    <h4 className="text-base font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors max-w-full">
+                                                                    <h4 className="text-base font-semibold text-slate-900 truncate group-hover:text-brand-yellow transition-colors max-w-full">
                                                                         {tx.idea?.title || "Unknown Venture"}
                                                                     </h4>
                                                                     {tx.type === "profit_share" ? (
@@ -460,7 +460,7 @@ const Transactions = () => {
                                 </>
                             ) : (
                                 <>
-                                    <Receipt className="w-5 h-5 text-indigo-600" />
+                                    <Receipt className="w-5 h-5 text-slate-900" />
                                     <span>Transaction Details</span>
                                 </>
                             )}
@@ -531,7 +531,7 @@ const Transactions = () => {
                                             rel="noreferrer"
                                             className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors"
                                         >
-                                            <ExternalLink className="w-4 h-4 text-indigo-600" />
+                                            <ExternalLink className="w-4 h-4 text-slate-900" />
                                         </a>
                                     </div>
                                 </div>

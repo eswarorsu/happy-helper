@@ -449,9 +449,9 @@ const ProfileSetup = () => {
 
             {/* Progress bar */}
             <div className="mb-8">
-              <div className="flex justify-between text-[11px] text-slate-400 mb-2">
+              <div className="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                 <span>Progress</span>
-                <span className="text-amber-500 font-semibold">{Math.round((step / 4) * 100)}%</span>
+                <span className="text-amber-600">{Math.round((step / 4) * 100)}%</span>
               </div>
               <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-brand-yellow to-amber-400 rounded-full transition-all duration-700" style={{ width: `${(step / 4) * 100}%` }} />
@@ -480,7 +480,7 @@ const ProfileSetup = () => {
           </div>
 
           <div className="p-7 border-t border-slate-100">
-            <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => navigate("/auth?mode=login")}>
+            <Button variant="ghost" className="w-full justify-start text-slate-500 font-medium hover:text-red-600 hover:bg-red-50 transition-all" onClick={() => navigate("/auth?mode=login")}>
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           </div>
@@ -565,7 +565,7 @@ const ProfileSetup = () => {
                           <Input
                             value={formData.name}
                             onChange={(e) => handleInputChange("name", e.target.value)}
-                            className={`h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-amber-400 transition-all rounded-xl ${errors.name ? 'border-red-400' : ''}`}
+                            className={`h-12 pl-10 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow/50 transition-all rounded-xl ${errors.name ? 'border-red-400' : ''}`}
                             placeholder="e.g. Chepuri Natraj"
                           />
                         </div>
@@ -575,7 +575,7 @@ const ProfileSetup = () => {
                       <div className="space-y-2">
                         <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Current Status</Label>
                         <Select value={formData.status} onValueChange={(v) => handleInputChange("status", v)}>
-                          <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 rounded-xl focus:border-amber-400">
+                          <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 rounded-xl focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow/50">
                             <SelectValue placeholder="Select your current status" />
                           </SelectTrigger>
                           <SelectContent className="bg-white border-slate-200 text-slate-900">

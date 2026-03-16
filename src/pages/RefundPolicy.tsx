@@ -9,8 +9,8 @@ const RefundPolicy: React.FC = () => {
       <header className="sticky top-0 z-50 w-full bg-background backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between p-6">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <RefreshCcw className="w-6 h-6 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md">
+              <RefreshCcw className="w-6 h-6 text-brand-yellow" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-[#111827]">INNOVESTOR</span>
           </Link>
@@ -21,7 +21,7 @@ const RefundPolicy: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-16">
+      <div className="bg-gradient-to-r from-slate-900 to-brand-charcoal text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
             <span className="text-4xl">💸</span>
@@ -82,7 +82,7 @@ const RefundPolicy: React.FC = () => {
           <section>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-primary" />
+                <Clock className="w-5 h-5 text-brand-charcoal" />
               </div>
               <h2 className="text-2xl font-bold text-foreground">3. Refund Process</h2>
             </div>
@@ -134,8 +134,8 @@ const RefundPolicy: React.FC = () => {
           {/* Contact Information */}
           <section className="border-t pt-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-brand-yellow/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-brand-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -148,8 +148,8 @@ const RefundPolicy: React.FC = () => {
               </p>
               <div className="space-y-1 text-slate-700">
                 <p><strong>Company:</strong> INNOVESTOR</p>
-                <p><strong>Email:</strong> <a href="mailto:refunds@innovestor.com" className="text-primary hover:underline">refunds@innovestor.com</a></p>
-                <p><strong>Support:</strong> <a href="mailto:support@innovestor.com" className="text-primary hover:underline">support@innovestor.com</a></p>
+                <p><strong>Email:</strong> <a href="mailto:refunds@innovestor.com" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">refunds@innovestor.com</a></p>
+                <p><strong>Support:</strong> <a href="mailto:support@innovestor.com" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">support@innovestor.com</a></p>
                 <p><strong>Address:</strong> Vizag, Andhra Pradesh, India – 530001</p>
               </div>
             </div>
@@ -165,11 +165,11 @@ const RefundPolicy: React.FC = () => {
             © 2026 INNOVESTOR. All rights reserved.
           </p>
           <div className="flex justify-center gap-4 mt-3 text-sm">
-            <Link to="/privacy-policy" className="text-slate-600 hover:text-primary hover:underline">Privacy Policy</Link>
+            <Link to="/privacy-policy" className="text-slate-600 hover:text-brand-charcoal hover:underline">Privacy Policy</Link>
             <span className="text-slate-400">|</span>
-            <Link to="/terms-and-conditions" className="text-slate-600 hover:text-primary hover:underline">Terms & Conditions</Link>
+            <Link to="/terms-and-conditions" className="text-slate-600 hover:text-brand-charcoal hover:underline">Terms & Conditions</Link>
             <span className="text-slate-400">|</span>
-            <Link to="/refund-policy" className="text-primary hover:underline">Refund Policy</Link>
+            <Link to="/refund-policy" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">Refund Policy</Link>
           </div>
         </div>
       </footer>

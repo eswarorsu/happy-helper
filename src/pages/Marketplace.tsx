@@ -346,7 +346,7 @@ const Marketplace = () => {
                                     placeholder="Search ideas..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 w-[12.5rem] sm:w-64 h-10 bg-background border-border"
+                                    className="pl-10 w-[12.5rem] sm:w-64 h-10 bg-background border-border placeholder:text-slate-500 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
                                 />
                             </div>
                             <Button
@@ -399,7 +399,7 @@ const Marketplace = () => {
                                             <CardContent className="pt-4 space-y-6">
                                                 {/* Sort By */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Sort By
                                                     </label>
                                                     <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
@@ -416,7 +416,7 @@ const Marketplace = () => {
 
                                                 {/* Domain */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Domain
                                                     </label>
                                                     <div className="flex flex-wrap gap-1.5">
@@ -438,7 +438,7 @@ const Marketplace = () => {
 
                                                 {/* Investment Range */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3 block">
                                                         Investment Range
                                                     </label>
                                                     <Slider
@@ -456,7 +456,7 @@ const Marketplace = () => {
 
                                                 {/* Work Mode */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Work Mode
                                                     </label>
                                                     <div className="space-y-2">
@@ -474,7 +474,7 @@ const Marketplace = () => {
 
                                                 {/* Location */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Location
                                                     </label>
                                                     <div className="relative">
@@ -490,7 +490,7 @@ const Marketplace = () => {
 
                                                 {/* Traction */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Traction Stage
                                                     </label>
                                                     <Select value={selectedTraction} onValueChange={setSelectedTraction}>
@@ -508,7 +508,7 @@ const Marketplace = () => {
 
                                                 {/* Team Size */}
                                                 <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">
                                                         Team Size
                                                     </label>
                                                     <Select value={selectedTeamSize} onValueChange={setSelectedTeamSize}>
@@ -555,7 +555,7 @@ const Marketplace = () => {
 
                                         return (
                                             <motion.div key={idea.id} variants={itemVariants} className="h-full">
-                                                <Card className="h-full flex flex-col bg-white border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer overflow-hidden rounded-xl">
+                                                <Card className="h-full flex flex-col bg-white border border-slate-200 shadow-md hover:shadow-2xl hover:shadow-brand-yellow/10 hover:border-brand-yellow/30 hover:-translate-y-1 transition-all duration-300 group cursor-pointer overflow-hidden rounded-xl">
                                                     <CardHeader className="pb-2 relative">
                                                         {isNew && (
                                                             <Badge className="absolute top-3 right-3 bg-brand-yellow text-brand-charcoal text-[9px] px-1.5 py-0.5 gap-1">
@@ -625,7 +625,7 @@ const Marketplace = () => {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="flex-1 h-9 text-xs border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 hover:border-slate-300 transition-all"
+                                                                className="flex-1 h-9 text-xs border-slate-200 text-slate-600 hover:text-brand-yellow hover:bg-brand-yellow/10 hover:border-brand-yellow/50 transition-all font-semibold"
                                                                 onClick={() => navigate(`/idea/${idea.id}`)}
                                                             >
                                                                 View Details

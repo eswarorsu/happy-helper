@@ -9,8 +9,8 @@ const TermsAndConditions: React.FC = () => {
       <header className="sticky top-0 z-50 w-full bg-background backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between p-6">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <FileText className="w-6 h-6 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md">
+              <FileText className="w-6 h-6 text-brand-yellow" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-[#111827]">INNOVESTOR</span>
           </Link>
@@ -21,7 +21,7 @@ const TermsAndConditions: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-brand-yellow to-brand-charcoal text-white py-16">
+      <div className="bg-gradient-to-r from-slate-900 to-brand-charcoal text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
             <Scale className="w-8 h-8" />
@@ -82,7 +82,7 @@ const TermsAndConditions: React.FC = () => {
           <section>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-primary" />
+                <UserCheck className="w-5 h-5 text-brand-charcoal" />
               </div>
               <h2 className="text-2xl font-bold text-foreground">1. Acceptance of Terms</h2>
             </div>
@@ -347,7 +347,7 @@ const TermsAndConditions: React.FC = () => {
           <section>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Gavel className="w-5 h-5 text-primary" />
+                <Gavel className="w-5 h-5 text-brand-charcoal" />
               </div>
               <h2 className="text-2xl font-bold text-foreground">10. Governing Law and Dispute Resolution</h2>
             </div>
@@ -410,8 +410,8 @@ const TermsAndConditions: React.FC = () => {
           {/* Contact Information */}
           <section className="border-t pt-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-brand-yellow/20 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-brand-charcoal" />
               </div>
               <h2 className="text-2xl font-bold text-foreground">Contact Us</h2>
             </div>
@@ -422,8 +422,8 @@ const TermsAndConditions: React.FC = () => {
               </p>
               <div className="space-y-1 text-slate-700">
                 <p><strong>Company:</strong> INNOVESTOR</p>
-                <p><strong>Email:</strong> <a href="mailto:legal@innovestor.com" className="text-primary hover:underline">legal@innovestor.com</a></p>
-                <p><strong>Support:</strong> <a href="mailto:support@innovestor.com" className="text-primary hover:underline">support@innovestor.com</a></p>
+                <p><strong>Email:</strong> <a href="mailto:legal@innovestor.com" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">legal@innovestor.com</a></p>
+                <p><strong>Support:</strong> <a href="mailto:support@innovestor.com" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">support@innovestor.com</a></p>
                 <p><strong>Address:</strong> Vizag, Andhra Pradesh, India – 530001</p>
               </div>
             </div>
@@ -439,11 +439,11 @@ const TermsAndConditions: React.FC = () => {
             © 2026 INNOVESTOR. All rights reserved.
           </p>
           <div className="flex justify-center gap-4 mt-3 text-sm">
-            <Link to="/privacy-policy" className="text-slate-600 hover:text-primary hover:underline">Privacy Policy</Link>
+            <Link to="/privacy-policy" className="text-slate-600 hover:text-brand-charcoal hover:underline">Privacy Policy</Link>
             <span className="text-slate-400">|</span>
-            <Link to="/terms-and-conditions" className="text-primary hover:underline">Terms & Conditions</Link>
+            <Link to="/terms-and-conditions" className="text-brand-charcoal font-semibold hover:text-brand-yellow transition-colors">Terms & Conditions</Link>
             <span className="text-slate-400">|</span>
-            <Link to="/refund-policy" className="text-slate-600 hover:text-primary hover:underline">Refund Policy</Link>
+            <Link to="/refund-policy" className="text-slate-600 hover:text-brand-charcoal hover:underline">Refund Policy</Link>
           </div>
         </div>
       </footer>

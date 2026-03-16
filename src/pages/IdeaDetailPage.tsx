@@ -354,22 +354,26 @@ export default function IdeaDetailPage() {
                 {activeDetailTab === "details" ? (
                     <div className="space-y-8">
                         {/* Section 1: Title & Domain */}
-                        <section>
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        <section className="mb-6">
+                            <Badge className="bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 border-none font-black text-[10px] tracking-widest mb-4">
                                 {idea.domain}
-                            </p>
-                            <h1 className="text-2xl font-bold text-foreground mb-2">{idea.title}</h1>
-                            <p className="text-sm text-muted-foreground">
-                                Founded by{" "}
-                                <span className="font-medium">{idea.founder?.name || "Unknown"}</span>
-                            </p>
+                            </Badge>
+                            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">{idea.title}</h1>
+                            <div className="flex items-center gap-3">
+                                <Avatar className="w-8 h-8 border border-slate-200">
+                                    <AvatarFallback className="bg-slate-100 text-slate-600 font-bold text-xs">{idea.founder?.name?.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <p className="text-sm text-slate-500 font-medium">
+                                    Proposed by <span className="font-bold text-slate-900">{idea.founder?.name || "Unknown"}</span>
+                                </p>
+                            </div>
                         </section>
 
                         {/* Section 2: Problem Statement */}
                         <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Target className="w-4 h-4 text-brand-charcoal" />
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Target className="w-4 h-4 text-brand-yellow" />
+                                <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Problem Statement
                                 </h2>
                             </div>
@@ -378,9 +382,9 @@ export default function IdeaDetailPage() {
 
                         {/* Section 3: Solution / Idea Explanation */}
                         <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2 mb-4">
                                 <Lightbulb className="w-4 h-4 text-brand-yellow fill-brand-yellow" />
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                                <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Solution / Idea
                                 </h2>
                             </div>
@@ -391,9 +395,9 @@ export default function IdeaDetailPage() {
 
                         {/* Section 4: Market & Domain Relevance */}
                         <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-4">
-                                <BarChart3 className="w-4 h-4 text-brand-charcoal" />
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                            <div className="flex items-center gap-2 mb-5">
+                                <BarChart3 className="w-4 h-4 text-brand-yellow" />
+                                <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Market & Domain Relevance
                                 </h2>
                             </div>
@@ -445,9 +449,9 @@ export default function IdeaDetailPage() {
 
                         {/* Section 5: Business Model */}
                         <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-3">
-                                <FileText className="w-4 h-4 text-brand-charcoal" />
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                            <div className="flex items-center gap-2 mb-4">
+                                <FileText className="w-4 h-4 text-brand-yellow" />
+                                <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Business Model
                                 </h2>
                             </div>
@@ -645,13 +649,23 @@ export default function IdeaDetailPage() {
                                             <Equalizer bars={9} className="w-40 sm:w-56" />
                                         </div>
                                     </div>
-                                    <Button
-                                        size="lg"
-                                        onClick={() => navigate("/investor-dashboard")}
-                                        className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal font-bold shadow-md transition-all hover:scale-105"
-                                    >
-                                        Back to Dashboard
-                                    </Button>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <Button
+                                            size="lg"
+                                            className="bg-brand-charcoal hover:bg-slate-800 text-brand-yellow font-black rounded-2xl h-12 px-8 shadow-xl hover:-translate-y-1 transition-all"
+                                            onClick={() => navigate("/investor-dashboard")}
+                                        >
+                                            Contact Founder
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="lg"
+                                            onClick={() => navigate("/marketplace")}
+                                            className="border-slate-200 text-slate-600 rounded-2xl h-12 font-bold hover:bg-slate-50 transition-colors"
+                                        >
+                                            Browse More
+                                        </Button>
+                                    </div>
                                 </div>
                             </section>
                         )}

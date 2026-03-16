@@ -147,14 +147,14 @@ const Profile = () => {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => navigate(`/profile-setup?type=${profile.user_type}&mode=edit`)}
-                                                className="h-6 w-6 p-0 rounded-full hover:bg-brand-yellow/20 text-slate-400 hover:text-brand-charcoal transition-colors"
+                                                className="h-7 w-7 p-0 rounded-full hover:bg-brand-yellow hover:text-brand-charcoal transition-all shadow-sm border border-transparent hover:border-brand-yellow/50"
                                                 title="Edit Profile"
                                             >
                                                 <Pencil className="w-3.5 h-3.5" />
                                             </Button>
                                         )}
                                     </h1>
-                                    <p className="text-sm text-slate-500">{profile.current_job || "Member"}</p>
+                                    <p className="text-sm font-medium text-slate-600">{profile.current_job || "Member"}</p>
 
                                     <div className="flex justify-center gap-2 flex-wrap">
                                         {profile.is_approved && (
@@ -212,8 +212,8 @@ const Profile = () => {
 
                         {/* Contact Info Card */}
                         <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                            <CardHeader className="pb-3 border-b border-border/40">
+                                <CardTitle className="text-xs font-bold text-slate-600 uppercase tracking-widest">
                                     Contact Information
                                 </CardTitle>
                             </CardHeader>
@@ -223,7 +223,7 @@ const Profile = () => {
                                         <Mail className="w-4 h-4 text-slate-500" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-xs text-slate-400 font-medium">Email</p>
+                                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">Email</p>
                                         <p className="text-slate-800 font-medium truncate">{profile.email}</p>
                                     </div>
                                 </div>
@@ -233,7 +233,7 @@ const Profile = () => {
                                             <Phone className="w-4 h-4 text-slate-500" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-400 font-medium">Phone</p>
+                                            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">Phone</p>
                                             <p className="text-slate-800 font-medium">{profile.phone}</p>
                                         </div>
                                     </div>
@@ -251,8 +251,8 @@ const Profile = () => {
                                         <Building2 className="w-5 h-5 text-brand-charcoal" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg font-semibold text-foreground">Professional Profile</CardTitle>
-                                        <p className="text-sm text-slate-500">Your professional journey and expertise</p>
+                                        <CardTitle className="text-xl font-bold text-foreground">Professional Profile</CardTitle>
+                                        <p className="text-sm font-medium text-slate-600">Your professional journey and expertise</p>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -260,7 +260,7 @@ const Profile = () => {
                                 {/* Experience */}
                                 {profile.experience && (
                                     <div className="space-y-3">
-                                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                             <Briefcase className="w-4 h-4" /> Experience
                                         </div>
                                         <div className="p-4 bg-secondary rounded-xl border border-border/60">
@@ -275,7 +275,7 @@ const Profile = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     {profile.education && (
                                         <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                                 <GraduationCap className="w-4 h-4" /> Education
                                             </div>
                                             <div className="p-4 bg-white rounded-xl border border-border">
@@ -286,7 +286,7 @@ const Profile = () => {
 
                                     {profile.domain && (
                                         <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                                 <Globe className="w-4 h-4" /> Domain
                                             </div>
                                             <div className="p-4 bg-white rounded-xl border border-border">
@@ -303,7 +303,7 @@ const Profile = () => {
                                     <div className="pt-4 border-t border-border/60 space-y-6">
                                         {profile.interested_domains && profile.interested_domains.length > 0 && (
                                             <div className="space-y-3">
-                                                <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                                     <Target className="w-4 h-4" /> Interested Sectors
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
@@ -318,7 +318,7 @@ const Profile = () => {
 
                                         {profile.investment_capital && (
                                             <div className="space-y-3 pt-4 border-t border-slate-50">
-                                                <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                                     <DollarSign className="w-4 h-4" /> Investment Capacity
                                                 </div>
                                                 <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 shadow-sm">

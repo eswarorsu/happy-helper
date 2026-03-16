@@ -80,7 +80,7 @@ const DealCenterIndex = () => {
                     d.deal_status === "deal_done"
                 );
 
-                setDeals(validDeals);
+                setDeals(validDeals as any[]);
             } catch (error) {
                 console.error("Error fetching deals:", error);
             } finally {
@@ -144,7 +144,7 @@ const DealCenterIndex = () => {
                                         <p className="text-muted-foreground max-w-sm mx-auto">
                                             We couldn't find any deals for your account.
                                         </p>
-                                        <Button onClick={() => navigate("/marketplace")} className="bg-indigo-600 hover:bg-indigo-700 text-white">Explore Marketplace</Button>
+                                        <Button onClick={() => navigate("/marketplace")} className="bg-brand-charcoal hover:bg-slate-800 text-brand-yellow font-bold shadow-md rounded-xl">Explore Marketplace</Button>
                                     </CardContent>
                                 </Card>
 
@@ -158,7 +158,7 @@ const DealCenterIndex = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                     >
-                                        <Card className="h-full bg-white hover:border-indigo-200 transition-all duration-300 shadow-sm hover:shadow-md group border-border/60">
+                                        <Card className="h-full bg-white hover:border-brand-yellow/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-brand-yellow/5 group border-slate-200 rounded-3xl">
                                             <CardContent className="p-6 space-y-6">
                                                 {/* Founder & Venture Info */}
                                                 <div className="flex justify-between items-start gap-4">
@@ -172,7 +172,7 @@ const DealCenterIndex = () => {
                                                             <p className="text-xs text-slate-500">{deal.idea?.domain}</p>
                                                         </div>
                                                     </div>
-                                                    <Badge variant={deal.deal_status === "deal_done" ? "default" : "secondary"} className={`capitalize ${deal.deal_status === "deal_done" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"}`}>
+                                                    <Badge variant={deal.deal_status === "deal_done" ? "default" : "secondary"} className={`capitalize font-bold border-none px-3 py-1 ${deal.deal_status === "deal_done" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20"}`}>
                                                         {deal.deal_status === "deal_done" ? "Invested" : "Negotiating"}
                                                     </Badge>
                                                 </div>
@@ -196,7 +196,7 @@ const DealCenterIndex = () => {
                                                 )}
 
                                                 <Button
-                                                    className="w-full bg-white border border-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                                    className="w-full bg-slate-900 border-none text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md hover:-translate-y-0.5"
                                                     onClick={() => navigate(`/deal-center/${deal.id}`)}
                                                 >
                                                     Enter Deal Room <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

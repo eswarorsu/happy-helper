@@ -183,7 +183,7 @@ const StepCard3D = ({ step, icon: Icon, title, description, delay }: {
       className="relative text-center group"
     >
       {/* Subtle connection line */}
-      <div className="hidden md:block absolute top-10 left-1/2 w-full h-[1px] -translate-x-1/2 opacity-30 bg-gradient-to-r from-transparent via-brand-yellow to-transparent"
+      <div className="hidden md:block absolute top-10 left-1/2 w-full h-[1px] -translate-x-1/2 opacity-60 bg-gradient-to-r from-transparent via-brand-yellow to-transparent"
       />
 
       {/* Icon Container - Professional & Subtle */}
@@ -202,8 +202,8 @@ const StepCard3D = ({ step, icon: Icon, title, description, delay }: {
 
       {/* Content - Clean & Professional */}
       <div>
-        <h3 className="text-lg font-semibold mb-2 tracking-tight text-foreground">{title}</h3>
-        <p className="text-sm leading-relaxed max-w-[240px] mx-auto text-muted-foreground">{description}</p>
+        <h3 className="text-lg font-bold mb-2 tracking-tight text-foreground">{title}</h3>
+        <p className="text-sm font-medium leading-relaxed max-w-[240px] mx-auto text-slate-600 dark:text-slate-400">{description}</p>
       </div>
     </div>
   );
@@ -220,10 +220,10 @@ const FeatureItem = ({ icon: Icon, title, description, variant = "light" }: {
       <Icon className="w-6 h-6" />
     </div>
     <div>
-      <h4 className={`font-semibold text-lg mb-1 ${variant === 'dark' ? 'text-white' : 'text-foreground'}`}>
+      <h4 className={`font-bold text-lg mb-1.5 ${variant === 'dark' ? 'text-white' : 'text-slate-900'}`}>
         {title}
       </h4>
-      <p className={`text-sm leading-relaxed ${variant === 'dark' ? 'text-slate-300' : 'text-muted-foreground'}`}>
+      <p className={`text-sm font-medium leading-relaxed ${variant === 'dark' ? 'text-slate-200' : 'text-slate-600'}`}>
         {description}
       </p>
     </div>
@@ -279,8 +279,8 @@ const PlatformCard3D = ({ icon: Icon, title, description, delay }: {
 
         {/* Content */}
         <div className="pt-3">
-          <h3 className="text-lg font-semibold mb-2 text-white">{title}</h3>
-          <p className="text-sm leading-relaxed text-slate-300">{description}</p>
+          <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
+          <p className="text-sm font-medium leading-relaxed text-slate-200">{description}</p>
         </div>
 
       </Card>
@@ -308,7 +308,7 @@ const TestimonialCard3D = ({ name, role, content, delay }: {
         <Quote className="w-8 h-8 mb-4 text-brand-yellow" strokeWidth={1.5} />
 
         {/* Content */}
-        <p className="text-slate-300 leading-relaxed mb-6 text-sm">
+        <p className="text-slate-200 font-medium leading-relaxed mb-6 text-sm">
           &ldquo;{content}&rdquo;
         </p>
 
@@ -320,8 +320,8 @@ const TestimonialCard3D = ({ name, role, content, delay }: {
             {name.charAt(0)}
           </div>
           <div>
-            <div className="font-medium text-white text-sm">{name}</div>
-            <div className="text-xs text-slate-400">{role}</div>
+            <div className="font-bold text-white text-sm">{name}</div>
+            <div className="text-xs font-medium text-slate-300">{role}</div>
           </div>
         </div>
       </div>
@@ -515,7 +515,7 @@ const Landing = () => {
                 gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.2 });
               }
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8 text-sm font-medium border backdrop-blur-md border-brand-yellow/40 bg-brand-yellow/15 text-brand-yellow shadow-lg shadow-brand-yellow/20 alive-float-slow alive-glow"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8 text-sm font-medium border backdrop-blur-md border-brand-yellow/60 bg-brand-yellow/20 text-brand-yellow shadow-lg shadow-brand-yellow/20 alive-float-slow alive-glow"
           >
             <Sparkles className="w-4 h-4" />
             Where Innovation Meets Investment
@@ -541,14 +541,15 @@ const Landing = () => {
                   {
                     text: 'future.', className: 'relative inline-block text-brand-yellow', trailing: (
                       <svg
-                        className="absolute -bottom-2 left-0 w-full"
-                        viewBox="0 0 200 8"
+                        className="absolute -bottom-1 left-0 w-full"
+                        viewBox="0 0 200 12"
                         fill="none"
+                        preserveAspectRatio="none"
                       >
                         <path
-                          d="M1 5.5Q50 1 100 5T199 3"
+                          d="M1 8.5Q50 2 100 8T199 5"
                           stroke="#EFBF04"
-                          strokeWidth="2"
+                          strokeWidth="3"
                           strokeLinecap="round"
                         />
                       </svg>
@@ -587,10 +588,10 @@ const Landing = () => {
               >
                 <Button
                   variant="outline"
-                  className="bg-transparent/10 backdrop-blur-sm text-sm sm:text-base font-medium rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all duration-300 hover:bg-white/10"
+                  className="bg-transparent/5 backdrop-blur-sm text-sm sm:text-base font-medium rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all duration-300 hover:bg-white/10"
                   style={{
-                    borderColor: 'rgba(255,255,255,0.2)',
-                    color: '#CBD5E1',
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    color: '#94a3b8',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                 >
@@ -737,8 +738,8 @@ const Landing = () => {
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ background: item.color }}
                       />
-                      <span className="text-sm text-slate-700 flex-1">{item.text}</span>
-                      <span className="text-xs text-slate-400">{item.time}</span>
+                      <span className="text-sm font-medium text-slate-700 flex-1">{item.text}</span>
+                      <span className="text-xs font-semibold text-slate-500">{item.time}</span>
                     </div>
                   ))}
                 </div>
@@ -939,17 +940,17 @@ const Landing = () => {
                   </div>
                   {/* Label */}
                   <div className="text-center mt-4">
-                    <h4 className="text-sm font-bold text-white">{screen.label}</h4>
-                    <p className="text-xs text-slate-400 mt-1">{screen.desc}</p>
+                    <h4 className="text-sm font-bold text-white mb-1.5">{screen.label}</h4>
+                    <p className="text-xs font-medium text-slate-300 mt-1">{screen.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Scroll indicator */}
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                <ChevronRight className="w-3.5 h-3.5 animate-pulse" />
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                <ChevronRight className="w-4 h-4 text-brand-yellow animate-pulse" />
                 <span>Swipe to explore</span>
               </div>
             </div>

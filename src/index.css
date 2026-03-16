@@ -45,7 +45,7 @@
 
     /* Muted */
     --muted: 60 20% 94%;
-    --muted-foreground: 0 0% 42%; /* #6B6B6B */
+    --muted-foreground: 0 0% 35%; /* #595959 (improved from #6B6B6B for better contrast) */
 
     /* Accent = Brand Yellow */
     --accent: 48 97% 47%;
@@ -100,7 +100,7 @@
     --secondary-foreground: 48 97% 47%;
 
     --muted: 0 0% 25%;
-    --muted-foreground: 0 0% 60%;
+    --muted-foreground: 0 0% 70%; /* #B3B3B3 (improved from #999999 for better contrast) */
 
     --accent: 48 97% 47%;
     --accent-foreground: 0 0% 17%;

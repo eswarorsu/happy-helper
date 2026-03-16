@@ -107,7 +107,7 @@ const ProductLaunch = () => {
                     throw error;
                 }
             } else {
-                setProducts(data || []);
+                setProducts(data as any[] || []);
             }
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -212,7 +212,7 @@ const ProductLaunch = () => {
                                         placeholder="Awesome SaaS Tool" 
                                         value={newProduct.name}
                                         onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                                        className="rounded-xl border-slate-200 focus:ring-brand-yellow/20"
+                                        className="rounded-xl border-slate-200 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -221,7 +221,7 @@ const ProductLaunch = () => {
                                         placeholder="Tell us what your product does..." 
                                         value={newProduct.description}
                                         onChange={e => setNewProduct({...newProduct, description: e.target.value})}
-                                        className="rounded-xl border-slate-200 h-24 focus:ring-brand-yellow/20"
+                                        className="rounded-xl border-slate-200 h-24 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -234,7 +234,7 @@ const ProductLaunch = () => {
                                                 placeholder="99.00" 
                                                 value={newProduct.price}
                                                 onChange={e => setNewProduct({...newProduct, price: e.target.value})}
-                                                className="pl-9 rounded-xl border-slate-200 focus:ring-brand-yellow/20"
+                                                className="pl-9 rounded-xl border-slate-200 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
@@ -244,7 +244,7 @@ const ProductLaunch = () => {
                                             placeholder="SaaS, DevTool, AI" 
                                             value={newProduct.category}
                                             onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                                            className="rounded-xl border-slate-200 focus:ring-brand-yellow/20"
+                                            className="rounded-xl border-slate-200 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                         />
                                     </div>
                                 </div>
@@ -254,7 +254,7 @@ const ProductLaunch = () => {
                                         placeholder="https://example.com/image.jpg" 
                                         value={newProduct.image_url}
                                         onChange={e => setNewProduct({...newProduct, image_url: e.target.value})}
-                                        className="rounded-xl border-slate-200 focus:ring-brand-yellow/20"
+                                        className="rounded-xl border-slate-200 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>

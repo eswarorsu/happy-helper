@@ -452,7 +452,7 @@ const AdminPortal = () => {
                       <p className="text-xs text-slate-500 font-medium">Authorizing and managing platform ecosystem access</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                      <Button variant="outline" onClick={() => setSearchQuery('investor')} className="border-slate-800 bg-slate-900 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 text-slate-400"><Filter size={14} /> Investors Only</Button>
+                      <Button variant="outline" onClick={() => setSearchQuery('investor')} className="border-slate-800 bg-slate-900 h-10 px-4 rounded-xl text-xs font-bold flex gap-2 text-slate-400 hover:bg-brand-yellow/10 hover:text-brand-yellow hover:border-brand-yellow/30 transition-colors"><Filter size={14} /> Investors Only</Button>
                       <Button onClick={() => fetchData()} className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal h-10 px-4 rounded-xl text-xs font-bold flex gap-2 shadow-lg shadow-brand-yellow/20"><Download size={14} /> Sync Database</Button>
                     </div>
                   </div>
@@ -471,7 +471,7 @@ const AdminPortal = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-800">
                           {filteredUsers.map((user) => (
-                            <tr key={user.id} className="hover:bg-slate-900/30 group transition-colors cursor-pointer" onClick={() => setSelectedUser(user)}>
+                            <tr key={user.id} className="hover:bg-slate-800/50 group transition-colors cursor-pointer" onClick={() => setSelectedUser(user)}>
                               <td className="py-4 px-6">
                                 <div className="flex items-center gap-3">
                                   <Avatar className="w-9 h-9 border border-slate-800">
@@ -528,7 +528,7 @@ const AdminPortal = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredIdeas.map((idea) => (
-                      <Card key={idea.id} className="bg-slate-900 border-slate-800 shadow-xl rounded-2xl overflow-hidden hover:border-brand-yellow/30 transition-all cursor-pointer group" onClick={() => setSelectedIdea(idea)}>
+                      <Card key={idea.id} className="bg-slate-900 border-slate-800 shadow-xl rounded-2xl overflow-hidden hover:border-brand-yellow/50 hover:shadow-brand-yellow/10 transition-all cursor-pointer group" onClick={() => setSelectedIdea(idea)}>
                         <div className="p-6 space-y-4">
                           <div className="flex items-center justify-between">
                             <Badge className="bg-slate-800 text-slate-400 border-none text-[9px] font-black uppercase tracking-widest">{idea.domain}</Badge>
@@ -575,7 +575,7 @@ const AdminPortal = () => {
                             p.razorpay_payment_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             p.razorpay_order_id?.toLowerCase().includes(searchQuery.toLowerCase())
                           ).map((p) => (
-                            <tr key={p.id} className="hover:bg-slate-900 group transition-colors">
+                            <tr key={p.id} className="hover:bg-slate-800/50 group transition-colors">
                               <td className="py-5 px-8 font-mono text-[10px] font-black text-slate-600 group-hover:text-brand-yellow transition-colors uppercase tracking-tighter">
                                 {p.razorpay_payment_id || p.razorpay_order_id?.substring(0, 16)}
                               </td>

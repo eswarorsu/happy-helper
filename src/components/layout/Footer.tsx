@@ -80,7 +80,7 @@ const Footer = () => {
                                     {item.to ? (
                                         <Link
                                             to={item.to}
-                                            className="text-sm transition-colors hover:text-white flex items-center gap-2 group"
+                                            className="text-sm transition-colors hover:text-brand-yellow flex items-center gap-2 group"
                                             style={{ color: "#64748B" }}
                                         >
                                             <span
@@ -92,7 +92,7 @@ const Footer = () => {
                                     ) : (
                                         <a
                                             href={item.href}
-                                            className="text-sm transition-colors hover:text-white flex items-center gap-2 group"
+                                            className="text-sm transition-colors hover:text-brand-yellow flex items-center gap-2 group"
                                             style={{ color: "#64748B" }}
                                         >
                                             <span
@@ -121,7 +121,7 @@ const Footer = () => {
                                 <li key={i}>
                                     <Link
                                         to={item.to}
-                                        className="text-sm transition-colors hover:text-white flex items-center gap-2 group"
+                                        className="text-sm transition-colors hover:text-brand-yellow flex items-center gap-2 group"
                                         style={{ color: "#64748B" }}
                                     >
                                         <span className="w-1 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-brand-yellow" />

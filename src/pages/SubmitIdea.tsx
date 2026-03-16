@@ -319,16 +319,16 @@ const SubmitIdea = () => {
                                                 placeholder="e.g., AI-Powered Health Diagnostics"
                                                 value={formData.title}
                                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 maxLength={100}
                                             />
-                                            <p className="text-xs text-muted-foreground">{formData.title.length}/100 characters</p>
+                                            <p className="text-xs text-slate-500 font-medium">{formData.title.length}/100 characters</p>
                                         </div>
 
                                         <div className="space-y-2">
                                             <Label className="text-sm font-semibold text-foreground">Domain / Industry *</Label>
                                             <Select value={formData.domain} onValueChange={(value) => setFormData({ ...formData, domain: value })}>
-                                                <SelectTrigger className="h-11 bg-white border-border rounded-lg text-foreground">
+                                                <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400">
                                                     <SelectValue placeholder="Select a domain" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -351,11 +351,11 @@ const SubmitIdea = () => {
                                                     placeholder="50,000"
                                                     value={formData.investment_needed}
                                                     onChange={(e) => setFormData({ ...formData, investment_needed: e.target.value })}
-                                                    className="h-11 pl-8 bg-white border-border rounded-lg text-foreground"
+                                                    className="h-11 pl-8 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                     min={1000}
                                                 />
                                             </div>
-                                            <p className="text-xs text-muted-foreground">Minimum: $1,000</p>
+                                            <p className="text-xs text-slate-500 font-medium">Minimum: $1,000</p>
                                         </div>
                                     </>
                                 )}
@@ -370,7 +370,7 @@ const SubmitIdea = () => {
                                                     Team Size
                                                 </Label>
                                                 <Select value={formData.team_size} onValueChange={(v) => setFormData({ ...formData, team_size: v })}>
-                                                    <SelectTrigger className="h-11 bg-white border-border rounded-lg text-foreground">
+                                                    <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400">
                                                         <SelectValue placeholder="Solo Founder" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -388,7 +388,7 @@ const SubmitIdea = () => {
                                                     Current Traction
                                                 </Label>
                                                 <Select value={formData.traction} onValueChange={(v) => setFormData({ ...formData, traction: v })}>
-                                                    <SelectTrigger className="h-11 bg-white border-border rounded-lg text-foreground">
+                                                    <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400">
                                                         <SelectValue placeholder="Idea Stage" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -409,7 +409,7 @@ const SubmitIdea = () => {
                                                 placeholder="e.g., $10B Global Market"
                                                 value={formData.market_size}
                                                 onChange={(e) => setFormData({ ...formData, market_size: e.target.value })}
-                                                className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                             />
                                         </div>
 
@@ -427,9 +427,9 @@ const SubmitIdea = () => {
                                                         placeholder="e.g., Hyderabad, India"
                                                         value={formData.founder_city}
                                                         onChange={(e) => setFormData({ ...formData, founder_city: e.target.value })}
-                                                        className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                        className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                     />
-                                                    <p className="text-[10px] text-muted-foreground">Helps investors filter by proximity</p>
+                                                    <p className="text-[10px] text-slate-500 font-medium">Helps investors filter by proximity</p>
                                                 </div>
 
                                                 <div className="space-y-2">
@@ -438,7 +438,7 @@ const SubmitIdea = () => {
                                                         Work Mode
                                                     </Label>
                                                     <Select value={formData.work_mode} onValueChange={(v) => setFormData({ ...formData, work_mode: v })}>
-                                                        <SelectTrigger className="h-11 bg-white border-border rounded-lg text-foreground">
+                                                        <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400">
                                                             <SelectValue placeholder="Select work mode" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -460,9 +460,9 @@ const SubmitIdea = () => {
                                                     placeholder="+91 98765 43210"
                                                     value={formData.founder_phone}
                                                     onChange={(e) => setFormData({ ...formData, founder_phone: e.target.value })}
-                                                    className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                    className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 />
-                                                <p className="text-[10px] text-muted-foreground">For admin support only. Never shared with investors.</p>
+                                                <p className="text-[10px] text-slate-500 font-medium">For admin support only. Never shared with investors.</p>
                                             </div>
                                         </div>
                                     </>
@@ -477,11 +477,11 @@ const SubmitIdea = () => {
                                                 placeholder="Describe your idea, the problem it solves, target market, competitive advantage, and your vision..."
                                                 value={formData.description}
                                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                className="min-h-[150px] bg-white border-border rounded-lg resize-none text-foreground"
+                                                className="min-h-[150px] bg-white border-slate-200 rounded-lg resize-none text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 maxLength={2000}
                                             />
                                             <div className="flex justify-between items-center">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <p className="text-xs text-slate-500 font-medium flex items-center gap-1">
                                                     <Lightbulb className="w-3 h-3" />
                                                     Be concise & compelling (minimum 50 characters)
                                                 </p>
@@ -498,7 +498,7 @@ const SubmitIdea = () => {
                                                     placeholder="https://docs.google.com/presentation/d/..."
                                                     value={formData.drive_link}
                                                     onChange={(e) => setFormData({ ...formData, drive_link: e.target.value })}
-                                                    className="h-11 bg-white border-border rounded-lg pr-10 text-foreground"
+                                                    className="h-11 bg-white border-slate-200 rounded-lg pr-10 text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 />
                                                 {formData.drive_link && (
                                                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -521,7 +521,7 @@ const SubmitIdea = () => {
                                                     placeholder="linkedin.com/in/..."
                                                     value={formData.linkedin_url}
                                                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                                                    className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                    className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 />
                                             </div>
 
@@ -534,7 +534,7 @@ const SubmitIdea = () => {
                                                     placeholder="https://..."
                                                     value={formData.website_url}
                                                     onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                                                    className="h-11 bg-white border-border rounded-lg text-foreground"
+                                                    className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"
                                                 />
                                             </div>
                                         </div>
@@ -557,7 +557,7 @@ const SubmitIdea = () => {
                                         <Button
                                             type="button"
                                             onClick={handleNext}
-                                            className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white rounded-lg"
+                                            className="flex-1 h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-md hover:-translate-y-0.5"
                                         >
                                             Continue <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
@@ -566,7 +566,7 @@ const SubmitIdea = () => {
                                             type="button"
                                             onClick={handleSubmit}
                                             disabled={isSubmitting}
-                                            className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white rounded-lg disabled:opacity-50"
+                                            className="flex-1 h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl disabled:opacity-50 transition-all shadow-md hover:-translate-y-0.5"
                                         >
                                             {isSubmitting ? (
                                                 <>

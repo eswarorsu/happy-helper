@@ -559,12 +559,12 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 h-10 px-2 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400"
+              className="flex-1 min-w-0 h-10 px-2 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 w-full"
               disabled={isLoading}
             />
-            <div className="flex gap-1 pr-1">
+            <div className="flex gap-1 pr-1 shrink-0">
               {["👍", "❤️", "😊"].map(e => (
-                <button type="button" key={e} onClick={() => setNewMessage(p => p + e)} className="p-1 hover:bg-slate-100 rounded-md transition text-sm opacity-60 hover:opacity-100">
+                <button type="button" key={e} onClick={() => setNewMessage(p => p + e)} className="p-1 hover:bg-slate-100 rounded-md transition text-sm opacity-60 hover:opacity-100 flex-shrink-0">
                   {e}
                 </button>
               ))}
@@ -607,7 +607,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
   if (variant === 'dialog') {
     return (
       <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-[440px] h-[75vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl rounded-2xl bg-background">
+        <DialogContent className="!w-screen !h-[100dvh] !max-w-none !max-h-none !rounded-none !top-0 !left-0 !translate-x-0 !translate-y-0 !border-none !p-0 sm:!w-full sm:!max-w-[440px] sm:!h-[75vh] sm:!rounded-2xl sm:!top-[50%] sm:!left-[50%] sm:!-translate-x-1/2 sm:!-translate-y-1/2 flex flex-col overflow-hidden bg-background sm:shadow-2xl">
           {Content}
         </DialogContent>
       </Dialog>

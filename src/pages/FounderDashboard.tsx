@@ -1238,9 +1238,7 @@ const FounderDashboard = () => {
                     </div>
                     <div className="flex items-center gap-3 sm:gap-6">
                         <div className="flex items-center gap-4">
-                            <button className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
-                                <Search className="w-5 h-5" />
-                            </button>
+
                             <Popover open={isNotifOpen} onOpenChange={setIsNotifOpen}>
                                 <PopoverTrigger asChild>
                                     <button className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
@@ -1344,7 +1342,7 @@ const FounderDashboard = () => {
                 <motion.aside
                     className={`${isMobile ? "fixed left-0 top-[73px] bottom-0 z-30 shadow-2xl" : "relative"} bg-white border-r border-slate-100 flex flex-col shrink-0 h-full overflow-hidden`}
                     initial={{ width: 320 }}
-                    animate={{ width: isMobile ? (isSidebarOpen ? "88vw" : 0) : (isSidebarOpen ? 320 : 80) }}
+                    animate={{ width: isMobile ? (isSidebarOpen ? "100vw" : 0) : (isSidebarOpen ? 320 : 80) }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                     <div className="p-3 sm:p-4 border-b border-border/60 bg-white sticky top-0 z-10 hidden md:block">
@@ -1386,6 +1384,7 @@ const FounderDashboard = () => {
                             {activeConnections.length > 0 ? (
                                 activeConnections
                                     .filter(chat => messageFilter === "all" || (messageFilter === "unread" && chat.unread_count && chat.unread_count > 0))
+                                    .filter(chat => !searchTerm || chat.investor?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
                                     .map((chat) => (
                                         <motion.div key={chat.id} variants={itemVariants}>
                                             <ConnectionItem chat={chat} isSelected={selectedChat?.id === chat.id} onSelect={() => setSelectedChat(chat)}
