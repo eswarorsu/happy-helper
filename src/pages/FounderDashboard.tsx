@@ -1448,7 +1448,7 @@ const FounderDashboard = () => {
                                 </h1>
                                 <p className="text-muted-foreground mt-1 text-sm sm:text-lg">Here's an overview of your venture portfolio</p>
                             </div>
-                            <div className="flex items-center gap-3 flex-wrap">
+                            <div className="hidden md:flex items-center gap-3 flex-wrap">
 
                                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                     <Button
