@@ -16,22 +16,25 @@ const LandingNavbar = () => {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navScrolled ? "bg-white/95 shadow-md py-3" : "bg-transparent py-4"
+            className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                navScrolled 
+                    ? "top-4 mx-4 sm:mx-8 xl:mx-auto max-w-7xl rounded-2xl bg-black/40 shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/10 py-2" 
+                    : "top-0 w-full bg-transparent py-4 border-b border-transparent"
                 }`}
-            style={{ backdropFilter: navScrolled ? "blur(12px)" : "none" }}
+            style={{ 
+                backdropFilter: navScrolled ? "blur(20px) saturate(180%)" : "none",
+                WebkitBackdropFilter: navScrolled ? "blur(20px) saturate(180%)" : "none"
+            }}
         >
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+            <div className={`mx-auto flex items-center justify-between px-4 sm:px-6 transition-all ${navScrolled ? "w-full" : "max-w-7xl"}`}>
                 {/* Logo */}
                 <Link to="/">
-                    <Logo showText light={!navScrolled} />
+                    <Logo showText light={true} />
                 </Link>
 
                 {/* Center Nav */}
                 <nav
-                    className={`hidden lg:flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${navScrolled
-                            ? "bg-gray-100/80"
-                            : "bg-white/10 backdrop-blur-md border border-white/10"
-                        }`}
+                    className={`hidden lg:flex items-center gap-1 px-2 py-1.5 rounded-2xl transition-all duration-300 bg-white/5 backdrop-blur-md border border-white/10`}
                 >
                     {[
                         { label: "How it works", href: "#how-it-works" },
@@ -43,10 +46,7 @@ const LandingNavbar = () => {
                         <a
                             key={item.label}
                             href={item.href}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${navScrolled
-                                    ? "hover:bg-white/60 text-gray-600 hover:text-brand-yellow"
-                                    : "text-white/90 hover:bg-white/10 hover:text-brand-yellow"
-                                }`}
+                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all text-white/90 hover:bg-white/10 hover:text-brand-yellow`}
                         >
                             {item.label}
                         </a>
@@ -58,25 +58,19 @@ const LandingNavbar = () => {
                     <Link to="/auth?mode=login" className="hidden sm:block">
                         <Button
                             variant="ghost"
-                            className={`text-sm font-medium rounded-full px-5 transition-colors ${navScrolled
-                                    ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                    : "text-white hover:bg-white/10 hover:text-white"
-                                }`}
+                            className={`text-sm font-medium rounded-xl px-5 transition-colors text-white hover:bg-white/10 hover:text-white`}
                         >
                             Login
                         </Button>
                     </Link>
                     <Link to="/auth?mode=register" className="hidden sm:block">
-                        <Button className="text-sm font-medium px-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-brand-charcoal hover:bg-brand-charcoal/90 border-0 rounded-md">
+                        <Button className="text-sm font-medium px-6 text-brand-charcoal shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-brand-yellow hover:bg-brand-yellow/90 border-0 rounded-xl">
                             Join for free
                         </Button>
                     </Link>
                     {/* Mobile Hamburger */}
                     <button
-                        className={`lg:hidden p-2 rounded-xl transition-colors ${navScrolled
-                                ? "hover:bg-gray-100 text-gray-900"
-                                : "hover:bg-white/10 text-white"
-                            }`}
+                        className={`lg:hidden p-2 rounded-xl transition-colors hover:bg-white/10 text-white`}
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         aria-label="Toggle menu"
                     >
@@ -90,7 +84,7 @@ const LandingNavbar = () => {
             </div>
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
-                <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 bg-white/95 backdrop-blur-lg">
+                <div className="lg:hidden mt-3 mx-4 sm:mx-8 rounded-2xl border border-white/10 p-4 space-y-2 bg-[#1a1a1a]/95 backdrop-blur-xl shadow-2xl">
                     {[
                         { label: "How it works", href: "#how-it-works" },
                         { label: "Features", href: "#features" },
@@ -102,12 +96,12 @@ const LandingNavbar = () => {
                             key={item.label}
                             href={item.href}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="block px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                            className="block px-4 py-3 rounded-xl text-sm font-medium transition-all hover:bg-white/10 text-white/90 hover:text-brand-yellow"
                         >
                             {item.label}
                         </a>
                     ))}
-                    <div className="flex flex-col gap-3 pt-3 border-t border-gray-200 lg:hidden">
+                    <div className="flex flex-col gap-3 pt-4 mt-2 border-t border-white/10 lg:hidden">
                         <Link
                             to="/auth?mode=login"
                             className="w-full"
@@ -115,7 +109,7 @@ const LandingNavbar = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="w-full text-sm font-medium rounded-full text-gray-600 border-gray-300 hover:bg-gray-100"
+                                className="w-full text-sm font-medium rounded-xl text-white border-white/20 hover:bg-white/10 hover:border-white/30"
                             >
                                 Login
                             </Button>
@@ -125,7 +119,7 @@ const LandingNavbar = () => {
                             className="w-full"
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            <Button className="w-full text-sm font-medium rounded-full text-white bg-brand-charcoal hover:bg-brand-charcoal/90 border-0">
+                            <Button className="w-full text-sm font-medium rounded-xl text-brand-charcoal bg-brand-yellow hover:bg-brand-yellow/90 border-0">
                                 Join for free
                             </Button>
                         </Link>

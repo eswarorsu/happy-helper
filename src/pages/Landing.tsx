@@ -13,6 +13,7 @@ import Hero3D from "@/components/Hero3D";
 import Logo from "@/components/ui/Logo";
 import LandingNavbar from "@/components/layout/LandingNavbar";
 import Footer from "@/components/layout/Footer";
+import useEmblaCarousel from "embla-carousel-react";
 
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -355,6 +356,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }: {
 
 const Landing = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [emblaRef] = useEmblaCarousel({ startIndex: 3, align: 'center', loop: false });
 
   // GSAP ScrollReveal & header smooth-with-pull behavior
   useEffect(() => {
@@ -627,6 +629,109 @@ const Landing = () => {
 
         </div>
       </Hero3D>
+
+      {/* ================================================================ */}
+      {/* MOBILE PLATFORM SHOWCASE */}
+      {/* ================================================================ */}
+      <section className="py-16 sm:py-24 bg-black overflow-hidden relative border-y border-white/5">
+        <div className="absolute inset-0 bg-brand-yellow/5" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center mb-10">
+          <span className="inline-block text-xs font-bold tracking-widest uppercase mb-3 text-brand-yellow">
+            Mobile First
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            Use our platform <span className="text-brand-yellow">comfortably</span> on your mobile
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+            Everything you need — dashboards, messaging, and deal-making — designed<br className="hidden sm:block" /> for a seamless mobile experience.
+          </p>
+        </div>
+
+        <div className="relative max-w-[100vw] mx-auto overflow-hidden" ref={emblaRef}>
+          <div className="flex touch-pan-y items-center gap-4 sm:gap-8 px-[10vw] sm:px-[20vw] md:px-[30vw] lg:px-[35vw] xl:px-[40vw] py-8">
+            
+            {/* Left 3: Founder */}
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/founder-dashboard.png" className="w-full h-full object-cover" alt="Founder Dashboard" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Founder Dashboard</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Track investments & ventures at a glance</p>
+              </div>
+            </div>
+            
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/founder-submit.png" className="w-full h-full object-cover" alt="Submit Venture" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Launch an Idea</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Submit your startup for admin approval</p>
+              </div>
+            </div>
+
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/founder-messages.png" className="w-full h-full object-cover" alt="Messages" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Secure Chat</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Chat directly with potential investors</p>
+              </div>
+            </div>
+
+            {/* Center: Innovestor Logo */}
+            <div className="shrink-0 w-[280px] sm:w-[300px] md:w-[320px] flex flex-col items-center group relative z-10">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-brand-charcoal border-4 border-brand-yellow/30 shadow-[0_0_50px_rgba(250,204,21,0.15)] overflow-hidden scale-105 transition-transform duration-500 group-hover:scale-110">
+                <img src="/images/showcase/center-logo.png" className="w-full h-full object-cover" alt="Innovestor Logo" />
+              </div>
+              <div className="mt-6 text-center">
+                <h4 className="text-brand-yellow font-black text-xl tracking-tight">INNOVESTOR APP</h4>
+                <p className="text-white text-xs font-medium tracking-wide mt-1">Swipe to explore →</p>
+              </div>
+            </div>
+
+            {/* Right 3: Investor */}
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/investor-marketplace.png" className="w-full h-full object-cover" alt="Investor Marketplace" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Investor Marketplace</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Browse and discover promising startups</p>
+              </div>
+            </div>
+
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/investor-dashboard.png" className="w-full h-full object-cover" alt="Investor Dashboard" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Investor Dashboard</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Monitor your portfolio growth and returns</p>
+              </div>
+            </div>
+
+            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
+              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
+                <img src="/images/showcase/investor-portfolio.png" className="w-full h-full object-cover" alt="Investor Portfolio" />
+              </div>
+              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-white font-bold text-lg">Secure Messaging</h4>
+                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Negotiate deals in encrypted DealCenter</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        
+        <div className="text-center mt-4 mb-2">
+           <p className="text-xs text-brand-yellow font-medium max-w-xs mx-auto flex items-center justify-center gap-2 mt-4">
+             <ChevronRight className="w-5 h-5" /> Swipe to explore 
+           </p>
+        </div>
+      </section>
 
       {/* ================================================================ */}
       {/* HOW IT WORKS */}
