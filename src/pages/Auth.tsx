@@ -180,11 +180,15 @@ const EmailVerificationScreen = ({ email, userType, onResend, onBack }: EmailVer
 
 // ─── Main Auth Component ───────────────────────────────────────────────────────
 
+import { useRef } from "react";
+
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") || "login";
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const isCheckingProfile = useRef(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -240,47 +244,66 @@ const Auth = () => {
   }, [navigate]);
 
   const checkProfileAndRedirect = async (userId: string) => {
+    if (isCheckingProfile.current) {
+      console.log("⏳ Profile check already in progress, skipping duplicate call...");
+      return;
+    }
+    
+    isCheckingProfile.current = true;
     console.log("🔍 Checking profile for user:", userId);
 
-    // Check for returnUrl
-    const returnUrl = searchParams.get("returnUrl") || searchParams.get("next");
-    if (returnUrl) {
-      console.log("↪️ Redirecting to returnUrl:", returnUrl);
-      navigate(returnUrl);
-      return;
-    }
-
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-
-    console.log("📋 Profile query result:", { profile, error });
-
-    // Check if there was a query error (not "no rows found")
-    if (error && error.code !== 'PGRST116') {
-      console.error("❌ Profile query error:", error);
-      toast({
-        title: "Error checking profile",
-        description: error.message,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (profile) {
-      console.log("✅ Profile found, redirecting to dashboard");
-      if ((profile as { is_admin?: boolean }).is_admin) {
-        navigate("/admin-innovestor");
-      } else {
-        navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
+    try {
+      // Check for returnUrl
+      const returnUrl = searchParams.get("returnUrl") || searchParams.get("next");
+      if (returnUrl) {
+        console.log("↪️ Redirecting to returnUrl:", returnUrl);
+        navigate(returnUrl);
+        return;
       }
-    } else {
-      console.log("⚠️ No profile found, redirecting to profile setup");
-      const { data: { session } } = await supabase.auth.getSession();
-      const userType = session?.user?.user_metadata?.user_type || 'founder';
-      navigate(`/profile-setup?type=${userType}`);
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      console.log("📋 Profile query result:", { profile, error });
+
+      // Check if there was a query error (not "no rows found")
+      if (error && error.code !== 'PGRST116') {
+        console.error("❌ Profile query error:", error);
+        
+        // Ignore AbortError if it still occurs
+        if (error.message?.includes('AbortError') || error.message?.includes('signal is aborted')) {
+           return;
+        }
+
+        toast({
+          title: "Error checking profile",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (profile) {
+        console.log("✅ Profile found, redirecting to dashboard");
+        if ((profile as { is_admin?: boolean }).is_admin) {
+          navigate("/admin-innovestor");
+        } else {
+          navigate(profile.user_type === "founder" ? "/founder-dashboard" : "/investor-dashboard");
+        }
+      } else {
+        console.log("⚠️ No profile found, redirecting to profile setup");
+        const { data: { session } } = await supabase.auth.getSession();
+        const userType = session?.user?.user_metadata?.user_type || 'founder';
+        navigate(`/profile-setup?type=${userType}`);
+      }
+    } finally {
+      // Reset after a short delay to prevent immediate re-triggers from React double-fires
+      setTimeout(() => {
+        isCheckingProfile.current = false;
+      }, 500);
     }
   };
 

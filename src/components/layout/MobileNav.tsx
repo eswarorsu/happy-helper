@@ -28,7 +28,7 @@ const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProp
         {
             label: "Messages",
             icon: MessageSquare,
-            onClick: onMessagesClick,
+            path: "/mobile-messages",
             badge: unreadCount,
         },
         {
@@ -102,8 +102,7 @@ const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProp
                             <button
                                 key={idx}
                                 onClick={() => {
-                                    if (item.onClick) item.onClick();
-                                    else if (item.path) navigate(item.path);
+                                    if (item.path) navigate(item.path);
                                 }}
                                 className="flex flex-col items-center gap-1.5 px-2 py-1.5 group"
                             >

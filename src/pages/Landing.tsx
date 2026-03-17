@@ -13,7 +13,6 @@ import Hero3D from "@/components/Hero3D";
 import Logo from "@/components/ui/Logo";
 import LandingNavbar from "@/components/layout/LandingNavbar";
 import Footer from "@/components/layout/Footer";
-import useEmblaCarousel from "embla-carousel-react";
 
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -216,15 +215,15 @@ const StepCard3D = ({ step, icon: Icon, title, description, delay }: {
 const FeatureItem = ({ icon: Icon, title, description, variant = "light" }: {
   icon: any; title: string; description: string; variant?: "light" | "dark";
 }) => (
-  <div className="flex items-start gap-4 group">
-    <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-primary text-brand-charcoal`}>
-      <Icon className="w-6 h-6" />
+  <div className="flex items-start gap-3 sm:gap-4 group">
+    <div className={`shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-primary text-brand-charcoal`}>
+      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
     </div>
     <div>
-      <h4 className={`font-bold text-lg mb-1.5 ${variant === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+      <h4 className={`font-bold text-base sm:text-lg mb-0.5 sm:mb-1.5 ${variant === 'dark' ? 'text-white' : 'text-slate-900'}`}>
         {title}
       </h4>
-      <p className={`text-sm font-medium leading-relaxed ${variant === 'dark' ? 'text-slate-200' : 'text-slate-600'}`}>
+      <p className={`text-xs sm:text-sm font-medium leading-relaxed ${variant === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
         {description}
       </p>
     </div>
@@ -356,7 +355,6 @@ const FAQItem = ({ question, answer, isOpen, onClick }: {
 
 const Landing = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [emblaRef] = useEmblaCarousel({ startIndex: 3, align: 'center', loop: false });
 
   // GSAP ScrollReveal & header smooth-with-pull behavior
   useEffect(() => {
@@ -631,109 +629,6 @@ const Landing = () => {
       </Hero3D>
 
       {/* ================================================================ */}
-      {/* MOBILE PLATFORM SHOWCASE */}
-      {/* ================================================================ */}
-      <section className="py-16 sm:py-24 bg-black overflow-hidden relative border-y border-white/5">
-        <div className="absolute inset-0 bg-brand-yellow/5" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center mb-10">
-          <span className="inline-block text-xs font-bold tracking-widest uppercase mb-3 text-brand-yellow">
-            Mobile First
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
-            Use our platform <span className="text-brand-yellow">comfortably</span> on your mobile
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-            Everything you need — dashboards, messaging, and deal-making — designed<br className="hidden sm:block" /> for a seamless mobile experience.
-          </p>
-        </div>
-
-        <div className="relative max-w-[100vw] mx-auto overflow-hidden" ref={emblaRef}>
-          <div className="flex touch-pan-y items-center gap-4 sm:gap-8 px-[10vw] sm:px-[20vw] md:px-[30vw] lg:px-[35vw] xl:px-[40vw] py-8">
-            
-            {/* Left 3: Founder */}
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/founder-dashboard.png" className="w-full h-full object-cover" alt="Founder Dashboard" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Founder Dashboard</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Track investments & ventures at a glance</p>
-              </div>
-            </div>
-            
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/founder-submit.png" className="w-full h-full object-cover" alt="Submit Venture" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Launch an Idea</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Submit your startup for admin approval</p>
-              </div>
-            </div>
-
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/founder-messages.png" className="w-full h-full object-cover" alt="Messages" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Secure Chat</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Chat directly with potential investors</p>
-              </div>
-            </div>
-
-            {/* Center: Innovestor Logo */}
-            <div className="shrink-0 w-[280px] sm:w-[300px] md:w-[320px] flex flex-col items-center group relative z-10">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-brand-charcoal border-4 border-brand-yellow/30 shadow-[0_0_50px_rgba(250,204,21,0.15)] overflow-hidden scale-105 transition-transform duration-500 group-hover:scale-110">
-                <img src="/images/showcase/center-logo.png" className="w-full h-full object-cover" alt="Innovestor Logo" />
-              </div>
-              <div className="mt-6 text-center">
-                <h4 className="text-brand-yellow font-black text-xl tracking-tight">INNOVESTOR APP</h4>
-                <p className="text-white text-xs font-medium tracking-wide mt-1">Swipe to explore →</p>
-              </div>
-            </div>
-
-            {/* Right 3: Investor */}
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/investor-marketplace.png" className="w-full h-full object-cover" alt="Investor Marketplace" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Investor Marketplace</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Browse and discover promising startups</p>
-              </div>
-            </div>
-
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/investor-dashboard.png" className="w-full h-full object-cover" alt="Investor Dashboard" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Investor Dashboard</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Monitor your portfolio growth and returns</p>
-              </div>
-            </div>
-
-            <div className="shrink-0 w-[260px] sm:w-[280px] md:w-[300px] flex flex-col items-center group">
-              <div className="relative w-full aspect-[428/926] rounded-[2.5rem] bg-black border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                <img src="/images/showcase/investor-portfolio.png" className="w-full h-full object-cover" alt="Investor Portfolio" />
-              </div>
-              <div className="mt-6 text-center opacity-70 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white font-bold text-lg">Secure Messaging</h4>
-                <p className="text-brand-yellow text-xs font-medium uppercase tracking-wider mt-1">Negotiate deals in encrypted DealCenter</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        
-        <div className="text-center mt-4 mb-2">
-           <p className="text-xs text-brand-yellow font-medium max-w-xs mx-auto flex items-center justify-center gap-2 mt-4">
-             <ChevronRight className="w-5 h-5" /> Swipe to explore 
-           </p>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
       {/* HOW IT WORKS */}
       {/* ================================================================ */}
       <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6 bg-background">
@@ -772,23 +667,23 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* FOR FOUNDERS */}
       {/* ================================================================ */}
-      <section id="for-founders" className="py-12 sm:py-20 px-4 sm:px-6 bg-black">
+      <section id="for-founders" className="py-10 sm:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-16 items-center">
             {/* Left Content */}
             <div>
-              <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
+              <span className="inline-block text-xs sm:text-sm font-bold tracking-widest uppercase mb-2 sm:mb-4 text-brand-yellow">
                 For Founders
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 leading-tight text-white">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-2 sm:mb-6 leading-tight text-white">
                 Turn your vision<br />into <span className="text-brand-yellow">reality</span>
               </h2>
-              <p className="text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed text-muted-foreground">
+              <p className="text-xs sm:text-lg mb-5 sm:mb-10 leading-relaxed text-slate-300 sm:text-muted-foreground">
                 Stop cold-emailing investors. INNOVESTOR puts your ideas directly in front of verified
                 investors who are actively looking for opportunities like yours.
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <FeatureItem variant="dark" icon={Lightbulb} title="Showcase Your Ideas" description="Submit detailed venture profiles with media, domain categories, and investment requirements." />
                 <FeatureItem variant="dark" icon={MessageSquare} title="Direct Communication" description="Chat securely with interested investors through our encrypted DealCenter." />
                 <FeatureItem variant="dark" icon={BarChart3} title="Track Everything" description="Real-time dashboards for investment tracking, profit sharing, and portfolio analytics." />
@@ -857,9 +752,9 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* FOR INVESTORS */}
       {/* ================================================================ */}
-      <section id="for-investors" className="py-12 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
+      <section id="for-investors" className="py-10 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-16 items-center">
             {/* Left Visual - Professional Dark Dashboard */}
             <div className="order-2 lg:order-1 relative">
               <Card className="p-6 bg-primary border-2 border-brand-yellow shadow-sm reveal-on-scroll reveal-item alive-float-slow">
@@ -928,18 +823,18 @@ const Landing = () => {
 
             {/* Right Content */}
             <div className="order-1 lg:order-2">
-              <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
+              <span className="inline-block text-xs sm:text-sm font-bold tracking-widest uppercase mb-2 sm:mb-4 text-brand-yellow">
                 For Investors
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-2 sm:mb-6 leading-tight">
                 Discover the next<br /><span className="text-brand-yellow">big thing</span>
               </h2>
-              <p className="text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed text-slate-300">
+              <p className="text-xs sm:text-lg mb-5 sm:mb-10 leading-relaxed text-slate-300">
                 Stop sifting through noise. INNOVESTOR delivers curated, admin-verified startup
                 opportunities matched to your investment interests.
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <FeatureItem variant="dark" icon={Search} title="Curated Marketplace" description="Browse vetted ideas filtered by domain, stage, and investment range." />
                 <FeatureItem variant="dark" icon={Eye} title="Transparent Data" description="Detailed venture profiles with investment needs, traction, and founder info." />
                 <FeatureItem variant="dark" icon={Lock} title="Secure Deal Flow" description="Private negotiations, encrypted chat, and secure UPI payment integration." />
@@ -990,75 +885,6 @@ const Landing = () => {
             <div className="reveal-on-scroll reveal-item" data-direction="right"><AnimatedCounter3D target={30} label="Student Founders" icon={GraduationCap} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="left"><AnimatedCounter3D target={10} label="Professionals" icon={Briefcase} /></div>
             <div className="reveal-on-scroll reveal-item" data-direction="right"><AnimatedCounter3D target={12} label="Active Investors" icon={CircleDollarSign} /></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* MOBILE EXPERIENCE SHOWCASE */}
-      {/* ================================================================ */}
-      <section className="py-10 sm:py-20 px-4 sm:px-6 bg-black overflow-hidden">
-        <div className="max-w-6xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-8 sm:mb-12">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
-              Mobile First
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
-              Use our platform <span className="text-brand-yellow">comfortably</span> on your mobile
-            </h2>
-            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need — dashboards, messaging, and deal-making — designed for a seamless mobile experience.
-            </p>
-          </div>
-
-          {/* Horizontal Scroll Showcase */}
-          <div className="relative">
-            {/* Gradient edges for scroll hint */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-
-            <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide px-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {[
-                { src: "/images/mobile-dashboard.png", label: "Founder Dashboard", desc: "Track investments & ventures at a glance" },
-                { src: "/images/mobile-marketplace.png", label: "Investor Marketplace", desc: "Browse and discover promising startups" },
-                { src: "/images/mobile-chat.png", label: "Secure Messaging", desc: "Negotiate deals in encrypted DealCenter" },
-              ].map((screen, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 snap-center group"
-                  style={{ width: 'min(280px, 72vw)' }}
-                >
-                  {/* Phone frame */}
-                  <div className="relative rounded-[2rem] border-2 border-slate-700/60 bg-slate-900 p-2 shadow-2xl shadow-brand-yellow/5 transition-transform duration-300 group-hover:scale-[1.03]">
-                    {/* Status bar */}
-                    <div className="flex items-center justify-center py-1.5 mb-1">
-                      <div className="w-20 h-1 rounded-full bg-slate-700" />
-                    </div>
-                    {/* Screenshot */}
-                    <img
-                      src={screen.src}
-                      alt={screen.label}
-                      className="w-full rounded-2xl object-cover aspect-[9/18]"
-                      loading="lazy"
-                    />
-                  </div>
-                  {/* Label */}
-                  <div className="text-center mt-4">
-                    <h4 className="text-sm font-bold text-white mb-1.5">{screen.label}</h4>
-                    <p className="text-xs font-medium text-slate-300 mt-1">{screen.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Scroll indicator */}
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                <ChevronRight className="w-4 h-4 text-brand-yellow animate-pulse" />
-                <span>Swipe to explore</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
