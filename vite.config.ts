@@ -43,6 +43,9 @@ export default defineConfig(({ mode }) => ({
             type: 'image/jpeg'
           }
         ]
+      },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
       }
     })
   ].filter(Boolean),
