@@ -16,6 +16,25 @@ import Logo from "@/components/ui/Logo";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ProfileViewModal } from "@/components/ProfileViewModal";
+interface UserProfile {
+    id: string;
+    user_id?: string;
+    name: string;
+    avatar_url?: string;
+    user_type: "investor" | "founder" | "admin";
+    bio?: string;
+    linkedin_profile?: string;
+    email?: string;
+    created_at: string;
+}
+
+interface ChatRequest {
+    id: string;
+    founder_id: string;
+    investor_id: string;
+    status: "pending" | "accepted" | "rejected" | "communicating";
+    created_at: string;
+}
 
 interface Product {
     id: string;
@@ -62,9 +81,9 @@ const ProductMarketplace = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
-    const [selectedFounder, setSelectedFounder] = useState<any>(null);
-    const [chatRequests, setChatRequests] = useState<any[]>([]);
-    const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
+    const [selectedFounder, setSelectedFounder] = useState<Product["founder"] | null>(null);
+    const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
+    const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
 
     const fetchChatRequests = async (profileId: string) => {
         try {
@@ -95,17 +114,15 @@ const ProductMarketplace = () => {
                 }
 
                 // Get products with founder details
+                const selectQuery = "*, founder:profiles!founder_id(*)" as any;
                 const { data, error } = await supabase
                     .from("products")
-                    .select(`
-                        *,
-                        founder:profiles!founder_id(*)
-                    `)
+                    .select(selectQuery)
                     .eq("is_live", true)
                     .order("created_at", { ascending: false });
 
                 if (error) throw error;
-                setProducts(data || []);
+                setProducts((data as Product[]) || []);
             } catch (error: any) {
                 console.error("Error in init:", error);
                 toast({ title: "Error", description: "Could not load marketplace data.", variant: "destructive" });

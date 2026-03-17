@@ -669,8 +669,8 @@ const DealCenter = () => {
                     <CardHeader className="pb-6">
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             <div className="space-y-2">
-                                <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                                    {data.idea.title} <span className="text-slate-500 font-normal text-lg ml-2">Deal Room</span>
+                                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                                    {data.idea.title} <span className="text-slate-500 font-normal text-base md:text-lg ml-2">Deal Room</span>
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-3 text-sm">
                                     <Badge variant="outline" className="border-brand-yellow/30 text-brand-yellow bg-brand-yellow/10 px-3 py-1">
@@ -715,7 +715,7 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Investment</p>
-                                    <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestment)}</p>
+                                    <p className="text-xl md:text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestment)}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -730,7 +730,7 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Profit Shared</p>
-                                    <p className="text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(totalProfit)}</p>
+                                    <p className="text-xl md:text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(totalProfit)}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -745,7 +745,7 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Current ROI</p>
-                                    <p className="text-2xl font-bold text-amber-600 mt-1">{roi}%</p>
+                                    <p className="text-xl md:text-2xl font-bold text-amber-600 mt-1">{roi}%</p>
                                 </div>
                             </div>
                         </CardContent>

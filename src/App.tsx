@@ -28,6 +28,7 @@ const Transactions = lazy(() => import("./pages/Transactions"));
 const DealCenter = lazy(() => import("./pages/DealCenter"));
 const DealCenterIndex = lazy(() => import("./pages/DealCenterIndex"));
 const MobileMessages = lazy(() => import("./pages/MobileMessages"));
+const MobileChat = lazy(() => import("./pages/MobileChat"));
 
 // Fallback Loader
 const PageLoader = () => (
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/deal-center/:chatRequestId" element={<DealCenter />} />
                 <Route path="/deal-center" element={<DealCenterIndex />} />
                 <Route path="/mobile-messages" element={<MobileMessages />} />
+                <Route path="/chat/:chatRequestId" element={<MobileChat />} />
               </Route>
 
               {/* Admin-only route */}

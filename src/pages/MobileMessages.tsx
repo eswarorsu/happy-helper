@@ -176,7 +176,11 @@ const MobileMessages = () => {
                                                 chat.status === "pending" ? "bg-amber-400" : "bg-slate-400";
 
                             return (
-                                <div key={chat.id} className="bg-white rounded-2xl p-4 shadow-[0_1px_8px_rgba(0,0,0,0.04)] border border-slate-100">
+                                <div 
+                                    key={chat.id} 
+                                    onClick={() => navigate(`/chat/${chat.id}`)}
+                                    className="bg-white rounded-2xl p-4 shadow-[0_1px_8px_rgba(0,0,0,0.04)] border border-slate-100 cursor-pointer hover:border-slate-200 transition-all active:scale-[0.98]"
+                                >
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="relative shrink-0">
                                             <div className="w-11 h-11 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
@@ -203,7 +207,10 @@ const MobileMessages = () => {
                                         </span>
                                     </div>
                                     <button
-                                        onClick={() => navigate(`/deal-center/${chat.id}`)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/deal-center/${chat.id}`);
+                                        }}
                                         className="w-full py-2.5 bg-brand-charcoal hover:bg-black text-brand-yellow rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                                     >
                                         View Deal Room

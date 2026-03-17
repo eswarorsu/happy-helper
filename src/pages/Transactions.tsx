@@ -298,7 +298,7 @@ const Transactions = () => {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total {profile?.user_type === "investor" ? "Invested" : "Raised"}</p>
-                                            <p className="text-2xl font-bold mt-1 text-slate-900">₹{totalAmount.toLocaleString()}</p>
+                                            <p className="text-xl sm:text-2xl font-bold mt-1 text-slate-900">₹{totalAmount.toLocaleString()}</p>
                                         </div>
                                         <div className="w-12 h-12 rounded-xl bg-brand-yellow/10 flex items-center justify-center">
                                             <TrendingUp className="w-6 h-6 text-brand-yellow" />
@@ -314,7 +314,7 @@ const Transactions = () => {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Completed Deals</p>
-                                            <p className="text-2xl font-bold text-slate-900 mt-1">{totalDeals}</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{totalDeals}</p>
                                         </div>
                                         <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                                             <Handshake className="w-6 h-6 text-emerald-600" />
@@ -330,7 +330,7 @@ const Transactions = () => {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Deals</p>
-                                            <p className="text-2xl font-bold text-slate-900 mt-1">{pendingDeals}</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{pendingDeals}</p>
                                         </div>
                                         <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
                                             <Clock className="w-6 h-6 text-amber-600" />
@@ -408,7 +408,7 @@ const Transactions = () => {
                                                             </div>
 
                                                             <div className="text-right shrink-0 pl-2">
-                                                                <p className={`text-2xl sm:text-lg font-bold leading-none whitespace-nowrap ${tx.type === "profit_share"
+                                                                <p className={`text-lg sm:text-xl font-bold leading-none whitespace-nowrap ${tx.type === "profit_share"
                                                                     ? (profile?.user_type === "investor" ? "text-emerald-600" : "text-red-600")
                                                                     : (profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600")
                                                                     }`}>
@@ -474,7 +474,7 @@ const Transactions = () => {
                         <div className="space-y-4">
                             <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg flex flex-col items-center justify-center">
                                 <p className="text-sm text-slate-500 uppercase tracking-wide">Amount</p>
-                                <p className={`text-3xl font-bold mt-1 ${selectedTransaction.type === "profit_share"
+                                <p className={`text-2xl md:text-3xl font-bold mt-1 ${selectedTransaction.type === "profit_share"
                                     ? (profile?.user_type === "investor" ? "text-emerald-600" : "text-red-600")
                                     : (profile?.user_type === "investor" ? "text-red-600" : "text-emerald-600")
                                     }`}>

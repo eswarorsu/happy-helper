@@ -11,7 +11,7 @@ import { db, sendMessage, subscribeToChat, markMessageAsRead, Message as Firebas
 import {
   Send, Handshake, CheckCircle2, Paperclip, Image as ImageIcon,
   FileText, Download, File as FileIcon, X, Check, CheckCheck,
-  DollarSign, AlertCircle, TrendingUp, Info, Smile
+  DollarSign, AlertCircle, TrendingUp, Info, Smile, ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -380,6 +380,11 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
       {/* Light Glassmorphic Header */}
       <div className="px-4 py-3 bg-background/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-3">
+          {variant === 'embedded' && onClose && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full shrink-0" onClick={onClose} aria-label="Go back">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          )}
           <div className="relative">
             <Avatar className="w-10 h-10 border border-white shadow-sm">
               <AvatarImage src={otherPartyAvatar} />
@@ -403,11 +408,9 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
             </div>
           )}
 
-          {requestStatus === "deal_done" && (
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/deal-center/${chatRequest.id}`)} className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full" title="View Deal" aria-label="View deal centre">
-              <TrendingUp className="w-4 h-4" />
-            </Button>
-          )}
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/deal-center/${chatRequest.id}`)} className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full" title="View Deal" aria-label="View deal centre">
+            <TrendingUp className="w-4 h-4" />
+          </Button>
 
           {onViewProfile && (
             <Button variant="ghost" size="icon" onClick={onViewProfile} className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full" title="View Profile Info" aria-label="View profile">
@@ -415,7 +418,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
             </Button>
           )}
 
-          {variant === 'embedded' && (
+          {variant !== 'embedded' && onClose && (
             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full ml-1" onClick={onClose} title="Close Chat" aria-label="Close chat">
               <X className="w-5 h-5" />
             </Button>
