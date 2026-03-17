@@ -70,22 +70,25 @@ const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProp
                                 <button
                                     key={idx}
                                     onClick={() => item.path && navigate(item.path)}
-                                    className="flex flex-col items-center gap-0.5 px-3 py-1 group"
+                                    className="flex flex-col items-center gap-1.5 px-2 py-1.5 group"
                                 >
-                                    <div
-                                        className={cn(
-                                            "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 active:scale-90",
-                                            isActive
-                                                ? "bg-brand-yellow text-brand-charcoal shadow-md shadow-brand-yellow/40"
-                                                : "bg-brand-yellow/20 text-brand-charcoal group-hover:bg-brand-yellow/40"
+                                    <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 active:scale-90 z-10">
+                                        <item.icon className={cn("w-[22px] h-[22px] z-20 transition-colors", isActive ? "text-brand-charcoal" : "text-brand-charcoal")} strokeWidth={2.5} />
+                                        {/* Background */}
+                                        {isActive ? (
+                                            <motion.div
+                                                layoutId="mobile-nav-bg"
+                                                className="absolute inset-0 bg-brand-yellow rounded-[14px] shadow-[0_4px_16px_rgba(252,211,77,0.4)]"
+                                                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-brand-yellow/20 rounded-[14px] group-hover:bg-brand-yellow/40 transition-colors" />
                                         )}
-                                    >
-                                        <item.icon className="w-[18px] h-[18px]" strokeWidth={2.5} />
                                     </div>
                                     <span
                                         className={cn(
-                                            "text-[9px] font-bold tracking-wide",
-                                            isActive ? "text-brand-yellow" : "text-brand-charcoal/55"
+                                            "text-[10px] tracking-wide transition-all",
+                                            isActive ? "text-foreground font-bold" : "text-muted-foreground font-semibold"
                                         )}
                                     >
                                         {item.label}
@@ -102,39 +105,39 @@ const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProp
                                     if (item.onClick) item.onClick();
                                     else if (item.path) navigate(item.path);
                                 }}
-                                className="flex flex-col items-center gap-0.5 px-3 py-1 group"
+                                className="flex flex-col items-center gap-1.5 px-2 py-1.5 group"
                             >
-                                <div className="relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 active:scale-90">
+                                <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 active:scale-90 z-10">
                                     <item.icon
                                         className={cn(
-                                            "w-[18px] h-[18px] transition-colors",
+                                            "w-[22px] h-[22px] transition-colors z-20",
                                             isActive
-                                                ? "text-brand-yellow"
+                                                ? "text-brand-charcoal"
                                                 : "text-slate-400 group-hover:text-slate-600"
                                         )}
                                         strokeWidth={isActive ? 2.5 : 2}
                                     />
-                                    {/* Tiny active dot */}
+                                    {/* Active Background Pill */}
                                     {isActive && (
-                                        <motion.span
-                                            layoutId="mobile-nav-dot"
-                                            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-yellow"
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        <motion.div
+                                            layoutId="mobile-nav-bg"
+                                            className="absolute inset-0 bg-brand-yellow rounded-[14px] shadow-[0_4px_16px_rgba(252,211,77,0.4)]"
+                                            transition={{ type: "spring", stiffness: 500, damping: 35 }}
                                         />
                                     )}
                                     {/* Unread badge */}
                                     {item.badge != null && item.badge > 0 && (
-                                        <span className="absolute -top-0.5 -right-1 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-4 flex items-center justify-center rounded-full border border-white px-1 leading-none">
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full border-2 border-white px-1 leading-none z-30 shadow-sm">
                                             {item.badge > 99 ? "99+" : item.badge}
                                         </span>
                                     )}
                                 </div>
                                 <span
                                     className={cn(
-                                        "text-[9px] font-semibold transition-colors",
+                                        "text-[11px] transition-all",
                                         isActive
-                                            ? "text-brand-yellow"
-                                            : "text-slate-400 group-hover:text-slate-600"
+                                            ? "text-foreground font-bold"
+                                            : "text-muted-foreground font-semibold group-hover:text-slate-600"
                                     )}
                                 >
                                     {item.label}
