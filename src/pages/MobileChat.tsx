@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
+import PageLoader from "@/components/ui/PageLoader";
 
 const MobileChat = () => {
     const { chatRequestId } = useParams<{ chatRequestId: string }>();
@@ -52,11 +52,7 @@ const MobileChat = () => {
     }, [chatRequestId, navigate]);
 
     if (loading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-yellow" />
-            </div>
-        );
+        return <PageLoader message="Loading chat..." />;
     }
 
     if (!chatRequest || !currentUserId) {

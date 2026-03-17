@@ -7,8 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { InvestorSidebar } from "@/components/layout/InvestorSidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { Loader2, DollarSign, ArrowRight, Briefcase } from "lucide-react";
+import { DollarSign, ArrowRight, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
+import PageLoader from "@/components/ui/PageLoader";
 
 interface Deal {
     id: string;
@@ -128,10 +129,7 @@ const DealCenterIndex = () => {
                     </header>
 
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-                            <p className="text-sm text-slate-400">Loading deals...</p>
-                        </div>
+                        <PageLoader message="Loading deals..." className="py-20" />
                     ) : (
                         deals.length === 0 ? (
                             <div className="space-y-4">

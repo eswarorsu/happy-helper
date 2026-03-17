@@ -237,8 +237,27 @@ const Transactions = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin" />
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+                <motion.div
+                    animate={{ 
+                        scale: [1, 1.1, 1],
+                        opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ 
+                        duration: 1.5, 
+                        repeat: Infinity,
+                        ease: "easeInOut" 
+                    }}
+                    className="mb-4"
+                >
+                    <div className="w-16 h-16 rounded-2xl bg-brand-yellow flex items-center justify-center overflow-hidden shadow-xl shadow-brand-yellow/20">
+                        <img src="/logo.jpeg" alt="Loading" className="w-full h-full object-cover scale-110" />
+                    </div>
+                </motion.div>
+                <div className="flex items-center gap-2 text-slate-500 font-medium">
+                    <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                    Loading transactions...
+                </div>
             </div>
         );
     }
@@ -247,37 +266,38 @@ const Transactions = () => {
         <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
             <div className="min-h-screen">
                 {/* Header */}
-                <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
-                    <div className="max-w-6xl mx-auto flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-3 sm:py-4 px-2 sm:px-6">
+                    <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 sm:gap-4 shrink-0">
                             <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={() => navigate(-1)}
-                                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-9 w-9 sm:w-auto sm:px-3 -ml-2 sm:ml-0"
                             >
-                                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                                <ArrowLeft className="w-4 h-4 sm:mr-1" />
+                                <span className="hidden sm:inline">Back</span>
                             </Button>
                             <div className="flex items-center gap-2">
-                                <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200">
-                                    <Receipt className="w-5 h-5 text-white" />
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200 shrink-0">
+                                    <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </div>
-                                <div>
-                                    <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
-                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+                                <div className="hidden min-[380px]:block">
+                                    <h1 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">Transactions</h1>
+                                    <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">
                                         {filteredTransactions.length} deals
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <div className="flex items-center justify-end flex-1 min-w-0">
+                            <div className="relative w-full max-w-[200px] sm:max-w-none">
+                                <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
                                 <Input
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 w-28 sm:w-64 h-10 bg-white border-slate-200 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
+                                    className="pl-8 sm:pl-10 w-full sm:w-64 h-9 sm:h-10 text-sm bg-white border-slate-200 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
                                 />
                             </div>
                         </div>

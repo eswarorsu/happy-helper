@@ -6,7 +6,7 @@ import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
-import { Loader2 } from "lucide-react";
+import PageLoader from "@/components/ui/PageLoader";
 
 // Lazy-loaded pages
 const Landing = lazy(() => import("./pages/Landing"));
@@ -30,12 +30,7 @@ const DealCenterIndex = lazy(() => import("./pages/DealCenterIndex"));
 const MobileMessages = lazy(() => import("./pages/MobileMessages"));
 const MobileChat = lazy(() => import("./pages/MobileChat"));
 
-// Fallback Loader
-const PageLoader = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-background">
-    <Loader2 className="h-10 w-10 animate-spin text-brand-yellow" />
-  </div>
-);
+
 
 const queryClient = new QueryClient();
 

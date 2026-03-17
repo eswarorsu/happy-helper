@@ -87,7 +87,7 @@ const ProductMarketplace = () => {
 
     const fetchChatRequests = async (profileId: string) => {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await (supabase as any)
                 .from("chat_requests")
                 .select("*")
                 .eq("investor_id", profileId);
@@ -115,7 +115,7 @@ const ProductMarketplace = () => {
 
                 // Get products with founder details
                 const selectQuery = "*, founder:profiles!founder_id(*)" as any;
-                const { data, error } = await supabase
+                const { data, error } = await (supabase as any)
                     .from("products")
                     .select(selectQuery)
                     .eq("is_live", true)
@@ -153,7 +153,7 @@ const ProductMarketplace = () => {
 
             if (error) throw error;
 
-            setChatRequests([...chatRequests, data]);
+            setChatRequests([...chatRequests, data as ChatRequest]);
             toast({ title: "Request Sent!", description: "Waiting for founder's approval." });
         } catch (error: any) {
             console.error("Error connecting:", error);

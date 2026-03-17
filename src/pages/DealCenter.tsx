@@ -605,10 +605,26 @@ const DealCenter = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
-                    <p className="text-slate-500">Loading deal...</p>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+                <motion.div
+                    animate={{ 
+                        scale: [1, 1.1, 1],
+                        opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ 
+                        duration: 1.5, 
+                        repeat: Infinity,
+                        ease: "easeInOut" 
+                    }}
+                    className="mb-4"
+                >
+                    <div className="w-16 h-16 rounded-2xl bg-brand-yellow flex items-center justify-center overflow-hidden shadow-xl shadow-brand-yellow/20">
+                        <img src="/logo.jpeg" alt="Loading" className="w-full h-full object-cover scale-110" />
+                    </div>
+                </motion.div>
+                <div className="flex items-center gap-2 text-slate-500 font-medium">
+                    <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                    Loading deal...
                 </div>
             </div>
         );
@@ -631,24 +647,26 @@ const DealCenter = () => {
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5" />
             </div>
 
-            <div className="relative z-10 p-6 max-w-5xl mx-auto pt-20">
+            <div className="relative z-10 p-4 sm:p-6 max-w-5xl mx-auto pt-20">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between gap-2 mb-6 sm:mb-8">
                     <Button
                         variant="ghost"
                         onClick={() => navigate(-1)}
-                        className="text-slate-500 hover:text-foreground hover:bg-brand-yellow/10"
+                        className="text-slate-500 hover:text-foreground hover:bg-brand-yellow/10 px-2 sm:px-4 shrink-0 -ml-2 sm:ml-0"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Dashboard
+                        <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Back to Dashboard</span>
+                        <span className="sm:hidden">Back</span>
                     </Button>
 
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <Button
                             variant="outline"
+                            size="icon"
                             onClick={() => fetchDealData()}
                             disabled={loading}
-                            className="border-border bg-white text-foreground hover:bg-secondary shadow-sm"
+                            className="border-border bg-white text-foreground hover:bg-secondary shadow-sm w-9 h-9 sm:w-10 sm:h-10 shrink-0"
                             title="Refresh data"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>
@@ -656,10 +674,10 @@ const DealCenter = () => {
                         <Button
                             variant="outline"
                             onClick={() => navigate("/transactions")}
-                            className="border-border bg-white text-foreground hover:bg-secondary shadow-sm"
+                            className="border-border bg-white text-foreground hover:bg-secondary shadow-sm h-9 sm:h-10 px-3 shrink-0"
                         >
-                            <Receipt className="w-4 h-4 mr-2" />
-                            History
+                            <Receipt className="w-4 h-4 sm:mr-2" />
+                            <span className="hidden sm:inline">History</span>
                         </Button>
                     </div>
                 </div>
