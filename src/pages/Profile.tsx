@@ -112,10 +112,11 @@ const Profile = () => {
                     </div>
                     <Button
                         variant="ghost"
+                        size="sm"
                         onClick={() => isAdminViewport ? navigate("/admin-innovestor") : navigate(isFounder ? "/founder-dashboard" : "/investor-dashboard")}
-                        className="text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        className="text-muted-foreground hover:text-foreground hover:bg-secondary text-xs md:text-sm px-2 md:px-4 h-8 md:h-9"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to {isAdminViewport ? "Admin Portal" : "Dashboard"}
+                        <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-2" /> <span className="hidden md:inline">Back to {isAdminViewport ? "Admin Portal" : "Dashboard"}</span><span className="md:hidden">Back</span>
                     </Button>
                 </div>
             </header>

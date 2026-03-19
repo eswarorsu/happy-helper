@@ -892,7 +892,7 @@ const FounderDashboard = () => {
         try {
             const { data: requests, error } = await supabase
                 .from("chat_requests")
-                .select(`*, investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url), idea:ideas!chat_requests_idea_id_fkey(title)`)
+                .select(`*, investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url, education, experience), idea:ideas!chat_requests_idea_id_fkey(title)`)
                 .eq("founder_id", userId);
 
             if (error) {

@@ -42,6 +42,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
   const [showRequestInput, setShowRequestInput] = useState(false);
   const [dealStatus, setDealStatus] = useState(chatRequest.deal_status || "none");
   const [showDealPanel, setShowDealPanel] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +52,8 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
   const isFounder = currentUserId === chatRequest.founder_id;
   const otherPartyName = isFounder ? chatRequest.investor?.name : chatRequest.founder?.name;
   const otherPartyAvatar = isFounder ? chatRequest.investor?.avatar_url : chatRequest.founder?.avatar_url;
+  const otherPartyEducation = isFounder ? chatRequest.investor?.education : chatRequest.founder?.education;
+  const otherPartyExperience = isFounder ? chatRequest.investor?.experience : chatRequest.founder?.experience;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -385,19 +388,26 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
-          <div className="relative">
-            <Avatar className="w-10 h-10 border border-white shadow-sm">
-              <AvatarImage src={otherPartyAvatar} />
-              <AvatarFallback className="bg-slate-100 text-slate-600 font-semibold text-sm">
-                {otherPartyName?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-sm font-bold text-slate-800 truncate">{otherPartyName}</h3>
-            <p className="text-xs text-slate-500 truncate max-w-[180px]">{chatRequest.idea?.title}</p>
-          </div>
+          <button
+            type="button"
+            className="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setShowProfilePopup(prev => !prev)}
+            aria-label="View profile info"
+          >
+            <div className="relative">
+              <Avatar className="w-10 h-10 border border-white shadow-sm">
+                <AvatarImage src={otherPartyAvatar} />
+                <AvatarFallback className="bg-slate-100 text-slate-600 font-semibold text-sm">
+                  {otherPartyName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+            </div>
+            <div className="min-w-0 text-left">
+              <h3 className="text-sm font-bold text-slate-800 truncate">{otherPartyName}</h3>
+              <p className="text-xs text-slate-500 truncate max-w-[180px]">{chatRequest.idea?.title}</p>
+            </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-1">
@@ -425,6 +435,49 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
           )}
         </div>
       </div>
+
+      {/* Profile Info Popup */}
+      <AnimatePresence>
+        {showProfilePopup && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden bg-white border-b border-slate-200 shrink-0"
+          >
+            <div className="px-4 py-3 space-y-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-12 h-12 border-2 border-slate-100 shadow-sm">
+                  <AvatarImage src={otherPartyAvatar} />
+                  <AvatarFallback className="bg-slate-100 text-slate-600 font-bold">
+                    {otherPartyName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">{otherPartyName}</h4>
+                  <p className="text-[11px] text-slate-500">{isFounder ? "Investor" : "Founder"}</p>
+                </div>
+              </div>
+              {otherPartyEducation && (
+                <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Education</p>
+                  <p className="text-xs text-slate-700 leading-relaxed">{otherPartyEducation}</p>
+                </div>
+              )}
+              {otherPartyExperience && (
+                <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Experience</p>
+                  <p className="text-xs text-slate-700 leading-relaxed line-clamp-3">{otherPartyExperience}</p>
+                </div>
+              )}
+              {!otherPartyEducation && !otherPartyExperience && (
+                <p className="text-xs text-slate-400 italic text-center py-2">No profile details available</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Action Bar */}
       <AnimatePresence>

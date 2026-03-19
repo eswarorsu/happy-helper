@@ -647,15 +647,16 @@ const DealCenter = () => {
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5" />
             </div>
 
-            <div className="relative z-10 p-4 sm:p-6 max-w-5xl mx-auto pt-20">
+            <div className="relative z-10 p-4 sm:p-6 max-w-5xl mx-auto pt-6 sm:pt-20">
                 {/* Header */}
-                <div className="flex items-center justify-between gap-2 mb-6 sm:mb-8">
+                <div className="flex items-center justify-between gap-2 mb-4 sm:mb-8">
                     <Button
                         variant="ghost"
+                        size="sm"
                         onClick={() => navigate(-1)}
-                        className="text-slate-500 hover:text-foreground hover:bg-brand-yellow/10 px-2 sm:px-4 shrink-0 -ml-2 sm:ml-0"
+                        className="text-slate-500 hover:text-foreground hover:bg-brand-yellow/10 px-2 sm:px-4 shrink-0 -ml-2 sm:ml-0 text-xs sm:text-sm h-8 sm:h-9"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+                        <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         <span className="hidden sm:inline">Back to Dashboard</span>
                         <span className="sm:hidden">Back</span>
                     </Button>
@@ -683,12 +684,12 @@ const DealCenter = () => {
                 </div>
 
                 {/* Deal Header Card */}
-                <Card className="mb-8 border-border bg-white/80 backdrop-blur-xl shadow-sm">
-                    <CardHeader className="pb-6">
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                            <div className="space-y-2">
-                                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                                    {data.idea.title} <span className="text-slate-500 font-normal text-base md:text-lg ml-2">Deal Room</span>
+                <Card className="mb-4 sm:mb-8 border-border bg-white/80 backdrop-blur-xl shadow-sm">
+                    <CardHeader className="pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 sm:gap-4">
+                            <div className="space-y-1.5 sm:space-y-2">
+                                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                                    {data.idea.title} <span className="text-slate-500 font-normal text-sm sm:text-base md:text-lg sm:ml-2">Deal Room</span>
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-3 text-sm">
                                     <Badge variant="outline" className="border-brand-yellow/30 text-brand-yellow bg-brand-yellow/10 px-3 py-1">
@@ -723,7 +724,8 @@ const DealCenter = () => {
                 </Card>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                {/* Mobile: compact 3-col row | Desktop: full cards */}
+                <div className="hidden md:grid md:grid-cols-3 gap-4 mb-8">
                     <Card className="border-border bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
                         <div className="absolute inset-0 bg-blue-600/5 group-hover:bg-blue-600/10 transition-colors" />
                         <CardContent className="pt-6 relative">
@@ -733,12 +735,11 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Investment</p>
-                                    <p className="text-xl md:text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestment)}</p>
+                                    <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestment)}</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
-
                     <Card className="border-border bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
                         <div className="absolute inset-0 bg-emerald-600/5 group-hover:bg-emerald-600/10 transition-colors" />
                         <CardContent className="pt-6 relative">
@@ -748,12 +749,11 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Profit Shared</p>
-                                    <p className="text-xl md:text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(totalProfit)}</p>
+                                    <p className="text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(totalProfit)}</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
-
                     <Card className="border-border bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
                         <div className="absolute inset-0 bg-brand-yellow/5 group-hover:bg-brand-yellow/10 transition-colors" />
                         <CardContent className="pt-6 relative">
@@ -763,11 +763,36 @@ const DealCenter = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Current ROI</p>
-                                    <p className="text-xl md:text-2xl font-bold text-amber-600 mt-1">{roi}%</p>
+                                    <p className="text-2xl font-bold text-amber-600 mt-1">{roi}%</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Mobile compact stats row */}
+                <div className="grid grid-cols-3 gap-2 mb-4 md:hidden">
+                    <div className="bg-white rounded-xl border border-border p-3 text-center shadow-sm">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-200 mx-auto mb-1.5">
+                            <DollarSign className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold leading-tight">Investment</p>
+                        <p className="text-sm font-bold text-foreground mt-0.5">{formatCurrency(totalInvestment)}</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-border p-3 text-center shadow-sm">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-200 mx-auto mb-1.5">
+                            <PiggyBank className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold leading-tight">Profit</p>
+                        <p className="text-sm font-bold text-emerald-600 mt-0.5">{formatCurrency(totalProfit)}</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-border p-3 text-center shadow-sm">
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-200 mx-auto mb-1.5">
+                            <TrendingUp className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold leading-tight">ROI</p>
+                        <p className="text-sm font-bold text-amber-600 mt-0.5">{roi}%</p>
+                    </div>
                 </div>
 
                 {/* Pending Profit Receipts (Investor View) */}
@@ -834,49 +859,53 @@ const DealCenter = () => {
                 )}
 
                 {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="bg-brand-yellow/10 p-1 border border-border rounded-xl w-full md:w-auto h-auto grid grid-cols-2 md:inline-flex md:gap-2">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+                    <TabsList className="bg-brand-yellow/10 p-1 border border-border rounded-xl w-full md:w-auto h-auto flex gap-1 md:inline-flex md:gap-2 overflow-x-auto no-scrollbar">
                         <TabsTrigger
                             value="overview"
-                            className="rounded-lg data-[state=active]:bg-brand-charcoal data-[state=active]:text-brand-yellow text-muted-foreground hover:text-foreground transition-all h-10"
+                            className="rounded-lg data-[state=active]:bg-brand-charcoal data-[state=active]:text-brand-yellow text-muted-foreground hover:text-foreground transition-all h-9 sm:h-10 text-xs sm:text-sm flex-1 md:flex-none whitespace-nowrap px-3 sm:px-4"
                         >
-                            <TrendingUp className="w-4 h-4 mr-2" />
-                            Overview
+                            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="sm:hidden">Overview</span>
+                            <span className="hidden sm:inline">Overview</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="profit-history"
-                            className="rounded-lg data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground transition-all h-10"
+                            className="rounded-lg data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground transition-all h-9 sm:h-10 text-xs sm:text-sm flex-1 md:flex-none whitespace-nowrap px-3 sm:px-4"
                         >
-                            <History className="w-4 h-4 mr-2" />
-                            Profit History
+                            <History className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="sm:hidden">Profits</span>
+                            <span className="hidden sm:inline">Profit History</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="transactions"
-                            className="rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground transition-all h-10"
+                            className="rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground transition-all h-9 sm:h-10 text-xs sm:text-sm flex-1 md:flex-none whitespace-nowrap px-3 sm:px-4"
                         >
-                            <Receipt className="w-4 h-4 mr-2" />
-                            Transactions
+                            <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="sm:hidden">Txns</span>
+                            <span className="hidden sm:inline">Transactions</span>
                             {data.transactions.some(t => t.status === 'investor_confirmed' && data.isFounder) && (
-                                <span className="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                <span className="ml-1 sm:ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                             )}
                         </TabsTrigger>
                         {data.isFounder && (
                             <TabsTrigger
                                 value="record-profit"
-                                className="rounded-lg data-[state=active]:bg-brand-yellow data-[state=active]:text-brand-charcoal text-slate-500 hover:text-foreground transition-all h-10 col-span-2 md:col-span-1"
+                                className="rounded-lg data-[state=active]:bg-brand-yellow data-[state=active]:text-brand-charcoal text-slate-500 hover:text-foreground transition-all h-9 sm:h-10 text-xs sm:text-sm flex-1 md:flex-none whitespace-nowrap px-3 sm:px-4"
                             >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Record Profit
+                                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                <span className="sm:hidden">Record</span>
+                                <span className="hidden sm:inline">Record Profit</span>
                             </TabsTrigger>
                         )}
                         {!data.isFounder && (
                             <Button
                                 onClick={() => setShowPaymentModal(true)}
-                                className="ml-2 bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal border-none shadow-lg shadow-brand-yellow/20"
+                                className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal border-none shadow-lg shadow-brand-yellow/20 text-xs sm:text-sm h-9 sm:h-10 flex-1 md:flex-none whitespace-nowrap px-3 sm:px-4"
                                 size="sm"
                             >
-                                <DollarSign className="w-4 h-4 mr-2" />
-                                Invest Now
+                                <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                Invest
                             </Button>
                         )}
                     </TabsList>

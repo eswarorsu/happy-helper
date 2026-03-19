@@ -36,8 +36,8 @@ const MobileChat = () => {
                 .select(`
                     *,
                     idea:ideas(title),
-                    investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url),
-                    founder:profiles!chat_requests_founder_id_fkey(id, name, avatar_url)
+                    investor:profiles!chat_requests_investor_id_fkey(id, name, avatar_url, education, experience),
+                    founder:profiles!chat_requests_founder_id_fkey(id, name, avatar_url, education, experience)
                 `)
                 .eq("id", chatRequestId)
                 .single();

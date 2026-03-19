@@ -96,7 +96,7 @@ const Marketplace = () => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [showFilters, setShowFilters] = useState(true);
+    const [showFilters, setShowFilters] = useState(false);
     const [chatRequests, setChatRequests] = useState<Record<string, string>>({});
 
     // Filter State
@@ -320,15 +320,18 @@ const Marketplace = () => {
                 {/* Header */}
                 <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate("/investor-dashboard")}
-                                className="text-muted-foreground hover:text-foreground"
-                            >
-                                <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                            </Button>
+                        {/* Mobile: Title left, Back right | Desktop: Back left, Title right */}
+                        <div className={`flex items-center gap-2 sm:gap-4 min-w-0 ${isMobile ? 'order-1' : ''}`}>
+                            {!isMobile && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => navigate("/investor-dashboard")}
+                                    className="text-muted-foreground hover:text-foreground"
+                                >
+                                    <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                                </Button>
+                            )}
                             <div className="flex items-center gap-2">
                                 <Logo size="sm" />
                                 <div>
@@ -339,21 +342,31 @@ const Marketplace = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                            <div className="relative">
+                        {isMobile && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate("/investor-dashboard")}
+                                className="text-muted-foreground hover:text-foreground order-2"
+                            >
+                                Back <ArrowLeft className="w-4 h-4 ml-1" />
+                            </Button>
+                        )}
+                        <div className={`flex items-center gap-2 sm:gap-3 w-full sm:w-auto ${isMobile ? 'order-3' : ''}`}>
+                            <div className="relative flex-1 sm:flex-none">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search ideas..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 w-[12.5rem] sm:w-64 h-10 bg-background border-border placeholder:text-slate-500 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
+                                    className="pl-10 w-full sm:w-64 h-10 bg-background border-border placeholder:text-slate-500 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-colors"
                                 />
                             </div>
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`gap-2 border-slate-200 shadow-sm transition-all ${showFilters
+                                className={`gap-2 border-slate-200 shadow-sm transition-all shrink-0 ${showFilters
                                     ? "bg-slate-100 text-slate-900 border-slate-300"
                                     : "bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                             >

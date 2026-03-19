@@ -214,16 +214,19 @@ export default function IdeaDetailPage() {
 
                         <div className="flex items-center gap-4">
                             {profile?.is_approved && (
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 md:gap-3 ml-auto md:ml-0">
                                     <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50">
                                         <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
                                     </Badge>
 
-                                    <ActivityTimerBadge
-                                        profileId={profile?.id}
-                                        isApproved={profile?.is_approved}
-                                        multiplier={timerMultiplier}
-                                    />
+                                    {/* Timer hidden on mobile */}
+                                    <div className="hidden md:block">
+                                        <ActivityTimerBadge
+                                            profileId={profile?.id}
+                                            isApproved={profile?.is_approved}
+                                            multiplier={timerMultiplier}
+                                        />
+                                    </div>
                                 </div>
                             )}
 

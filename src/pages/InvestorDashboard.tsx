@@ -397,7 +397,7 @@ const InvestorDashboard = () => {
       .from("chat_requests")
       .select(`
         *,
-        founder:profiles!chat_requests_founder_id_fkey(id, name, avatar_url, user_type),
+        founder:profiles!chat_requests_founder_id_fkey(id, name, avatar_url, user_type, education, experience),
         idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .eq("investor_id", profileData.id);
@@ -615,7 +615,7 @@ const InvestorDashboard = () => {
       })
       .select(`
         *,
-        founder:profiles!chat_requests_founder_id_fkey(id, name, user_type),
+        founder:profiles!chat_requests_founder_id_fkey(id, name, user_type, education, experience),
         idea:ideas!chat_requests_idea_id_fkey(title, investment_needed)
       `)
       .single();
