@@ -196,7 +196,6 @@ const Auth = () => {
 
   // ── Password Reset / Recovery state ──────────────────────────────────────────
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // ── Verification screen state ──────────────────────────────────────────────
   const [pendingVerification, setPendingVerification] = useState<{
@@ -216,10 +215,6 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session?.user?.id);
-
-      if (event === 'PASSWORD_RECOVERY') {
-        setIsResettingPassword(true);
-      }
 
       if (event === 'SIGNED_IN' && session?.user) {
         // 🔥 CONNECT FIREBASE (non-blocking)
@@ -393,7 +388,7 @@ const Auth = () => {
     setErrors({});
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/auth?mode=login`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
       toast({ title: "Check your email", description: "We have sent a password reset link to your email." });
@@ -401,27 +396,6 @@ const Auth = () => {
       setFormData(prev => ({ ...prev, password: "" }));
     } catch (error: any) {
       toast({ title: "Reset failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.password || formData.password.length < 6) {
-      setErrors({ password: "Password must be at least 6 characters" });
-      return;
-    }
-    setIsLoading(true);
-    setErrors({});
-    try {
-      const { error } = await supabase.auth.updateUser({ password: formData.password });
-      if (error) throw error;
-      toast({ title: "Password updated successfully", description: "You can now continue to your dashboard." });
-      setIsResettingPassword(false);
-      // Let onAuthStateChange or checkProfileAndRedirect handle navigation
-    } catch (error: any) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -579,58 +553,25 @@ const Auth = () => {
               <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-5">
-              {isResettingPassword 
-                ? "Set new password" 
-                : isForgotPassword 
-                  ? "Reset your password" 
-                  : mode === "login" 
-                    ? "Welcome back" 
-                    : "Create your account"}
+              {isForgotPassword 
+                ? "Reset your password" 
+                : mode === "login" 
+                  ? "Welcome back" 
+                  : "Create your account"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-              {isResettingPassword
-                ? "Please enter your new password below."
-                : isForgotPassword
-                  ? "We'll send you a link to reset it."
-                  : mode === "login"
-                    ? "Sign in to continue to your dashboard"
-                    : "Join the community of founders & investors"}
+              {isForgotPassword
+                ? "We'll send you a link to reset it."
+                : mode === "login"
+                  ? "Sign in to continue to your dashboard"
+                  : "Join the community of founders & investors"}
             </p>
           </div>
 
           {/* Form Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-border/50 shadow-xl shadow-black/[0.03]">
             <CardContent className="p-5 sm:p-7">
-              {isResettingPassword ? (
-                // ── Update Password Form ──
-                <form onSubmit={handleUpdatePassword} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="password" className="text-sm font-medium">New Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className={`text-foreground ${errors.password ? "border-destructive focus-visible:ring-red-200" : ""} pr-10`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
-                  </div>
-                  <Button type="submit" className="w-full h-11 gradient-cta" disabled={isLoading}>
-                    {isLoading ? "Updating..." : "Update Password"}
-                  </Button>
-                </form>
-              ) : isForgotPassword ? (
+              {isForgotPassword ? (
                 // ── Forgot Password Form ──
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-1.5">
@@ -822,7 +763,7 @@ const Auth = () => {
               </form>
               )}
 
-              {!isResettingPassword && !isForgotPassword && (
+              {!isForgotPassword && (
                 <>
                   {/* Divider */}
                   <div className="relative my-6">

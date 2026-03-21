@@ -53,43 +53,47 @@ const PaymentQR: React.FC<PaymentQRProps> = ({ upiId, payeeName, amount, note, o
     }
 
     return (
-        <Card className="w-full max-w-md mx-auto shadow-lg border-border">
-            <CardHeader className="text-center">
-                <CardTitle className="text-xl font-bold text-foreground">Scan to Pay</CardTitle>
-                <CardDescription>Use any UPI app to complete the payment</CardDescription>
+        <Card className="w-full max-w-md mx-auto border-none shadow-none bg-transparent">
+            <CardHeader className="text-center px-0 pt-0 pb-3">
+                <CardTitle className="text-lg sm:text-xl font-bold text-foreground">Scan to Pay</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Use any UPI app to complete the payment</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center space-y-4">
-                <div className="bg-black p-2 rounded-xl border border-border/60 shadow-inner text-white">
+            <CardContent className="flex flex-col items-center space-y-4 px-0 pb-4">
+                <div className="bg-black p-3 sm:p-4 rounded-2xl border border-border/60 shadow-inner w-full max-w-[220px] sm:max-w-[280px] flex justify-center">
                     {qrCodeUrl ? (
-                        <img src={qrCodeUrl} alt="UPI QR Code" className="w-64 h-64 object-contain" />
+                        <img src={qrCodeUrl} alt="UPI QR Code" className="w-full aspect-square object-contain bg-white rounded-xl p-2" />
                     ) : (
-                        <div className="w-64 h-64 bg-indigo-50 flex items-center justify-center text-slate-400">
-                            QR Generation Failed
+                        <div className="w-full aspect-square bg-indigo-50 flex items-center justify-center text-slate-400 rounded-xl text-sm">
+                            Gen Failed
                         </div>
                     )}
                 </div>
 
-                <div className="text-center space-y-1 w-full p-4 bg-background rounded-lg">
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-500">Payee:</span>
-                        <span className="font-medium text-foreground">{payeeName}</span>
+                <div className="text-center space-y-1.5 w-full p-3 sm:p-4 bg-slate-50 border border-slate-100/50 rounded-xl">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
+                        <span className="text-slate-500 whitespace-nowrap mr-2">Payee:</span>
+                        <span className="font-medium text-foreground text-right">{payeeName}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-500">UPI ID:</span>
-                        <span className="font-mono text-foreground">{upiId}</span>
+                    <div className="flex justify-between items-start sm:items-center text-xs sm:text-sm">
+                        <span className="text-slate-500 whitespace-nowrap mr-2 mt-0.5 sm:mt-0">UPI ID:</span>
+                        <span className="font-mono text-foreground break-all text-right">{upiId}</span>
                     </div>
-                    <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-border mt-2">
+                    <div className="flex justify-between items-center text-base sm:text-lg font-bold pt-2 border-t border-slate-200 mt-2">
                         <span className="text-slate-700">Amount:</span>
                         <span className="text-primary">₹{amount.toLocaleString('en-IN')}</span>
                     </div>
                 </div>
 
                 {/* Mobile Deep Link Button */}
-                <div className="text-center text-sm text-slate-500 md:hidden">
-                    <p className="mb-2">On mobile? Tap below to pay directly</p>
+                <div className="text-center w-full md:hidden pt-2">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="h-px bg-border flex-1" />
+                        <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">OR</span>
+                        <div className="h-px bg-border flex-1" />
+                    </div>
                     <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full bg-white shadow-sm h-11 border-slate-200 hover:bg-slate-50 text-brand-charcoal font-semibold"
                         onClick={() => {
                             const upiString = generateUPIString({
                                 pa: upiId,
@@ -100,12 +104,12 @@ const PaymentQR: React.FC<PaymentQRProps> = ({ upiId, payeeName, amount, note, o
                             window.location.href = upiString;
                         }}
                     >
-                        Open UPI App
+                        Pay directly with UPI App
                     </Button>
                 </div>
 
             </CardContent>
-            <CardFooter>
+            <CardFooter className="px-0 pb-0">
                 {!confirmed ? (
                     <Button className="w-full" size="lg" onClick={handleConfirm}>
                         I have completed the payment

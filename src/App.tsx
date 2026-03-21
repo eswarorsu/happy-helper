@@ -25,6 +25,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const IdeaDetailPage = lazy(() => import("./pages/IdeaDetailPage"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
 const Transactions = lazy(() => import("./pages/Transactions"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const DealCenter = lazy(() => import("./pages/DealCenter"));
 const DealCenterIndex = lazy(() => import("./pages/DealCenterIndex"));
 const MobileMessages = lazy(() => import("./pages/MobileMessages"));
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/idea/:id" element={<IdeaDetailPage />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Protected routes – require authentication */}
               <Route element={<PrivateRoute />}>

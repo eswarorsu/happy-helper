@@ -1160,10 +1160,10 @@ const DealCenter = () => {
                         setPaymentProofFile(null);
                     }
                 }}>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="sm:max-w-md w-[95vw] rounded-2xl sm:w-full p-4 sm:p-6 overflow-y-auto max-h-[90vh]">
                         <DialogHeader>
-                            <DialogTitle>Invest via UPI</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="text-lg sm:text-xl">Invest via UPI</DialogTitle>
+                            <DialogDescription className="text-xs sm:text-sm">
                                 Direct transfer to {data.founder.name}
                             </DialogDescription>
                         </DialogHeader>
@@ -1305,35 +1305,35 @@ const DealCenter = () => {
                         setProfitProofFile(null);
                     }
                 }}>
-                    <DialogContent className="sm:max-w-md border-border bg-gradient-to-b from-white to-slate-50">
-                        <DialogHeader className="text-center pb-2">
-                            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-4 border border-emerald-200">
-                                <PiggyBank className="w-8 h-8 text-emerald-400" />
+                    <DialogContent className="sm:max-w-md border-border bg-gradient-to-b from-white to-slate-50 w-[95vw] rounded-2xl sm:w-full p-4 sm:p-6 overflow-y-auto max-h-[90vh]">
+                        <DialogHeader className="text-center pb-0 sm:pb-2">
+                            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-2 sm:mb-4 border border-emerald-200">
+                                <PiggyBank className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400" />
                             </div>
-                            <DialogTitle className="text-xl font-bold text-foreground">
+                            <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
                                 Share Profit via UPI
                             </DialogTitle>
-                            <DialogDescription className="text-slate-500">
+                            <DialogDescription className="text-slate-500 text-xs sm:text-sm">
                                 Send profit share to <span className="text-emerald-600 font-medium">{data.investor.name}</span>
                             </DialogDescription>
                         </DialogHeader>
 
                         {profitPaymentStep === "input" && (
-                            <div className="space-y-6 py-4">
+                            <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
                                 {/* Amount Display Card */}
-                                <div className="relative overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6">
+                                <div className="relative overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 sm:p-6">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
                                     <div className="relative">
-                                        <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Amount to Share</p>
-                                        <p className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                        <p className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 sm:mb-2">Amount to Share</p>
+                                        <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-all">
                                             {formatCurrency(parseFloat(profitAmount) || 0)}
                                         </p>
 
                                         {profitDescription && (
-                                            <div className="mt-4 pt-4 border-t border-emerald-200">
-                                                <p className="text-sm text-slate-600 flex items-start gap-2">
-                                                    <Receipt className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                                            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-emerald-200">
+                                                <p className="text-xs sm:text-sm text-slate-600 flex items-start gap-2">
+                                                    <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 mt-0.5 flex-shrink-0" />
                                                     {profitDescription}
                                                 </p>
                                             </div>
@@ -1342,16 +1342,16 @@ const DealCenter = () => {
                                 </div>
 
                                 {/* Recipient Info */}
-                                <div className="flex items-center gap-4 p-4 rounded-xl bg-background border border-border">
-                                    <div className="w-12 h-12 rounded-full bg-brand-yellow flex items-center justify-center text-brand-charcoal font-bold text-lg">
+                                <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-background border border-border">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-yellow flex items-center justify-center text-brand-charcoal font-bold text-base sm:text-lg flex-shrink-0">
                                         {data.investor.name?.charAt(0).toUpperCase()}
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-foreground">{data.investor.name}</p>
-                                        <p className="text-xs text-slate-500 font-mono">{data.investor.upi_id || 'UPI ID not set'}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-foreground text-sm sm:text-base truncate">{data.investor.name}</p>
+                                        <p className="text-[10px] sm:text-xs text-slate-500 font-mono break-all">{data.investor.upi_id || 'UPI ID not set'}</p>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                                        <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                        <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
                                     </div>
                                 </div>
 
