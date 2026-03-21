@@ -935,9 +935,9 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* COLLEGE MARQUEE */}
       {/* ================================================================ */}
-      <section className="py-10 sm:py-16 overflow-hidden bg-background">
-        <div className="text-center mb-6 sm:mb-10 px-4 sm:px-6">
-          <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
+      <section className="py-6 sm:py-10 overflow-hidden bg-background">
+        <div className="text-center mb-4 sm:mb-6 px-4 sm:px-6">
+          <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-3 text-brand-yellow">
             Our Network
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground">
@@ -946,7 +946,7 @@ const Landing = () => {
         </div>
 
         {/* Row 1 */}
-        <div className="flex animate-marquee hover:[animation-play-state:paused] mb-4">
+        <div className="flex animate-marquee hover:[animation-play-state:paused] mb-3">
           {[...colleges, ...colleges].map((college, i) => (
             <span key={i} className="shrink-0 mx-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap border border-border text-muted-foreground bg-white transition-colors hover:border-brand-yellow hover:bg-brand-yellow/10">
               {college}

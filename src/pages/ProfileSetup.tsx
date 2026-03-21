@@ -117,7 +117,7 @@ const ROI_TIMELINES = [
 
 const ProfileSetup = () => {
   const [searchParams] = useSearchParams();
-  const userType = searchParams.get("type") as "founder" | "investor";
+  const userType = searchParams.get("type") as "founder" | "investor" | "choose";
   const mode = searchParams.get("mode");
   const navigate = useNavigate();
   const { toast } = useToast();

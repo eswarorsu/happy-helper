@@ -609,7 +609,7 @@ const Auth = () => {
                   <>
                     {/* Name */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                      <Label htmlFor="name" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Full Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -623,7 +623,7 @@ const Auth = () => {
 
                     {/* Phone */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                      <Label htmlFor="phone" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Phone Number</Label>
                       <Input
                         id="phone"
                         name="phone"
@@ -638,7 +638,7 @@ const Auth = () => {
 
                     {/* User Type — Pill Tab Toggle */}
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-medium">I am a</Label>
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">I am a</Label>
                       <div className="flex rounded-full bg-secondary/70 p-1 border-2 border-slate-200">
                         <button
                           type="button"
@@ -667,7 +667,7 @@ const Auth = () => {
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                  <Label htmlFor="email" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Email</Label>
                   <Input
                     id="email"
                     name="email"
@@ -683,7 +683,7 @@ const Auth = () => {
                 {/* Password */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                    <Label htmlFor="password" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Password</Label>
                     {mode === "login" && (
                       <button 
                         type="button"
