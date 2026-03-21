@@ -187,12 +187,16 @@ const Auth = () => {
   const mode = searchParams.get("mode") || "login";
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const isCheckingProfile = useRef(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // ── Password Reset / Recovery state ──────────────────────────────────────────
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // ── Verification screen state ──────────────────────────────────────────────
   const [pendingVerification, setPendingVerification] = useState<{
@@ -212,6 +216,10 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session?.user?.id);
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsResettingPassword(true);
+      }
 
       if (event === 'SIGNED_IN' && session?.user) {
         // 🔥 CONNECT FIREBASE (non-blocking)
@@ -248,7 +256,7 @@ const Auth = () => {
       console.log("⏳ Profile check already in progress, skipping duplicate call...");
       return;
     }
-    
+
     isCheckingProfile.current = true;
     console.log("🔍 Checking profile for user:", userId);
 
@@ -272,10 +280,10 @@ const Auth = () => {
       // Check if there was a query error (not "no rows found")
       if (error && error.code !== 'PGRST116') {
         console.error("❌ Profile query error:", error);
-        
+
         // Ignore AbortError if it still occurs
         if (error.message?.includes('AbortError') || error.message?.includes('signal is aborted')) {
-           return;
+          return;
         }
 
         toast({
@@ -370,6 +378,67 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email) {
+      toast({ title: "Email required", description: "Please enter your email address to reset your password", variant: "destructive" });
+      setErrors({ email: "Email required" });
+      return;
+    }
+    setIsLoading(true);
+    setErrors({});
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/auth?mode=login`,
+      });
+      if (error) throw error;
+      toast({ title: "Check your email", description: "We have sent a password reset link to your email." });
+      setIsForgotPassword(false);
+      setFormData(prev => ({ ...prev, password: "" }));
+    } catch (error: any) {
+      toast({ title: "Reset failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.password || formData.password.length < 6) {
+      setErrors({ password: "Password must be at least 6 characters" });
+      return;
+    }
+    setIsLoading(true);
+    setErrors({});
+    try {
+      const { error } = await supabase.auth.updateUser({ password: formData.password });
+      if (error) throw error;
+      toast({ title: "Password updated successfully", description: "You can now continue to your dashboard." });
+      setIsResettingPassword(false);
+      // Let onAuthStateChange or checkProfileAndRedirect handle navigation
+    } catch (error: any) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth?mode=login`,
+        }
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast({ title: "Google Login Failed", description: error.message, variant: "destructive" });
       setIsLoading(false);
     }
   };
@@ -510,19 +579,89 @@ const Auth = () => {
               <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-5">
-              {mode === "login" ? "Welcome back" : "Create your account"}
+              {isResettingPassword 
+                ? "Set new password" 
+                : isForgotPassword 
+                  ? "Reset your password" 
+                  : mode === "login" 
+                    ? "Welcome back" 
+                    : "Create your account"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-              {mode === "login"
-                ? "Sign in to continue to your dashboard"
-                : "Join the community of founders & investors"}
+              {isResettingPassword
+                ? "Please enter your new password below."
+                : isForgotPassword
+                  ? "We'll send you a link to reset it."
+                  : mode === "login"
+                    ? "Sign in to continue to your dashboard"
+                    : "Join the community of founders & investors"}
             </p>
           </div>
 
           {/* Form Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-border/50 shadow-xl shadow-black/[0.03]">
             <CardContent className="p-5 sm:p-7">
-              <form onSubmit={mode === "login" ? handleLogin : handleRegister} className="space-y-4">
+              {isResettingPassword ? (
+                // ── Update Password Form ──
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-sm font-medium">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className={`text-foreground ${errors.password ? "border-destructive focus-visible:ring-red-200" : ""} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
+                  </div>
+                  <Button type="submit" className="w-full h-11 gradient-cta" disabled={isLoading}>
+                    {isLoading ? "Updating..." : "Update Password"}
+                  </Button>
+                </form>
+              ) : isForgotPassword ? (
+                // ── Forgot Password Form ──
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={`text-foreground ${errors.email ? "border-destructive focus-visible:ring-red-200" : ""}`}
+                    />
+                    {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+                  </div>
+                  <Button type="submit" className="w-full h-11 gradient-cta" disabled={isLoading}>
+                    {isLoading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <div className="text-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPassword(false)}
+                      className="text-sm text-foreground hover:text-brand-yellow underline underline-offset-2"
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                // ── Login / Register Form ──
+                <form onSubmit={mode === "login" ? handleLogin : handleRegister} className="space-y-4">
                 {mode === "register" && (
                   <>
                     {/* Name */}
@@ -600,7 +739,18 @@ const Auth = () => {
 
                 {/* Password */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                    {mode === "login" && (
+                      <button 
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-xs text-brand-yellow font-medium hover:underline focus:outline-none"
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Input
                       id="password"
@@ -634,7 +784,7 @@ const Auth = () => {
                         onChange={(e) => setAgreedToTerms(e.target.checked)}
                         className="mt-0.5 h-4 w-4 rounded border-border accent-brand-charcoal cursor-pointer shrink-0"
                       />
-                        <label htmlFor="terms" className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
+                      <label htmlFor="terms" className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
                         I have read and agree to the{" "}
                         <Link to="/terms-and-conditions" target="_blank" className="font-semibold text-slate-700 underline underline-offset-2 hover:text-brand-yellow transition-colors">
                           Terms &amp; Conditions
@@ -670,37 +820,63 @@ const Auth = () => {
                   </Button>
                 )}
               </form>
+              )}
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border/60" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-muted-foreground">
-                    {mode === "login" ? "New here?" : "Already a member?"}
-                  </span>
-                </div>
-              </div>
+              {!isResettingPassword && !isForgotPassword && (
+                <>
+                  {/* Divider */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border/60" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-3 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Switch mode */}
-              <div className="text-center">
-                {mode === "login" ? (
-                  <Link
-                    to="/auth?mode=register"
-                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
+                  {/* Google OAuth Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 bg-white hover:bg-slate-50 border-slate-200 text-slate-700 font-medium tracking-tight"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
                   >
-                    Create a free account
-                  </Link>
-                ) : (
-                  <Link
-                    to="/auth?mode=login"
-                    className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
-                  >
-                    Sign in instead
-                  </Link>
-                )}
-              </div>
+                    <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                      <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                    </svg>
+                    Google
+                  </Button>
+
+                  {/* Divider 2 */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border/30" />
+                    </div>
+                  </div>
+
+                  {/* Switch mode */}
+                  <div className="text-center">
+                    {mode === "login" ? (
+                      <Link
+                        to="/auth?mode=register"
+                        className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
+                      >
+                        Create a free account
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/auth?mode=login"
+                        className="inline-flex items-center justify-center w-full h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-yellow hover:border-brand-yellow/50 transition-all"
+                      >
+                        Sign in instead
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
