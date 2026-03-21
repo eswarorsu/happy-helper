@@ -946,18 +946,27 @@ const Landing = () => {
         </div>
 
         {/* Row 1 */}
-        <div className="flex animate-marquee hover:[animation-play-state:paused] mb-3">
+        <div className="flex animate-marquee hover:[animation-play-state:paused] mb-2 sm:mb-3">
           {[...colleges, ...colleges].map((college, i) => (
-            <span key={i} className="shrink-0 mx-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap border border-border text-muted-foreground bg-white transition-colors hover:border-brand-yellow hover:bg-brand-yellow/10">
+            <span key={`r1-${i}`} className="shrink-0 mx-1 sm:mx-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium whitespace-nowrap border border-border text-muted-foreground bg-white transition-colors hover:border-brand-yellow hover:bg-brand-yellow/10">
               {college}
             </span>
           ))}
         </div>
 
         {/* Row 2 */}
-        <div className="flex animate-marquee-reverse hover:[animation-play-state:paused]">
+        <div className="flex animate-marquee-reverse hover:[animation-play-state:paused] mb-2 sm:mb-3">
           {[...colleges].reverse().concat([...colleges].reverse()).map((college, i) => (
-            <span key={i} className="shrink-0 mx-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap border border-brand-yellow/20 text-brand-yellow bg-brand-yellow/5 transition-colors hover:bg-brand-yellow/10">
+            <span key={`r2-${i}`} className="shrink-0 mx-1 sm:mx-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium whitespace-nowrap border border-brand-yellow/20 text-brand-yellow bg-brand-yellow/5 transition-colors hover:bg-brand-yellow/10">
+              {college}
+            </span>
+          ))}
+        </div>
+
+        {/* Row 3 */}
+        <div className="flex animate-marquee hover:[animation-play-state:paused]" style={{ animationDuration: '40s' }}>
+          {[...colleges].sort(() => Math.random() - 0.5).concat([...colleges]).map((college, i) => (
+            <span key={`r3-${i}`} className="shrink-0 mx-1 sm:mx-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium whitespace-nowrap border border-border text-muted-foreground bg-white transition-colors hover:border-brand-yellow hover:bg-brand-yellow/10">
               {college}
             </span>
           ))}

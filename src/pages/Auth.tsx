@@ -291,6 +291,7 @@ const Auth = () => {
 
       if (profile) {
         console.log("✅ Profile found, redirecting to dashboard");
+        toast({ title: "User exists", description: "Logging you in directly..." });
         if ((profile as { is_admin?: boolean }).is_admin) {
           navigate("/admin-innovestor");
         } else {
@@ -298,6 +299,7 @@ const Auth = () => {
         }
       } else {
         console.log("⚠️ No profile found, redirecting to profile setup");
+        toast({ title: "New user detected", description: "Let's set up your account profile." });
         const { data: { session } } = await supabase.auth.getSession();
         const userType = session?.user?.user_metadata?.user_type || 'choose';
         navigate(`/profile-setup?type=${userType}`);
