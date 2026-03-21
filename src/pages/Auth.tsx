@@ -530,10 +530,10 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex relative overflow-hidden">
-      {/* ─── Global Top-Left Back Button ─── */}
+      {/* ─── Global Top-Right Back Button ─── */}
       <Link
         to="/"
-        className="absolute top-5 left-5 md:top-8 md:left-8 z-50 inline-flex items-center gap-2 text-slate-500 hover:text-brand-yellow transition-colors text-sm font-medium bg-white/50 md:bg-transparent backdrop-blur-md md:backdrop-blur-none py-1.5 px-3 rounded-full border border-slate-200 md:border-transparent"
+        className="absolute top-5 right-5 md:top-8 md:right-8 z-50 inline-flex items-center gap-2 text-slate-500 hover:text-brand-yellow transition-colors text-sm font-medium bg-white/50 md:bg-transparent backdrop-blur-md md:backdrop-blur-none py-1.5 px-3 rounded-full border border-slate-200 md:border-transparent"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Back to home</span>

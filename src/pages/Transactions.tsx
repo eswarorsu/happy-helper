@@ -213,6 +213,13 @@ const Transactions = () => {
     const totalDeals = transactions.filter(tx => tx.status === "confirmed").length;
     const pendingDeals = transactions.filter(tx => tx.status === "pending").length;
 
+    const formatCompactCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-IN', {
+            notation: "compact",
+            maximumFractionDigits: 1,
+        }).format(amount);
+    };
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "confirmed":
@@ -310,52 +317,52 @@ const Transactions = () => {
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
+                        className="grid grid-cols-3 gap-2 sm:gap-4"
                     >
                         <motion.div variants={itemVariants}>
-                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                                <CardContent className="p-5">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total {profile?.user_type === "investor" ? "Invested" : "Raised"}</p>
-                                            <p className="text-xl sm:text-2xl font-bold mt-1 text-slate-900">₹{totalAmount.toLocaleString()}</p>
-                                        </div>
-                                        <div className="w-12 h-12 rounded-xl bg-brand-yellow/10 flex items-center justify-center">
-                                            <TrendingUp className="w-6 h-6 text-brand-yellow" />
-                                        </div>
+                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow h-full">
+                                <CardContent className="p-3 sm:p-5 flex flex-col items-center text-center h-full justify-center">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-2.5">
+                                        <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                                     </div>
+                                    <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 line-clamp-1">
+                                        {profile?.user_type === "investor" ? "Invested" : "Raised"}
+                                    </p>
+                                    <p className="text-[15px] sm:text-xl font-black text-slate-900 leading-none">
+                                        ₹{formatCompactCurrency(totalAmount)}
+                                    </p>
                                 </CardContent>
                             </Card>
                         </motion.div>
 
                         <motion.div variants={itemVariants}>
-                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                                <CardContent className="p-5">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Completed Deals</p>
-                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{totalDeals}</p>
-                                        </div>
-                                        <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-                                            <Handshake className="w-6 h-6 text-emerald-600" />
-                                        </div>
+                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow h-full">
+                                <CardContent className="p-3 sm:p-5 flex flex-col items-center text-center h-full justify-center">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-2.5">
+                                        <Handshake className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
                                     </div>
+                                    <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 line-clamp-1">
+                                        Completed
+                                    </p>
+                                    <p className="text-[15px] sm:text-xl font-black text-emerald-600 leading-none">
+                                        {totalDeals}
+                                    </p>
                                 </CardContent>
                             </Card>
                         </motion.div>
 
                         <motion.div variants={itemVariants}>
-                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                                <CardContent className="p-5">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Deals</p>
-                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{pendingDeals}</p>
-                                        </div>
-                                        <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
-                                            <Clock className="w-6 h-6 text-amber-600" />
-                                        </div>
+                            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow h-full">
+                                <CardContent className="p-3 sm:p-5 flex flex-col items-center text-center h-full justify-center">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-2.5">
+                                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                                     </div>
+                                    <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 line-clamp-1">
+                                        Pending
+                                    </p>
+                                    <p className="text-[15px] sm:text-xl font-black text-amber-500 leading-none">
+                                        {pendingDeals}
+                                    </p>
                                 </CardContent>
                             </Card>
                         </motion.div>
