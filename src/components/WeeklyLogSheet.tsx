@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Pencil, Rocket, Calendar, Image as ImageIcon, Plus, Loader2, Upload, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 interface Idea {
     id: string;
@@ -211,9 +212,12 @@ export function WeeklyLogSheet({
                                     className="space-y-4 bg-background p-4 rounded-xl border border-border"
                                 >
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                            What did you work on?
-                                        </label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                What did you work on?
+                                            </label>
+                                            <CopilotAgentButton context="weekly-log" inline className="scale-90 origin-right" />
+                                        </div>
                                         <Textarea
                                             placeholder="Describe your progress..."
                                             value={newLog}

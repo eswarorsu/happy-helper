@@ -14,6 +14,7 @@ import {
   DollarSign, AlertCircle, TrendingUp, Info, Smile, ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 interface Message extends Omit<FirebaseMessage, 'id' | 'created_at'> {
   id: string;
@@ -592,6 +593,9 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
 
       {/* Light Footer Input */}
       <div className="p-3 sm:p-4 bg-background border-t border-slate-200/60 shrink-0 pb-4 md:pb-4">
+        <div className="flex justify-end mb-2">
+          <CopilotAgentButton context="chatbox" inline />
+        </div>
         <form onSubmit={handleSendMessage} className="flex gap-2 items-end">
           <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.gif" />
 

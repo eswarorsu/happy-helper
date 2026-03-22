@@ -31,6 +31,8 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityTimerBadge } from "@/components/ActivityTimerBadge";
 import { evaluateFounderSubmitAccess, ensurePremiumFlag } from "@/lib/founderAccess";
+import { UnverifiedUserBanner } from "@/components/UnverifiedUserBanner";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 import {
     BarChart,
     Bar,
@@ -1440,6 +1442,10 @@ const FounderDashboard = () => {
                 {/* MAIN CONTENT */}
                 <main className={`flex-1 overflow-y-auto bg-background transition-all duration-300 pb-20 md:pb-0 ${selectedChat ? "lg:mr-96" : ""}`}>
                     <motion.div className="max-w-[1600px] mx-auto p-3 sm:p-4 md:p-8" variants={containerVariants} initial="hidden" animate="visible">
+                        {/* Unverified User Engagement Banner */}
+                        {!profile?.is_approved && (
+                            <UnverifiedUserBanner userName={profile?.name} />
+                        )}
                         {/* Page Header */}
                         <motion.div className="flex flex-col md:flex-row md:items-end justify-between mb-4 sm:mb-8 gap-4" variants={itemVariants}>
                             <div>
@@ -1818,6 +1824,7 @@ const FounderDashboard = () => {
                 )}
             </AnimatePresence>
 
+            <CopilotAgentButton context="dashboard" />
             <ProfileViewModal isOpen={!!profileToView} onClose={() => setProfileToView(null)} profile={profileToView} />
         </div>
     );

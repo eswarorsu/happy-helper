@@ -18,6 +18,7 @@ import {
 import Logo from "@/components/ui/Logo";
 import { evaluateFounderSubmitAccess, ensurePremiumFlag, type SubmitAccessResult } from "@/lib/founderAccess";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 const DOMAINS = [
     "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
@@ -586,6 +587,7 @@ const SubmitIdea = () => {
                     </div>
                 </div>
             </main>
+            <CopilotAgentButton context="pitch" />
             <MobileNav userType="founder" />
         </div>
     );

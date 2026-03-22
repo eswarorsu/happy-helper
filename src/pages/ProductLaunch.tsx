@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 interface Product {
     id: string;
@@ -402,6 +403,7 @@ const ProductLaunch = () => {
                     )}
                 </AnimatePresence>
             </main>
+            <CopilotAgentButton context="product-launch" />
         </div>
     );
 };
