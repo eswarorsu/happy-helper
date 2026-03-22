@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { motion, AnimatePresence } from "framer-motion";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ProfileViewModal } from "@/components/ProfileViewModal";
 interface UserProfile {
@@ -400,6 +401,7 @@ const ProductMarketplace = () => {
                     )
                 }
             />
+            <CopilotAgentButton context="product-marketplace" />
         </div>
     );
 };

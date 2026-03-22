@@ -13,6 +13,7 @@ import Hero3D from "@/components/Hero3D";
 import Logo from "@/components/ui/Logo";
 import LandingNavbar from "@/components/layout/LandingNavbar";
 import Footer from "@/components/layout/Footer";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 import { LandingCopilotWidget } from "@/components/LandingCopilotWidget";
 
 import gsap from "gsap";

@@ -13,8 +13,7 @@ import { connectFirebase } from "@/lib/firebase";
 import { ref, set } from "firebase/database";
 import { db } from "@/lib/firebase";
 import { authLimiter } from "@/lib/rateLimiter";
-
-
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -873,6 +872,7 @@ const Auth = () => {
           <p className="text-white/60 text-xs mt-2">— Early Founder</p>
         </div>
       </div>
+      <CopilotAgentButton context="auth" />
     </div>
   );
 };

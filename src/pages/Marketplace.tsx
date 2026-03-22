@@ -15,6 +15,7 @@ import {
     DollarSign, TrendingUp, Users, Sparkles, ChevronDown, X, Store
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -677,6 +678,7 @@ const Marketplace = () => {
                 </div>
             </div>
             <MobileNav userType="investor" />
+            <CopilotAgentButton context="marketplace" />
         </div>
     );
 };

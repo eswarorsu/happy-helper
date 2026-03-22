@@ -15,7 +15,7 @@ import Logo from "@/components/ui/Logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 const STATUS_OPTIONS = ["Student", "Final Year Student", "Graduate", "Working Professional"];
 
 // --- FOUNDER STEP 4 CONSTANTS ---
@@ -1469,6 +1469,7 @@ const ProfileSetup = () => {
           </div>
         </div>
       </div>
+      <CopilotAgentButton context="profile" />
     </div >
   );
 };

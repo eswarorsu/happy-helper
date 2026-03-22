@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import PaymentQR from "@/components/PaymentQR";
 import { MobileNav } from "@/components/layout/MobileNav";
-
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 interface DealData {
     chatRequest: any;
     idea: any;
@@ -1555,6 +1555,7 @@ const DealCenter = () => {
 
             </div>
             <MobileNav userType={data?.isFounder ? "founder" : "investor"} />
+            <CopilotAgentButton context="dealroom" />
         </div>
     );
 };

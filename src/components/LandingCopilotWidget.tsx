@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Rocket, FileText, TrendingUp, Bot } from "lucide-react";
 
 const COPILOT_URL = "https://innovestor-copilot.vercel.app/";
 
 const QUESTIONS = [
-    "Got a billion-dollar startup idea? 💡",
-    "Want to refine your pitch? 🚀",
-    "Need help writing a weekly log? 📝",
-    "Curious about investor trends? 📊"
+    <span className="flex items-center gap-2" key="q1">Got a billion-dollar startup idea? <Sparkles className="w-4 h-4 text-amber-500" /></span>,
+    <span className="flex items-center gap-2" key="q2">Want to refine your pitch? <Rocket className="w-4 h-4 text-amber-500" /></span>,
+    <span className="flex items-center gap-2" key="q3">Need help writing a weekly log? <FileText className="w-4 h-4 text-amber-500" /></span>,
+    <span className="flex items-center gap-2" key="q4">Curious about investor trends? <TrendingUp className="w-4 h-4 text-amber-500" /></span>
 ];
 
 export function LandingCopilotWidget() {
@@ -36,22 +37,21 @@ export function LandingCopilotWidget() {
     };
 
     return (
-        <div className="fixed bottom-6 right-4 sm:bottom-10 sm:right-10 z-[100] flex flex-col items-end gap-3 pointer-events-none">
+        <div className="fixed bottom-24 right-4 sm:bottom-10 sm:right-10 z-[100] flex flex-col items-end gap-3 pointer-events-none">
             <AnimatePresence>
                 {showQuestion && (
                     <motion.div
                         initial={{ opacity: 0, y: 10, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                        className="bg-white border-2 border-brand-yellow shadow-xl shadow-brand-yellow/20 rounded-2xl p-3 pr-4 flex items-center gap-3 origin-bottom-right pointer-events-auto cursor-pointer"
+                        className="mb-3 mr-2 pointer-events-auto relative bg-white border border-slate-200 shadow-xl shadow-brand-yellow/5 rounded-[20px] rounded-br-[4px] px-5 py-3.5 cursor-pointer flex items-center justify-center origin-bottom-right"
                         onClick={handleClick}
                     >
-                        <div className="flex-shrink-0 w-8 h-8 bg-brand-yellow/20 rounded-full flex items-center justify-center">
-                            <span className="text-xl">🤖</span>
-                        </div>
-                        <p className="text-sm font-semibold text-brand-charcoal">
+                        <p className="text-sm font-bold text-brand-charcoal text-center leading-snug">
                             {QUESTIONS[questionIndex]}
                         </p>
+                        {/* Speech Bubble Tail */}
+                        <div className="absolute -bottom-2 right-[10px] w-4 h-4 bg-white border-b border-r border-slate-200 transform rotate-45 rounded-sm" />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -62,7 +62,7 @@ export function LandingCopilotWidget() {
                 onHoverEnd={() => setShowQuestion(false)}
                 // Bouncing animation
                 animate={{
-                    y: [0, -15, 0],
+                    y: [0, -8, 0],
                 }}
                 transition={{
                     duration: 1.5,
@@ -72,14 +72,11 @@ export function LandingCopilotWidget() {
                 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="relative flex items-center justify-center p-0 overflow-hidden bg-brand-yellow w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-2xl shadow-brand-yellow/40 cursor-pointer pointer-events-auto border-4 border-white group"
+                className="relative flex items-center justify-center p-0 overflow-hidden w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg hover:shadow-xl cursor-pointer pointer-events-auto transition-all group"
             >
-                {/* Glow ring */}
-                <span className="absolute inset-0 rounded-full bg-brand-yellow mix-blend-overlay group-hover:animate-ping opacity-50" />
-                
                 {/* Copilot icon */}
                 <img
-                    src="/copilot-icon.jpg"
+                    src="/copilot-agent-icon.jpg"
                     alt="AI Copilot"
                     className="w-full h-full object-cover scale-110"
                 />

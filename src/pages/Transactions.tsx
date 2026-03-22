@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 
 interface Transaction {
@@ -574,6 +575,7 @@ const Transactions = () => {
                 </DialogContent>
             </Dialog>
             <MobileNav userType={profile?.user_type as any} />
+            <CopilotAgentButton context="transactions" />
         </div >
     );
 };
