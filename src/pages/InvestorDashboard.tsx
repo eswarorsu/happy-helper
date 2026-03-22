@@ -16,6 +16,8 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import ChatBox from "@/components/ChatBox";
 import { connectFirebase, getUnreadCount, subscribeToUnreadCount } from "@/lib/firebase";
 import { ProfileViewModal } from "@/components/ProfileViewModal";
+import { UnverifiedUserBanner } from "@/components/UnverifiedUserBanner";
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 // AnimatedGridBackground removed in redesign
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -915,6 +917,11 @@ const InvestorDashboard = () => {
                 </div>
               </div>
 
+              {/* Unverified User Engagement Banner */}
+              {!profile?.is_approved && (
+                <UnverifiedUserBanner userName={profile?.name} />
+              )}
+              
               {/* Inline metric stats row */}
               {/* Pearl Street Style Metrics Row */}
               <div className="mt-4 sm:mt-8 grid grid-cols-2 sm:grid-cols-3 gap-px bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
@@ -1403,6 +1410,7 @@ const InvestorDashboard = () => {
         onClose={() => setProfileToView(null)}
         profile={profileToView}
       />
+      <CopilotAgentButton context="dashboard" />
     </div>
   );
 };
