@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Rocket, FileText, TrendingUp, Bot } from "lucide-react";
+import BotAvatar from "@/components/ui/BotAvatar";
 
 const COPILOT_URL = "https://innovestor-copilot.vercel.app/";
 
@@ -66,11 +67,9 @@ export function LandingCopilotWidget() {
                 className="relative flex items-center justify-center p-0 overflow-hidden w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg hover:shadow-xl cursor-pointer pointer-events-auto transition-all group"
             >
                 {/* Copilot icon */}
-                <img
-                    src="/copilot-agent-icon.jpg"
-                    alt="AI Copilot"
-                    className="w-full h-full object-cover scale-110 mix-blend-multiply"
-                />
+                <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                    <BotAvatar className="w-full h-full scale-110" />
+                </div>
             </motion.button>
         </div>
     );

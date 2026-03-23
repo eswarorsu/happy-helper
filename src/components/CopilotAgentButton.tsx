@@ -4,6 +4,7 @@ import {
     Rocket, MessageCircle, FileText, ShoppingCart, 
     Sparkles, Search, Store, Handshake, Wallet, UserCircle, Key 
 } from "lucide-react";
+import BotAvatar from "@/components/ui/BotAvatar";
 
 type CopilotContext = "pitch" | "chatbox" | "weekly-log" | "product-launch" | "dashboard" | "landing" | "marketplace" | "product-marketplace" | "dealroom" | "transactions" | "profile" | "auth";
 
@@ -62,8 +63,8 @@ export function CopilotAgentButton({
                 aria-label="Open AI Copilot"
                 title="Open Innovestor Copilot"
             >
-                <div className="w-5 h-5 rounded-full overflow-hidden shrink-0">
-                    <img src="/copilot-agent-icon.jpg" alt="AI" className="w-full h-full object-cover mix-blend-multiply" />
+                <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-slate-900 border border-slate-700">
+                    <BotAvatar className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] sm:text-xs font-bold text-slate-700 whitespace-nowrap flex items-center gap-1">Ask Copilot <Sparkles className="w-3 h-3 text-amber-500" /></span>
             </motion.button>
@@ -114,11 +115,9 @@ export function CopilotAgentButton({
                 className="relative flex items-center justify-center p-0 overflow-hidden w-14 h-14 sm:w-16 sm:h-16 cursor-pointer pointer-events-auto group rounded-full shadow-lg hover:shadow-xl transition-all"
             >
                 {/* Copilot icon */}
-                <img
-                    src="/copilot-agent-icon.jpg"
-                    alt="AI Copilot"
-                    className="w-full h-full object-cover mix-blend-multiply"
-                />
+                <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                    <BotAvatar className="w-full h-full scale-110" />
+                </div>
             </motion.button>
         </div>
     );
