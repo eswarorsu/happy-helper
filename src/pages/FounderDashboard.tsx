@@ -1824,7 +1824,7 @@ const FounderDashboard = () => {
                 )}
             </AnimatePresence>
 
-            <CopilotAgentButton context="dashboard" />
+            {!selectedChat && <CopilotAgentButton context="dashboard" />}
             <ProfileViewModal isOpen={!!profileToView} onClose={() => setProfileToView(null)} profile={profileToView} />
         </div>
     );

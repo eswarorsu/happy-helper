@@ -1410,7 +1410,7 @@ const InvestorDashboard = () => {
         onClose={() => setProfileToView(null)}
         profile={profileToView}
       />
-      <CopilotAgentButton context="dashboard" />
+      {!selectedChat && <CopilotAgentButton context="dashboard" />}
     </div>
   );
 };

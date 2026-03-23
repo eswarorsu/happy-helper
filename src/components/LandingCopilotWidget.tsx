@@ -12,17 +12,8 @@ const QUESTIONS = [
 ];
 
 export function LandingCopilotWidget() {
-    const [showQuestion, setShowQuestion] = useState(true);
+    const [showQuestion, setShowQuestion] = useState(false);
     const [questionIndex, setQuestionIndex] = useState(0);
-
-    // Initial sequence: Show for 2 seconds, then disappear
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowQuestion(false);
-        }, 3000); // 3 seconds total (1s entrance + 2s visibility)
-
-        return () => clearTimeout(timer);
-    }, []);
 
     // Also cycle questions occasionally if hovered or periodically (optional)
     useEffect(() => {
@@ -78,7 +69,7 @@ export function LandingCopilotWidget() {
                 <img
                     src="/copilot-agent-icon.jpg"
                     alt="AI Copilot"
-                    className="w-full h-full object-cover scale-110"
+                    className="w-full h-full object-cover scale-110 mix-blend-multiply"
                 />
             </motion.button>
         </div>

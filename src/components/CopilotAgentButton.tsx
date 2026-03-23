@@ -45,16 +45,8 @@ export function CopilotAgentButton({
     inline = false,
     className = "",
 }: CopilotAgentButtonProps) {
-    const [showBubble, setShowBubble] = useState(true);
+    const [showBubble, setShowBubble] = useState(false);
     const message = CONTEXT_MESSAGES[context] || CONTEXT_MESSAGES["dashboard"];
-
-    useEffect(() => {
-        if (!inline) {
-            // Hide the bubble after 5 seconds
-            const timer = setTimeout(() => setShowBubble(false), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [inline]);
 
     const handleClick = () => {
         window.open(COPILOT_URL, "_blank", "noopener,noreferrer");
@@ -71,7 +63,7 @@ export function CopilotAgentButton({
                 title="Open Innovestor Copilot"
             >
                 <div className="w-5 h-5 rounded-full overflow-hidden shrink-0">
-                    <img src="/copilot-agent-icon.jpg" alt="AI" className="w-full h-full object-cover" />
+                    <img src="/copilot-agent-icon.jpg" alt="AI" className="w-full h-full object-cover mix-blend-multiply" />
                 </div>
                 <span className="text-[10px] sm:text-xs font-bold text-slate-700 whitespace-nowrap flex items-center gap-1">Ask Copilot <Sparkles className="w-3 h-3 text-amber-500" /></span>
             </motion.button>
@@ -125,7 +117,7 @@ export function CopilotAgentButton({
                 <img
                     src="/copilot-agent-icon.jpg"
                     alt="AI Copilot"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover mix-blend-multiply"
                 />
             </motion.button>
         </div>

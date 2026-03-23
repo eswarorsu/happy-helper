@@ -142,7 +142,7 @@ const ProductMarketplace = () => {
         }
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await (supabase as any)
                 .from("chat_requests")
                 .insert({
                     founder_id: founderId,

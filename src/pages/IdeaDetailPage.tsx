@@ -37,7 +37,7 @@ import { Equalizer } from "@/components/ui/equalizer";
 import { CheckCircle2, LogOut, User as UserIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { IdeaProductSection } from "@/components/IdeaProductSection";
-
+import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 /**
@@ -696,6 +696,7 @@ export default function IdeaDetailPage() {
                 onOpenChange={setIsLogSheetOpen}
                 isFounder={isFounder}
             />
+            <CopilotAgentButton context={isFounder ? "weekly-log" : "product-marketplace"} />
         </div>
     );
 }
