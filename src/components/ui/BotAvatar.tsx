@@ -25,7 +25,7 @@ export const BotAvatar: React.FC<BotAvatarProps> = ({ className }) => (
         </style>
         {/* Base glow */}
         <circle cx="50" cy="50" r="40" fill="#FDE047" opacity="0.2" filter="blur(10px)" />
-        
+
         {/* Background dark circle to give it a solid base */}
         <circle cx="50" cy="55" r="42" fill="#0F172A" />
         <circle cx="50" cy="55" r="41" fill="url(#bg-gradient)" />
@@ -38,11 +38,11 @@ export const BotAvatar: React.FC<BotAvatarProps> = ({ className }) => (
 
         {/* Head Base */}
         <path d="M20 45 A 30 30 0 0 1 80 45 C 80 68 65 75 50 75 C 35 75 20 68 20 45 Z" fill="url(#head-gradient)" />
-        
+
         {/* Ears */}
         <rect x="12" y="40" width="10" height="20" rx="4" fill="#0F172A" stroke="#FBBF24" strokeWidth="1.5" />
         <rect x="78" y="40" width="10" height="20" rx="4" fill="#0F172A" stroke="#FBBF24" strokeWidth="1.5" />
-        
+
         {/* Antenna */}
         <rect x="48" y="10" width="4" height="15" fill="#FBBF24" />
         <circle cx="50" cy="8" r="5" fill="#FEF08A" filter="url(#glow)" />
@@ -50,13 +50,13 @@ export const BotAvatar: React.FC<BotAvatarProps> = ({ className }) => (
 
         {/* Visor Area Base */}
         <rect x="25" y="38" width="50" height="24" rx="12" fill="#0F172A" />
-        
+
         {/* Left Eye */}
         <g className="eye-left">
             <circle cx="38" cy="50" r="4" fill="#FEF08A" filter="url(#glow)" />
             <circle cx="38" cy="50" r="2.5" fill="#FFFFFF" />
         </g>
-        
+
         {/* Right Eye */}
         <g className="eye-right">
             <circle cx="62" cy="50" r="4" fill="#FEF08A" filter="url(#glow)" />

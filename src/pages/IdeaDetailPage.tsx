@@ -194,29 +194,29 @@ export default function IdeaDetailPage() {
             {/* Founder Portal Header - ONLY for Founder */}
             {isFounder && (
                 <motion.header
-                    className="bg-background/80 backdrop-blur-md border-b border-border/60 px-6 py-4 sticky top-0 z-50 shrink-0"
+                    className="bg-background/80 backdrop-blur-md border-b border-border/60 px-3 sm:px-6 py-3 sm:py-4 sticky top-0 z-50 shrink-0"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                     <div className="max-w-[1800px] mx-auto flex items-center justify-between">
                         <motion.div
-                            className="flex items-center gap-3 cursor-pointer"
+                            className="flex items-center gap-2 sm:gap-3 cursor-pointer"
                             onClick={() => navigate("/founder-dashboard")}
                             whileHover={{ scale: 1.01 }}
                         >
-                            <Logo size="sm" />
+                            <Logo size="sm" className="w-6 h-6 sm:w-8 sm:h-8" />
                             <div>
-                                <h1 className="text-lg font-bold text-foreground tracking-tight">INNOVESTOR</h1>
-                                <p className="text-xs text-muted-foreground font-medium">Founder Portal</p>
+                                <h1 className="text-sm sm:text-lg font-bold text-foreground tracking-tight">INNOVESTOR</h1>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">Founder Portal</p>
                             </div>
                         </motion.div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                             {profile?.is_approved && (
-                                <div className="flex items-center gap-3 md:gap-3 ml-auto md:ml-0">
-                                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50">
-                                        <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
+                                <div className="flex items-center gap-1 sm:gap-3 ml-auto md:ml-0">
+                                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50 px-1.5 sm:px-2.5">
+                                        <CheckCircle2 className="w-3 h-3 sm:mr-1" /> <span className="hidden sm:inline">Verified</span>
                                     </Badge>
 
                                     {/* Timer hidden on mobile */}
@@ -243,13 +243,13 @@ export default function IdeaDetailPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleLogout}
-                                className="text-muted-foreground hover:text-red-600"
+                                className="text-muted-foreground hover:text-red-600 px-2 sm:px-3"
                             >
                                 <LogOut className="w-4 h-4" />
                             </Button>
-                            <Avatar className="w-10 h-10 border-2 border-white ring-2 ring-brand-yellow/20 shadow-md">
+                            <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-white ring-2 ring-brand-yellow/20 shadow-md">
                                 <AvatarImage src={profile?.avatar_url} />
-                                <AvatarFallback className="bg-brand-yellow text-brand-charcoal font-bold text-lg">
+                                <AvatarFallback className="bg-brand-yellow text-brand-charcoal font-bold text-sm sm:text-lg">
                                     {profile?.name?.charAt(0).toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
@@ -260,31 +260,31 @@ export default function IdeaDetailPage() {
 
             {!isFounder && (
                 <motion.header
-                    className="bg-background/80 backdrop-blur-md border-b border-border/60 px-6 py-4 sticky top-0 z-50 shrink-0"
+                    className="bg-background/80 backdrop-blur-md border-b border-border/60 px-3 sm:px-6 py-3 sm:py-4 sticky top-0 z-50 shrink-0"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                     <div className="max-w-[1800px] mx-auto flex items-center justify-between">
                         <motion.div
-                            className="flex items-center gap-3 cursor-pointer"
+                            className="flex items-center gap-2 sm:gap-3 cursor-pointer"
                             onClick={() => navigate("/investor-dashboard")}
                             whileHover={{ scale: 1.01 }}
                         >
-                            <Logo size="sm" />
+                            <Logo size="sm" className="w-6 h-6 sm:w-8 sm:h-8" />
                             <div>
-                                <h1 className="text-lg font-bold text-foreground tracking-tight">INNOVESTOR</h1>
-                                <p className="text-xs text-muted-foreground font-medium">Idea Spotlight</p>
+                                <h1 className="text-sm sm:text-lg font-bold text-foreground tracking-tight">INNOVESTOR</h1>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">Idea Spotlight</p>
                             </div>
                         </motion.div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => navigate("/marketplace")}
-                                className="rounded-xl font-bold border-slate-200"
+                                className="rounded-xl font-bold border-slate-200 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                             >
-                                <Search className="w-4 h-4 mr-2" /> Browse More
+                                <Search className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Browse <span className="hidden sm:inline">More</span>
                             </Button>
                         </div>
                     </div>
@@ -293,11 +293,11 @@ export default function IdeaDetailPage() {
 
             {/* Sub-header with Back Button and Idea Badges */}
             <div className={cn(
-                "bg-white border-b border-slate-200 px-6 py-3 text-slate-900 shadow-sm sticky z-40 transition-all duration-300",
-                "top-[73px]"
+                "bg-white border-b border-slate-200 px-4 sm:px-6 py-2 sm:py-3 text-slate-900 shadow-sm sticky z-40 transition-all duration-300",
+                "top-[60px] sm:top-[73px]"
             )}>
-                <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+                <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <Button
                             variant="ghost"
                             size="sm"
@@ -353,15 +353,15 @@ export default function IdeaDetailPage() {
             </div>
 
             {/* Main Content - Scrollable */}
-            <main className="max-w-4xl mx-auto px-6 py-8">
+            <main className="max-w-4xl mx-auto px-4 py-4 sm:py-6 sm:px-6 sm:py-8">
                 {activeDetailTab === "details" ? (
-                    <div className="space-y-8">
+                    <div className="space-y-5 sm:space-y-8">
                         {/* Section 1: Title & Domain */}
-                        <section className="mb-6">
-                            <Badge className="bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 border-none font-black text-[10px] tracking-widest mb-4">
+                        <section className="mb-4 sm:mb-6">
+                            <Badge className="bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 border-none font-black text-[10px] tracking-widest mb-3 sm:mb-4">
                                 {idea.domain}
                             </Badge>
-                            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">{idea.title}</h1>
+                            <h1 className="text-2xl sm:text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3 sm:mb-4">{idea.title}</h1>
                             <div className="flex items-center gap-3">
                                 <Avatar className="w-8 h-8 border border-slate-200">
                                     <AvatarFallback className="bg-slate-100 text-slate-600 font-bold text-xs">{idea.founder?.name?.charAt(0)}</AvatarFallback>
@@ -373,32 +373,32 @@ export default function IdeaDetailPage() {
                         </section>
 
                         {/* Section 2: Problem Statement */}
-                        <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-4">
+                        <section className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                 <Target className="w-4 h-4 text-brand-yellow" />
                                 <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Problem Statement
                                 </h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed text-base">{problemStatement}</p>
+                            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{problemStatement}</p>
                         </section>
 
                         {/* Section 3: Solution / Idea Explanation */}
-                        <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-4">
+                        <section className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                 <Lightbulb className="w-4 h-4 text-brand-yellow fill-brand-yellow" />
                                 <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Solution / Idea
                                 </h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed whitespace-pre-line text-base">
+                            <p className="text-slate-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                                 {solutionExplanation}
                             </p>
                         </section>
 
                         {/* Section 4: Market & Domain Relevance */}
-                        <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-5">
+                        <section className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+                            <div className="flex items-center gap-2 mb-3 sm:mb-5">
                                 <BarChart3 className="w-4 h-4 text-brand-yellow" />
                                 <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Market & Domain Relevance
@@ -451,14 +451,14 @@ export default function IdeaDetailPage() {
                         </section>
 
                         {/* Section 5: Business Model */}
-                        <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-4">
+                        <section className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                 <FileText className="w-4 h-4 text-brand-yellow" />
                                 <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
                                     Business Model
                                 </h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed text-base">
+                            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
                                 Business model details are available in the pitch deck. Key metrics and
                                 revenue projections can be discussed after connecting with the founder.
                             </p>
@@ -487,8 +487,8 @@ export default function IdeaDetailPage() {
                         </section>
 
                         {/* Section 6: Weekly Progress */}
-                        <section className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-                            <div className="flex items-center justify-between mb-4">
+                        <section className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4">
                                 <div className="flex items-center gap-2">
                                     <Rocket className="w-4 h-4 text-brand-yellow fill-brand-yellow" />
                                     <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
@@ -559,11 +559,11 @@ export default function IdeaDetailPage() {
 
                         {/* Section 8: External Links */}
                         {/* Section 8: External Links */}
-                        <section className="border border-slate-800 rounded-2xl p-6 bg-black text-white shadow-lg overflow-hidden relative">
+                        <section className="border border-slate-800 rounded-2xl p-4 sm:p-6 bg-black text-white shadow-lg overflow-hidden relative">
                             {/* Subtle gradient effect */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-800/20 to-transparent rounded-bl-3xl pointer-events-none" />
 
-                            <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-5 flex items-center gap-2 relative z-10">
+                            <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 sm:mb-5 flex items-center gap-2 relative z-10">
                                 <LinkIcon className="w-4 h-4 text-slate-400" />
                                 External Links
                             </h2>
@@ -626,7 +626,7 @@ export default function IdeaDetailPage() {
                                 )}
 
                                 {!idea.media_url && !idea.website_url && !idea.founder?.linkedin_profile && (
-                                    <div className="text-center py-8 px-4 border border-dashed border-slate-800 rounded-xl">
+                                    <div className="text-center py-5 sm:py-8 px-4 border border-dashed border-slate-800 rounded-xl">
                                         <p className="text-slate-500 italic text-sm">
                                             No external links provided.
                                         </p>
@@ -674,9 +674,9 @@ export default function IdeaDetailPage() {
                         )}
                     </div>
                 ) : (
-                    <div className="space-y-8">
+                    <div className="space-y-5 sm:space-y-8">
                         {/* Product Launch Section */}
-                        <div className="text-center mb-8">
+                        <div className="text-center mb-5 sm:mb-8">
                             <h2 className="text-2xl font-black text-slate-900 mb-2">Developed Products</h2>
                             <p className="text-slate-500">Live products and MVPs launched under this venture.</p>
                         </div>
@@ -696,7 +696,7 @@ export default function IdeaDetailPage() {
                 onOpenChange={setIsLogSheetOpen}
                 isFounder={isFounder}
             />
-            <CopilotAgentButton context={isFounder ? "weekly-log" : "product-marketplace"} />
+            {!isLogSheetOpen && <CopilotAgentButton context={isFounder ? "weekly-log" : "product-marketplace"} />}
         </div>
     );
 }

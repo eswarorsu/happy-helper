@@ -158,7 +158,7 @@ const AnimatedCounter3D = ({ target, label, icon: Icon, suffix = "+" }: {
       <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 bg-brand-yellow/15">
         <Icon className="w-7 h-7 text-brand-yellow" strokeWidth={1.5} />
       </div>
-      <div className="text-4xl md:text-5xl font-bold mb-2 text-brand-yellow">
+      <div className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold mb-2 text-brand-yellow">
         {count.toLocaleString()}{suffix}
       </div>
       <div className="text-sm font-medium tracking-wide uppercase text-muted-foreground">
@@ -310,7 +310,7 @@ const TestimonialCard3D = ({ name, role, content, delay }: {
         <Quote className="w-8 h-8 mb-4 text-brand-yellow" strokeWidth={1.5} />
 
         {/* Content */}
-        <p className="text-slate-200 font-medium leading-relaxed mb-6 text-sm">
+        <p className="text-slate-200 font-medium leading-relaxed mb-4 sm:mb-6 text-sm">
           &ldquo;{content}&rdquo;
         </p>
 
@@ -342,7 +342,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }: {
   >
     <button
       onClick={onClick}
-      className="flex justify-between items-center w-full py-6 text-left group"
+      className="flex justify-between items-center w-full py-4 sm:py-6 text-left group"
     >
       <span className="text-lg font-medium pr-4 text-white">{question}</span>
       <ChevronDown
@@ -517,7 +517,7 @@ const Landing = () => {
                 gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.2 });
               }
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8 text-sm font-medium border backdrop-blur-md border-brand-yellow/60 bg-brand-yellow/20 text-brand-yellow shadow-lg shadow-brand-yellow/20 alive-float-slow alive-glow"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-5 sm:mb-8 text-sm font-medium border backdrop-blur-md border-brand-yellow/60 bg-brand-yellow/20 text-brand-yellow shadow-lg shadow-brand-yellow/20 alive-float-slow alive-glow"
           >
             <Sparkles className="w-4 h-4" />
             Where Innovation Meets Investment
@@ -525,7 +525,7 @@ const Landing = () => {
 
           {/* Headline with 3D text effect */}
           <h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5 sm:mb-8 leading-[1.05]"
+            className="text-2xl sm:text-3xl sm:text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5 sm:mb-8 leading-[1.05]"
             style={{
               textShadow: '0 0 60px rgba(239, 191, 4, 0.3)'
             }}
@@ -564,7 +564,7 @@ const Landing = () => {
 
           {/* Subtitle */}
           <p
-            className="text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed text-muted-foreground"
+            className="text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-5 sm:mb-8 sm:mb-12 leading-relaxed text-muted-foreground"
           >
             INNOVESTOR bridges the gap between visionary founders and strategic investors.
             Showcase your ideas, discover opportunities, and make deals - all in one platform.
@@ -578,7 +578,7 @@ const Landing = () => {
               <div className="alive-float"
               >
                 <Button
-                  className="text-sm sm:text-base font-semibold rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto text-brand-charcoal bg-brand-yellow hover:scale-105 transition-all duration-300 shadow-xl shadow-brand-yellow/30"
+                  className="text-sm sm:text-base font-semibold rounded-full px-4 sm:px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto text-brand-charcoal bg-brand-yellow hover:scale-105 transition-all duration-300 shadow-xl shadow-brand-yellow/30"
                 >
                   Get Started - It's Free
                   <ChevronRight className="ml-2 w-5 h-5" />
@@ -590,7 +590,7 @@ const Landing = () => {
               >
                 <Button
                   variant="outline"
-                  className="bg-transparent/5 backdrop-blur-sm text-sm sm:text-base font-medium rounded-full px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all duration-300 hover:bg-white/10"
+                  className="bg-transparent/5 backdrop-blur-sm text-sm sm:text-base font-medium rounded-full px-4 sm:px-6 sm:px-10 py-5 sm:py-6 w-full sm:w-auto transition-all duration-300 hover:bg-white/10"
                   style={{
                     borderColor: 'rgba(255,255,255,0.15)',
                     color: '#94a3b8',
@@ -640,13 +640,13 @@ const Landing = () => {
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               How It Works
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               From idea to investment<br />in four simple steps
             </h2>
           </div>
 
           {/* Steps */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 sm:gap-10 relative">
             {/* Connector Line (desktop only) */}
             <div className="hidden md:block absolute top-10 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-transparent via-brand-yellow/40 to-transparent" />
 
@@ -671,7 +671,7 @@ const Landing = () => {
       {/* ================================================================ */}
       <section id="for-founders" className="py-10 sm:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-3 sm:gap-6 sm:gap-16 items-center">
             {/* Left Content */}
             <div>
               <span className="inline-block text-xs sm:text-sm font-bold tracking-widest uppercase mb-2 sm:mb-4 text-brand-yellow">
@@ -695,7 +695,7 @@ const Landing = () => {
 
             {/* Right Visual - Professional Dashboard Preview */}
             <div className="relative">
-              <Card className="p-6 bg-white border reveal-on-scroll reveal-item alive-float-slow" style={{ borderColor: 'rgba(0,0,0,0.06)', boxShadow: '0 20px 50px rgba(0,0,0,0.08)' }}>
+              <Card className="p-4 sm:p-6 bg-white border reveal-on-scroll reveal-item alive-float-slow" style={{ borderColor: 'rgba(0,0,0,0.06)', boxShadow: '0 20px 50px rgba(0,0,0,0.08)' }}>
 
                 {/* Main Stat Card */}
                 <div className="flex items-center justify-between p-5 rounded-xl bg-slate-50 mb-4 border border-brand-yellow">
@@ -756,10 +756,10 @@ const Landing = () => {
       {/* ================================================================ */}
       <section id="for-investors" className="py-10 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-3 sm:gap-6 sm:gap-16 items-center">
             {/* Left Visual - Professional Dark Dashboard */}
             <div className="order-2 lg:order-1 relative">
-              <Card className="p-6 bg-primary border-2 border-brand-yellow shadow-sm reveal-on-scroll reveal-item alive-float-slow">
+              <Card className="p-4 sm:p-6 bg-primary border-2 border-brand-yellow shadow-sm reveal-on-scroll reveal-item alive-float-slow">
                 <CardContent className="p-0">
                   {/* Portfolio Value */}
                   <div className="flex items-center justify-between p-5 rounded-xl mb-4 border border-brand-yellow" style={{ background: 'rgba(0,0,0,0.08)' }}>
@@ -852,11 +852,11 @@ const Landing = () => {
       {/* ================================================================ */}
       <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-background">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 sm:mb-14">
+          <div className="text-center mb-5 sm:mb-8 sm:mb-14">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               Platform Features
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Everything you need,<br />nothing you don't
             </h2>
           </div>
@@ -877,8 +877,8 @@ const Landing = () => {
       {/* ================================================================ */}
       <section className="py-10 sm:py-20 px-4 sm:px-6 text-white bg-brand-charcoal">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+          <div className="text-center mb-5 sm:mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
               Growing <span className="text-brand-yellow">every day</span>
             </h2>
           </div>
@@ -896,11 +896,11 @@ const Landing = () => {
       {/* ================================================================ */}
       <section className="py-10 sm:py-20 px-4 sm:px-6 bg-brand-charcoal">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center mb-5 sm:mb-8 sm:mb-12">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               Testimonials
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
               What our community says
             </h2>
           </div>
@@ -937,7 +937,7 @@ const Landing = () => {
       {/* ================================================================ */}
       {/* COLLEGE MARQUEE */}
       {/* ================================================================ */}
-      <section className="py-6 sm:py-10 overflow-hidden bg-background">
+      <section className="py-4 sm:py-6 sm:py-10 overflow-hidden bg-background">
         <div className="text-center mb-4 sm:mb-6 px-4 sm:px-6">
           <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-3 text-brand-yellow">
             Our Network
@@ -980,11 +980,11 @@ const Landing = () => {
       {/* ================================================================ */}
       <section id="faq" className="py-10 sm:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center mb-5 sm:mb-8 sm:mb-12">
             <span className="inline-block text-sm font-semibold tracking-widest uppercase mb-4 text-brand-yellow">
               FAQ
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
               Got questions?
             </h2>
           </div>
@@ -1013,10 +1013,10 @@ const Landing = () => {
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto reveal-on-scroll reveal-item">
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white mb-4 sm:mb-6">
             Ready to build the future?
           </h2>
-          <p className="text-sm sm:text-lg mb-6 sm:mb-10 max-w-xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg mb-4 sm:mb-6 sm:mb-10 max-w-xl mx-auto text-muted-foreground">
             Join hundreds of founders and investors already using INNOVESTOR
             to connect, invest, and grow together.
           </p>

@@ -184,7 +184,7 @@ const ProductLaunch = () => {
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 py-4 px-6">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 py-4 px-4 sm:px-6">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="sm" onClick={() => navigate("/founder-dashboard")} className="hidden md:flex">
@@ -274,38 +274,38 @@ const ProductLaunch = () => {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-10">
                     <motion.div 
                         whileHover={{ y: -5 }}
-                        className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm"
+                        className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm"
                     >
                         <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
                             <ShoppingBag className="w-6 h-6 text-blue-600" />
                         </div>
                         <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Products</h3>
-                        <p className="text-3xl font-black mt-1">{products.length}</p>
+                        <p className="text-2xl sm:text-3xl font-black mt-1">{products.length}</p>
                     </motion.div>
                     <motion.div 
                         whileHover={{ y: -5 }}
-                        className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm"
+                        className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm"
                     >
                         <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4">
                             <TrendingUp className="w-6 h-6 text-emerald-600" />
                         </div>
                         <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Market Visiblity</h3>
-                        <p className="text-3xl font-black mt-1">Founders Only</p>
+                        <p className="text-2xl sm:text-3xl font-black mt-1">Founders Only</p>
                     </motion.div>
                     <motion.div 
                         whileHover={{ y: -5 }}
-                        className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm"
+                        className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm"
                     >
                         <div className="w-12 h-12 bg-brand-yellow/10 rounded-2xl flex items-center justify-center mb-4">
                             <BarChart3 className="w-6 h-6 text-brand-charcoal" />
                         </div>
                         <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Avg. Listing Price</h3>
-                        <p className="text-3xl font-black mt-1">
+                        <p className="text-2xl sm:text-3xl font-black mt-1">
                             ${products.length > 0 
                                 ? (products.reduce((acc, p) => acc + p.price, 0) / products.length).toFixed(2) 
                                 : "0.00"}
@@ -314,7 +314,7 @@ const ProductLaunch = () => {
                 </div>
 
                 {/* Products List */}
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-4 sm:mb-6 flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-black text-slate-900">Your Product Fleet</h2>
                         <p className="text-slate-500">Manage your marketing place listings</p>
@@ -327,7 +327,7 @@ const ProductLaunch = () => {
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6"
                         >
                             {products.map((product) => (
                                 <motion.div key={product.id} variants={itemVariants}>
@@ -386,11 +386,11 @@ const ProductLaunch = () => {
                             animate={{ opacity: 1 }}
                             className="bg-white rounded-[40px] border-2 border-dashed border-slate-200 py-32 flex flex-col items-center justify-center text-center"
                         >
-                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                                 <Rocket className="w-10 h-10 text-slate-300" />
                             </div>
                             <h3 className="text-2xl font-black text-slate-900 mb-2">Ready to Launch?</h3>
-                            <p className="text-slate-500 max-w-sm mb-8">
+                            <p className="text-slate-500 max-w-sm mb-5 sm:mb-8">
                                 List your MVP, SaaS, or any product to showcase it to other founders and investors in the marketplace.
                             </p>
                             <Button 

@@ -263,7 +263,7 @@ const VentureCard = ({
         >
             <motion.div
                 variants={cardHoverVariants}
-                className="bg-white border border-border/60 rounded-3xl p-6 hover:border-border transition-all duration-300 h-full flex flex-col text-slate-900"
+                className="bg-white border border-border/60 rounded-3xl p-4 sm:p-6 hover:border-border transition-all duration-300 h-full flex flex-col text-slate-900"
                 style={{
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)"
                 }}
@@ -309,7 +309,7 @@ const VentureCard = ({
                     </div>
                 </div>
 
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-6 flex-1 px-1">{idea.description}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4 sm:mb-6 flex-1 px-1">{idea.description}</p>
 
                 <div className="space-y-4 mt-auto">
                     <div className="flex items-center justify-between text-sm">
@@ -1280,7 +1280,7 @@ const FounderDashboard = () => {
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center h-48 p-6 text-center">
+                                            <div className="flex flex-col items-center justify-center h-48 p-4 sm:p-6 text-center">
                                                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-3">
                                                     <Bell className="w-6 h-6 text-muted-foreground/50" />
                                                 </div>
@@ -1467,7 +1467,7 @@ const FounderDashboard = () => {
                                 </motion.div>
 
                                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                    <Button onClick={handleNewVentureNavigation} className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal shadow-lg shadow-brand-yellow/20 rounded-xl h-11 px-6 font-bold">
+                                    <Button onClick={handleNewVentureNavigation} className="bg-brand-yellow hover:bg-brand-yellow/90 text-brand-charcoal shadow-lg shadow-brand-yellow/20 rounded-xl h-11 px-4 sm:px-6 font-bold">
                                         <Plus className="w-5 h-5 mr-2" /> New Venture
                                     </Button>
                                 </motion.div>
@@ -1475,7 +1475,7 @@ const FounderDashboard = () => {
                         </motion.div>
 
                         {/* Metrics Grid */}
-                        <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8" variants={containerVariants}>
+                        <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-6 sm:mb-8" variants={containerVariants}>
                             <MetricCard title="Total Raised" value={`$${totalRaised.toLocaleString()}`} subtitle="Across all ventures" icon={DollarSign} accentColor="emerald"
                                 trend={totalRaised > 0 ? { value: "+12%", positive: true } : undefined} index={0} />
                             <MetricCard title="Active Ventures" value={ideas.length} subtitle="In your portfolio" icon={Lightbulb} accentColor="blue" index={1} />
@@ -1484,11 +1484,11 @@ const FounderDashboard = () => {
                         </motion.div>
 
                         {/* Analytics Charts */}
-                        <motion.div className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8" variants={containerVariants}>
+                        <motion.div className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6 sm:mb-8" variants={containerVariants}>
                             {/* Funding Overview Chart */}
                             <motion.div variants={itemVariants} className="lg:col-span-2 h-full">
-                                <div className="border border-border/60 bg-white rounded-3xl shadow-sm h-full overflow-hidden p-6 flex flex-col">
-                                    <div className="flex items-center justify-between mb-6">
+                                <div className="border border-border/60 bg-white rounded-3xl shadow-sm h-full overflow-hidden p-4 sm:p-6 flex flex-col">
+                                    <div className="flex items-center justify-between mb-4 sm:mb-6">
                                         <div>
                                             <h3 className="text-xl font-bold text-foreground">Funding Overview</h3>
                                             <p className="text-sm text-muted-foreground">Target vs Raised per venture</p>
@@ -1570,7 +1570,7 @@ const FounderDashboard = () => {
                                                             </PieChart>
                                                         </ResponsiveContainer>
                                                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                                            <span className="text-3xl font-bold text-foreground">{totalVentures}</span>
+                                                            <span className="text-2xl sm:text-3xl font-bold text-foreground">{totalVentures}</span>
                                                             <span className="text-xs text-muted-foreground font-medium">Ventures</span>
                                                         </div>
                                                     </div>
@@ -1640,7 +1640,7 @@ const FounderDashboard = () => {
                                             <motion.div className="text-center py-16" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                                                 <Building2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                                                 <h3 className="text-lg font-semibold text-foreground mb-2">No ventures yet</h3>
-                                                <p className="text-sm text-muted-foreground mb-6">Launch your first venture to start connecting with investors</p>
+                                                <p className="text-sm text-muted-foreground mb-4 sm:mb-6">Launch your first venture to start connecting with investors</p>
                                                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                                     <Button onClick={handleNewVentureNavigation} className="bg-indigo-600 hover:bg-indigo-700">
                                                         <Plus className="w-4 h-4 mr-2" /> Launch Venture
@@ -1703,18 +1703,18 @@ const FounderDashboard = () => {
                                         </div>
                                     </div>
                                 </DialogHeader>
-                                <motion.div className="space-y-6 pt-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                                <motion.div className="space-y-4 sm:space-y-6 pt-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                                     <div className="p-5 bg-white rounded-2xl border border-border/60">
                                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{viewingIdea.description}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <motion.div className="p-5 bg-white border border-border/60 rounded-2xl" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                                             <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">Target</p>
-                                            <p className="text-3xl font-black text-foreground">${viewingIdea.investment_needed.toLocaleString()}</p>
+                                            <p className="text-2xl sm:text-3xl font-black text-foreground">${viewingIdea.investment_needed.toLocaleString()}</p>
                                         </motion.div>
                                         <motion.div className="p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                                             <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider mb-1">Raised</p>
-                                            <p className="text-3xl font-black text-emerald-600">${viewingIdea.investment_received.toLocaleString()}</p>
+                                            <p className="text-2xl sm:text-3xl font-black text-emerald-600">${viewingIdea.investment_received.toLocaleString()}</p>
                                         </motion.div>
                                     </div>
                                     <div className="relative h-3 bg-secondary rounded-full overflow-hidden">

@@ -270,14 +270,14 @@ const Payment = () => {
                 <Button
                     variant="ghost"
                     onClick={() => navigate("/founder-dashboard")}
-                    className="mb-6 text-slate-500 hover:text-slate-700"
+                    className="mb-4 sm:mb-6 text-slate-500 hover:text-slate-700"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
                 </Button>
 
                 <Card className="border border-slate-200 shadow-xl bg-white rounded-3xl text-slate-900 overflow-hidden">
                     <CardHeader className="text-center pb-4">
-                        <div className="flex justify-center mb-6">
+                        <div className="flex justify-center mb-4 sm:mb-6">
                             <Logo size="md" />
                         </div>
                         <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
@@ -290,12 +290,12 @@ const Payment = () => {
 
                     <CardContent className="pt-4">
                         {paymentStarted ? (
-                            <div className="space-y-6 py-4">
+                            <div className="space-y-4 sm:space-y-6 py-4">
                                 <div className="flex flex-col items-center justify-center p-8 bg-background rounded-2xl border border-border">
                                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
                                         Verification Sent to {upiId}
                                     </p>
-                                    <div className="text-5xl font-bold text-[#111827] tabular-nums">
+                                    <div className="text-4xl sm:text-5xl font-bold text-[#111827] tabular-nums">
                                         {formatTime(timeLeft)}
                                     </div>
                                     <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider font-medium">Window closing soon</p>
@@ -316,7 +316,7 @@ const Payment = () => {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
                                 {/* Pricing Box */}
                                 <div className="bg-background rounded-2xl p-8 text-center border border-border relative">
                                     <div className="absolute top-4 right-4">
@@ -326,7 +326,7 @@ const Payment = () => {
                                     </div>
                                     <p className="text-slate-400 text-sm font-medium line-through mb-1">₹499/-</p>
                                     <div className="flex items-center justify-center gap-1 mb-2">
-                                        <span className="text-4xl font-bold text-[#111827]">₹1</span>
+                                        <span className="text-2xl sm:text-3xl sm:text-4xl font-bold text-[#111827]">₹1</span>
                                         <span className="text-slate-500 font-medium text-lg">/-</span>
                                     </div>
                                     <p className="text-slate-500 font-medium text-xs uppercase tracking-wider">Launch fee</p>
@@ -446,7 +446,7 @@ const Payment = () => {
                     </CardContent>
                 </Card>
 
-                <p className="text-center mt-6 text-slate-400 text-xs font-medium">
+                <p className="text-center mt-4 sm:mt-6 text-slate-400 text-xs font-medium">
                     By continuing, you agree to our{" "}
                     <a href="/terms" className="underline hover:text-slate-600">Terms of Service</a> and{" "}
                     <a href="/refund" className="underline hover:text-slate-600">Refund Policy</a>.

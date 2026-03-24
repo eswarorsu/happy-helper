@@ -152,12 +152,12 @@ export function IdeaProductSection({ ideaId, isFounder, founderId }: IdeaProduct
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-5 sm:space-y-8">
             {isFounder && (
                 <div className="flex justify-center">
                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl px-6 py-6 shadow-xl shadow-slate-200 h-auto gap-3">
+                            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl px-4 sm:px-6 py-4 sm:py-6 shadow-xl shadow-slate-200 h-auto gap-3">
                                 <Plus className="w-5 h-5" />
                                 Launch New {products.length > 0 ? 'Adjacent' : ''} Product
                             </Button>
@@ -241,7 +241,7 @@ export function IdeaProductSection({ ideaId, isFounder, founderId }: IdeaProduct
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                        className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6"
                     >
                         {products.map((product) => (
                             <motion.div key={product.id} variants={itemVariants}>
@@ -286,7 +286,7 @@ export function IdeaProductSection({ ideaId, isFounder, founderId }: IdeaProduct
                                         </p>
                                     </CardContent>
                                     {isFounder && (
-                                        <CardFooter className="pt-0 p-6 flex gap-2">
+                                        <CardFooter className="pt-0 p-4 sm:p-6 flex gap-2">
                                             <Button variant="outline" className="flex-1 rounded-xl h-10 border-slate-200 hover:bg-slate-50 font-bold">
                                                 <Edit2 className="w-3.5 h-3.5 mr-2" /> Edit
                                             </Button>
@@ -300,7 +300,7 @@ export function IdeaProductSection({ ideaId, isFounder, founderId }: IdeaProduct
                                         </CardFooter>
                                     )}
                                     {!isFounder && (
-                                        <CardFooter className="pt-0 p-6">
+                                        <CardFooter className="pt-0 p-4 sm:p-6">
                                             <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl h-11 transition-all">
                                                 Inquire Details
                                             </Button>
@@ -314,15 +314,15 @@ export function IdeaProductSection({ ideaId, isFounder, founderId }: IdeaProduct
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="bg-white rounded-[40px] border-2 border-dashed border-slate-200 py-24 flex flex-col items-center justify-center text-center px-6"
+                        className="bg-white rounded-[40px] border-2 border-dashed border-slate-200 py-24 flex flex-col items-center justify-center text-center px-4 sm:px-6"
                     >
-                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                             <Rocket className="w-10 h-10 text-slate-300" />
                         </div>
                         <h3 className="text-2xl font-black text-slate-900 mb-2">
                             {isFounder ? "No Products Launched Yet" : "No Live Products Available"}
                         </h3>
-                        <p className="text-slate-500 max-w-sm mb-8">
+                        <p className="text-slate-500 max-w-sm mb-5 sm:mb-8">
                             {isFounder
                                 ? "Launch an MVP or related product to show investors your execution capabilities."
                                 : "The founder hasn't listed any specific products for this idea yet."}

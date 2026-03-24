@@ -190,7 +190,7 @@ const ProductMarketplace = () => {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 py-4 px-6">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 py-4 px-4 sm:px-6">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="sm" onClick={() => navigate("/investor-dashboard")} className="hidden md:flex">
@@ -225,14 +225,14 @@ const ProductMarketplace = () => {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-6 py-10">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
                 {/* Intro Section */}
                 <div className="mb-12 text-center max-w-2xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Invest in tangible products</h2>
+                        <h2 className="text-2xl sm:text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-4">Invest in tangible products</h2>
                         <p className="text-slate-500 text-lg">
                             Explore what our founders are building. From innovative SaaS tools to physical prototypes,
                             see the value they're creating beyond the pitch deck.
@@ -247,7 +247,7 @@ const ProductMarketplace = () => {
                             key={cat}
                             variant={selectedCategory === cat ? "default" : "outline"}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`rounded-full px-6 font-bold h-10 capitalize ${selectedCategory === cat
+                            className={`rounded-full px-4 sm:px-6 font-bold h-10 capitalize ${selectedCategory === cat
                                 ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
                                 : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300"
                                 }`}
@@ -263,7 +263,7 @@ const ProductMarketplace = () => {
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8"
                     >
                         {filteredProducts.map(product => (
                             <motion.div key={product.id} variants={itemVariants}>
@@ -315,7 +315,7 @@ const ProductMarketplace = () => {
                                             </div>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="pt-0 p-6 flex gap-3">
+                                    <CardFooter className="pt-0 p-4 sm:p-6 flex gap-3">
                                         {getConnectionStatus(product.founder_id) === 'accepted' || getConnectionStatus(product.founder_id) === 'communicating' ? (
                                             <Button
                                                 className="flex-1 bg-brand-yellow text-brand-charcoal hover:bg-brand-yellow/80 font-bold rounded-2xl h-11 transition-all"
@@ -351,11 +351,11 @@ const ProductMarketplace = () => {
                     </motion.div>
                 ) : (
                     <div className="text-center py-20 bg-white rounded-[40px] border-2 border-dashed border-slate-200">
-                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                             <ShoppingBag className="w-10 h-10 text-slate-300" />
                         </div>
                         <h3 className="text-2xl font-black text-slate-900 mb-2">No products found</h3>
-                        <p className="text-slate-500 max-w-sm mx-auto mb-8">
+                        <p className="text-slate-500 max-w-sm mx-auto mb-5 sm:mb-8">
                             We couldn't find any products matching your criteria. Try adjusting your filters or search query.
                         </p>
                         <Button

@@ -209,7 +209,7 @@ const SubmitIdea = () => {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 md:pb-0">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-4 transition-all">
+            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 sm:px-6 py-4 transition-all">
                 <div className="max-w-6xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Logo size="sm" />
@@ -243,16 +243,16 @@ const SubmitIdea = () => {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-6xl mx-auto px-6 py-10">
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
                 <Button
                     variant="ghost"
                     onClick={() => navigate("/founder-dashboard")}
-                    className="mb-6 text-muted-foreground hover:text-foreground -ml-2"
+                    className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground -ml-2"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
                 </Button>
 
-                <div className="grid lg:grid-cols-3 gap-8">
+                <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
                     {/* Left Sidebar - Progress Steps */}
                     <div className="lg:col-span-1">
                         <Card className="border border-border shadow-sm sticky top-24 rounded-2xl bg-white">
@@ -310,7 +310,7 @@ const SubmitIdea = () => {
                                 <CardTitle className="text-xl font-bold text-foreground">{STEPS[currentStep - 1].title}</CardTitle>
                                 <CardDescription>{STEPS[currentStep - 1].subtitle}</CardDescription>
                             </CardHeader>
-                            <CardContent className="pt-6 space-y-6">
+                            <CardContent className="pt-6 space-y-4 sm:space-y-6">
                                 {/* Step 1: Basic Details */}
                                 {currentStep === 1 && (
                                     <>
@@ -364,7 +364,7 @@ const SubmitIdea = () => {
                                 {/* Step 2: Traction & Team */}
                                 {currentStep === 2 && (
                                     <>
-                                        <div className="grid md:grid-cols-2 gap-6">
+                                        <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                                             <div className="space-y-2">
                                                 <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                                                     <Users className="w-4 h-4 text-muted-foreground" />
@@ -418,7 +418,7 @@ const SubmitIdea = () => {
                                         <div className="border-t border-border/60 pt-6 mt-4">
                                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Contact & Location</p>
 
-                                            <div className="grid md:grid-cols-2 gap-6">
+                                            <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                                                 <div className="space-y-2">
                                                     <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                                                         <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -512,7 +512,7 @@ const SubmitIdea = () => {
                                             </div>
                                         </div>
 
-                                        <div className="grid md:grid-cols-2 gap-6">
+                                        <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                                             <div className="space-y-2">
                                                 <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                                                     <Linkedin className="w-4 h-4 text-muted-foreground" />

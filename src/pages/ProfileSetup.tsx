@@ -436,11 +436,11 @@ const ProfileSetup = () => {
 
         <div className="w-full max-w-4xl relative z-10">
           <div className="text-center mb-10 sm:mb-14">
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
               <Logo size="sm" />
               <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-3">
+            <h1 className="text-2xl sm:text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-3">
               How will you use Innovestor?
             </h1>
             <p className="text-slate-500 text-sm sm:text-base max-w-xl mx-auto">
@@ -448,18 +448,18 @@ const ProfileSetup = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-3xl mx-auto">
+          <div className="grid sm:grid-cols-2 gap-3 sm:gap-6 sm:gap-8 max-w-3xl mx-auto">
             {/* Founder Card */}
             <button
               onClick={() => navigate("/profile-setup?type=founder")}
-              className="group text-left bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-100 hover:border-amber-400 hover:shadow-2xl hover:shadow-amber-400/10 transition-all duration-300 relative overflow-hidden"
+              className="group text-left bg-white p-4 sm:p-6 sm:p-8 rounded-3xl border-2 border-slate-100 hover:border-amber-400 hover:shadow-2xl hover:shadow-amber-400/10 transition-all duration-300 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/5 group-hover:bg-amber-400/10 rounded-bl-[100px] transition-colors" />
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Briefcase className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">I am a Founder</h3>
-              <p className="text-sm font-medium text-slate-500 mb-6">
+              <p className="text-sm font-medium text-slate-500 mb-4 sm:mb-6">
                 I am building a startup, looking for funding, mentorship, or to share my MVP.
               </p>
               <div className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-600">
@@ -470,14 +470,14 @@ const ProfileSetup = () => {
             {/* Investor Card */}
             <button
               onClick={() => navigate("/profile-setup?type=investor")}
-              className="group text-left bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-100 hover:border-brand-charcoal hover:shadow-2xl hover:shadow-brand-charcoal/10 transition-all duration-300 relative overflow-hidden"
+              className="group text-left bg-white p-4 sm:p-6 sm:p-8 rounded-3xl border-2 border-slate-100 hover:border-brand-charcoal hover:shadow-2xl hover:shadow-brand-charcoal/10 transition-all duration-300 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-slate-100 group-hover:bg-slate-200/50 rounded-bl-[100px] transition-colors" />
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Target className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">I am an Investor</h3>
-              <p className="text-sm font-medium text-slate-500 mb-6">
+              <p className="text-sm font-medium text-slate-500 mb-4 sm:mb-6">
                 I am looking to discover, review, and invest in high-potential early-stage startups.
               </p>
               <div className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-700 group-hover:text-brand-charcoal">
@@ -505,7 +505,7 @@ const ProfileSetup = () => {
         <div className="hidden lg:flex w-72 flex-col justify-between fixed h-full z-20 bg-white border-r border-slate-100">
           <div className="p-7">
             {/* Logo */}
-            <div className="flex items-center gap-2.5 mb-8">
+            <div className="flex items-center gap-2.5 mb-5 sm:mb-8">
               <Logo size="sm" />
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mode === 'edit' ? 'Edit Profile' : 'Onboarding'}</p>
@@ -514,7 +514,7 @@ const ProfileSetup = () => {
             </div>
 
             {/* Progress bar */}
-            <div className="mb-8">
+            <div className="mb-5 sm:mb-8">
               <div className="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                 <span>Progress</span>
                 <span className="text-amber-600">{Math.round((step / 4) * 100)}%</span>
@@ -556,7 +556,7 @@ const ProfileSetup = () => {
         <div className="flex-1 lg:ml-72">
           <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-10 pt-8 sm:pt-12 lg:pt-16">
             {/* Mobile Progress */}
-            <div className="lg:hidden mb-6">
+            <div className="lg:hidden mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-bold text-slate-800">Step {step} of 4</span>
                 <span className="text-xs text-slate-400">{steps[step - 1].label}</span>
@@ -567,7 +567,7 @@ const ProfileSetup = () => {
             </div>
 
             {/* Step label on desktop */}
-            <div className="hidden lg:flex items-center gap-3 mb-6">
+            <div className="hidden lg:flex items-center gap-3 mb-4 sm:mb-6">
               <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">Step {step} of 4</span>
               <div className="h-px flex-1 bg-slate-200" />
               <span className="text-xs text-slate-400">{steps[step - 1].label}</span>
@@ -577,16 +577,16 @@ const ProfileSetup = () => {
               {/* Yellow top accent bar */}
               <div className="h-1 bg-gradient-to-r from-brand-yellow to-amber-400" />
 
-              <div className="p-6 sm:p-8 lg:p-10 min-h-[520px] flex flex-col justify-between">
+              <div className="p-4 sm:p-6 sm:p-8 lg:p-10 min-h-[520px] flex flex-col justify-between">
                 {/* --- STEP CONTENT --- */}
                 {step === 1 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Let's start with the basics</h2>
                       <p className="text-slate-500 mt-1.5 text-sm">Tell us a bit about yourself to personalise your experience.</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {/* Avatar Picker */}
                       <div className="flex items-center gap-5 p-4 rounded-2xl border border-slate-100 bg-slate-50">
                         <div className="relative shrink-0">
@@ -655,7 +655,7 @@ const ProfileSetup = () => {
                 )}
 
                 {step === 2 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Professional Info</h2>
                       <p className="text-slate-500 mt-1.5 text-sm">Help investors understand your background.</p>
@@ -717,7 +717,7 @@ const ProfileSetup = () => {
                 )}
 
                 {step === 3 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Contact & Socials</h2>
                       <p className="text-slate-500 mt-1.5 text-sm">How investors can reach and verify you.</p>
@@ -765,7 +765,7 @@ const ProfileSetup = () => {
 
                 {/* --- STEP 4: STARTUP CONTEXT --- */}
                 {step === 4 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Tell us about your startup</h2>
                       <p className="text-slate-500 mt-1.5 text-sm">Takes 60 seconds. You can update this anytime later.</p>
@@ -885,7 +885,7 @@ const ProfileSetup = () => {
                     </div>
 
                     {/* Decision Timeline + Funding Status side by side */}
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                       <div className="space-y-3">
                         <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Decision timeline</Label>
                         <div className="flex flex-wrap gap-2">
@@ -1011,7 +1011,7 @@ const ProfileSetup = () => {
           </div>
           <h1 className="text-2xl font-black text-foreground mb-10">Investor Profile</h1>
 
-          <div className="space-y-6 relative">
+          <div className="space-y-4 sm:space-y-6 relative">
             {/* Connecting Line */}
             <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border/60 z-0"></div>
 
@@ -1058,7 +1058,7 @@ const ProfileSetup = () => {
         <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-12 pt-8 sm:pt-12 lg:pt-20">
 
           {/* Mobile Progress */}
-          <div className="lg:hidden mb-6">
+          <div className="lg:hidden mb-4 sm:mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-bold text-foreground">Step {step} of 4</span>
               <span className="text-xs text-muted-foreground">{investorSteps[step - 1].label}</span>
@@ -1080,13 +1080,13 @@ const ProfileSetup = () => {
 
               {/* STEP 1: Personal Identity */}
               {step === 1 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
+                <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900">Let's verify your identity</h2>
                     <p className="text-slate-500 mt-2">Basic details to establish trust with founders.</p>
                   </div>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3 sm:gap-6">
                     <Avatar className="w-24 h-24 border-4 border-slate-50">
                       <AvatarImage src={formData.avatarUrl} className="object-cover" />
                       <AvatarFallback className="bg-slate-100 text-slate-400 text-2xl font-bold">
@@ -1105,7 +1105,7 @@ const ProfileSetup = () => {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">Full Legal Name <span className="text-red-500">*</span></Label>
                       <Input
@@ -1162,13 +1162,13 @@ const ProfileSetup = () => {
 
               {/* STEP 2: Professional Background */}
               {step === 2 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
+                <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900">Your professional background</h2>
                     <p className="text-slate-500 mt-2">Help founders understand your expertise.</p>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Add UPI ID for Investors */}
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">UPI ID <span className="text-slate-400 font-normal">(For receiving returns)</span></Label>
@@ -1184,7 +1184,7 @@ const ProfileSetup = () => {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">Investor Type <span className="text-red-500">*</span></Label>
                       <Select value={formData.investorType} onValueChange={(v) => handleInputChange("investorType", v)}>
@@ -1266,13 +1266,13 @@ const ProfileSetup = () => {
 
               {/* STEP 3: Investment Profile */}
               {step === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
+                <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900">Investment preferences</h2>
                     <p className="text-slate-500 mt-2">Help us match you with the right startups.</p>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">Investment Range <span className="text-red-500">*</span></Label>
                       <Select value={formData.investmentRange} onValueChange={(v) => handleInputChange("investmentRange", v)}>
@@ -1366,13 +1366,13 @@ const ProfileSetup = () => {
 
               {/* STEP 4: Verification */}
               {step === 4 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
+                <div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 flex-1">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900">Contact & Verification</h2>
                     <p className="text-slate-500 mt-2">Final details for secure communication.</p>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">Email</Label>
                       <Input
@@ -1409,7 +1409,7 @@ const ProfileSetup = () => {
                     <p className="text-xs text-slate-500">For KYC purposes (last 4 chars)</p>
                   </div>
 
-                  <div className="p-6 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/30">
+                  <div className="p-4 sm:p-6 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/30">
                     <label className="flex items-start gap-4 cursor-pointer">
                       <input
                         type="checkbox"

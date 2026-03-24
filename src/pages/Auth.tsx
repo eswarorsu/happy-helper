@@ -74,13 +74,13 @@ const EmailVerificationScreen = ({ email, userType, onResend, onBack }: EmailVer
         {/* Back button */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors text-sm"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-5 sm:mb-8 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" /> Back to sign in
         </button>
 
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-5 sm:mb-8">
           <Logo size="sm" />
           <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
         </div>
@@ -88,25 +88,25 @@ const EmailVerificationScreen = ({ email, userType, onResend, onBack }: EmailVer
         <Card className="bg-white/80 backdrop-blur-sm border-border/50 shadow-xl shadow-black/[0.03]">
           <CardContent className="p-7 sm:p-8">
             {/* Icon */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4 sm:mb-6">
               <div className="w-20 h-20 rounded-full bg-brand-yellow/10 border-2 border-brand-yellow/30 flex items-center justify-center">
                 <Mail className="w-9 h-9 text-brand-yellow" />
               </div>
             </div>
 
             <h1 className="text-2xl font-bold text-center tracking-tight mb-2">Check your inbox</h1>
-            <p className="text-muted-foreground text-center text-sm mb-6">
+            <p className="text-muted-foreground text-center text-sm mb-4 sm:mb-6">
               We've sent a verification link to
             </p>
 
             {/* Email display */}
-            <div className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-6">
+            <div className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-4 sm:mb-6">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
               <span className="font-semibold text-slate-800 text-sm break-all">{email}</span>
             </div>
 
             {/* Instructions */}
-            <ol className="space-y-3 mb-8">
+            <ol className="space-y-3 mb-5 sm:mb-8">
               {[
                 "Open your email app (Gmail, Outlook, etc.)",
                 "Find the email from INNOVESTOR — check Spam / Junk too",
@@ -166,7 +166,7 @@ const EmailVerificationScreen = ({ email, userType, onResend, onBack }: EmailVer
         </Card>
 
         {/* Already verified link */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-4 sm:mt-6">
           Already verified?{" "}
           <Link to="/auth?mode=login" className="font-semibold text-foreground underline underline-offset-2 hover:text-brand-yellow transition-colors">
             Sign in
@@ -550,7 +550,7 @@ const Auth = () => {
         <div className="w-full max-w-sm sm:max-w-[400px] relative z-10 transition-all">
 
           {/* Brand */}
-          <div className="mb-8">
+          <div className="mb-5 sm:mb-8">
             <div className="flex items-center gap-3 mb-3">
               <Logo size="sm" />
               <span className="text-xl font-bold tracking-tight">INNOVESTOR</span>
@@ -839,7 +839,7 @@ const Auth = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-yellow/10 rounded-full blur-3xl" />
 
         <div className="relative z-10">
-          <h2 className="text-white text-3xl xl:text-4xl font-bold tracking-tight leading-tight">
+          <h2 className="text-white text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight leading-tight">
             Where ideas meet <br />
             <span className="text-brand-yellow">investment.</span>
           </h2>
@@ -865,7 +865,7 @@ const Auth = () => {
         </div>
 
         {/* Bottom quote */}
-        <div className="relative z-10 mt-8 pt-6 border-t border-white/10">
+        <div className="relative z-10 mt-5 sm:mt-8 pt-6 border-t border-white/10">
           <p className="text-white/60 text-xs leading-relaxed italic">
             "INNOVESTOR transformed how we connect with investors. Our funding round closed 3x faster."
           </p>

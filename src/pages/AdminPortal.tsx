@@ -227,7 +227,7 @@ const AdminPortal = () => {
         <aside
           className={`bg-[#020617] border-r border-slate-800 transition-all duration-300 flex flex-col z-50 ${isSidebarOpen ? 'fixed inset-y-0 left-0 w-64 lg:relative' : 'hidden lg:flex w-20'}`}
         >
-          <div className="p-6 flex items-center justify-between border-b border-slate-800 h-20">
+          <div className="p-4 sm:p-6 flex items-center justify-between border-b border-slate-800 h-20">
             <div className="flex items-center gap-3">
               <Logo size="sm" />
               {isSidebarOpen && (
@@ -296,7 +296,7 @@ const AdminPortal = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 sm:gap-6">
               <div className="relative group hidden md:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
@@ -328,7 +328,7 @@ const AdminPortal = () => {
           </header>
 
           {/* Viewport */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6 sm:space-y-8 custom-scrollbar">
 
             <AnimatePresence mode="wait">
               {activeTab === 'overview' && (
@@ -336,10 +336,10 @@ const AdminPortal = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="space-y-8"
+                  className="space-y-5 sm:space-y-8"
                 >
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {[
                       { label: "Platform Revenue", value: `₹${payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString()}`, icon: DollarSign, trend: "+12.5%", color: "yellow" },
                       { label: "Elite Investors", value: users.filter(u => u.user_type === 'investor').length, icon: TrendingUp, trend: "+3 this week", color: "emerald" },
@@ -377,7 +377,7 @@ const AdminPortal = () => {
                           ))}
                         </div>
                       </CardHeader>
-                      <CardContent className="p-6 h-[380px]">
+                      <CardContent className="p-4 sm:p-6 h-[380px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={payments.filter(p => p.created_at).slice(0, 15).reverse().map(p => ({ date: format(new Date(p.created_at), 'MMM dd'), amount: Number(p.amount) || 0 }))}>
                             <defs>
@@ -400,9 +400,9 @@ const AdminPortal = () => {
                     </Card>
 
                     {/* Side Feed */}
-                    <div className="col-span-12 lg:col-span-4 space-y-6">
+                    <div className="col-span-12 lg:col-span-4 space-y-4 sm:space-y-6">
                       <Card className="bg-slate-900/50 border-slate-800 border rounded-2xl h-[500px] shadow-sm flex flex-col">
-                        <CardHeader className="p-6 border-b border-slate-800/50">
+                        <CardHeader className="p-4 sm:p-6 border-b border-slate-800/50">
                           <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
                             Platform Activity
                             <div className="flex items-center gap-2">
@@ -413,8 +413,8 @@ const AdminPortal = () => {
                             </div>
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 flex-1 overflow-y-auto no-scrollbar">
-                          <div className="space-y-6">
+                        <CardContent className="p-4 sm:p-6 flex-1 overflow-y-auto no-scrollbar">
+                          <div className="space-y-4 sm:space-y-6">
                             {combinedEvents.map((evt) => {
                               const Icon = evt.icon;
                               return (
@@ -445,7 +445,7 @@ const AdminPortal = () => {
               )}
 
               {activeTab === 'users' && (
-                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4 sm:space-y-6">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-900/50 p-4 sm:p-6 rounded-2xl border border-slate-800 gap-3 sm:gap-0">
                     <div>
                       <h3 className="text-lg font-bold text-white">Member Directory</h3>
@@ -462,17 +462,17 @@ const AdminPortal = () => {
                       <table className="w-full text-left">
                         <thead>
                           <tr className="border-b border-slate-800 bg-slate-900/30 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            <th className="py-4 px-6">Member Identity</th>
-                            <th className="py-4 px-6">Account Class</th>
-                            <th className="py-4 px-6">Contact Vector</th>
-                            <th className="py-4 px-6">Verification</th>
-                            <th className="py-4 px-6 text-right">Actions</th>
+                            <th className="py-4 px-4 sm:px-6">Member Identity</th>
+                            <th className="py-4 px-4 sm:px-6">Account Class</th>
+                            <th className="py-4 px-4 sm:px-6">Contact Vector</th>
+                            <th className="py-4 px-4 sm:px-6">Verification</th>
+                            <th className="py-4 px-4 sm:px-6 text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
                           {filteredUsers.map((user) => (
                             <tr key={user.id} className="hover:bg-slate-800/50 group transition-colors cursor-pointer" onClick={() => setSelectedUser(user)}>
-                              <td className="py-4 px-6">
+                              <td className="py-4 px-4 sm:px-6">
                                 <div className="flex items-center gap-3">
                                   <Avatar className="w-9 h-9 border border-slate-800">
                                     <AvatarImage src={user.avatar_url} />
@@ -484,13 +484,13 @@ const AdminPortal = () => {
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-4 px-6">
+                              <td className="py-4 px-4 sm:px-6">
                                 <Badge className={`${user.user_type === 'investor' ? 'bg-brand-yellow/10 text-brand-yellow border-brand-yellow/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'} border text-[9px] font-black uppercase tracking-tighter px-2`}>
                                   {user.user_type}
                                 </Badge>
                               </td>
-                              <td className="py-4 px-6 text-xs text-slate-400 font-medium">{user.email}</td>
-                              <td className="py-4 px-6">
+                              <td className="py-4 px-4 sm:px-6 text-xs text-slate-400 font-medium">{user.email}</td>
+                              <td className="py-4 px-4 sm:px-6">
                                 {user.is_approved ? (
                                   <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
                                     <CheckCircle2 size={14} /> Verified
@@ -501,7 +501,7 @@ const AdminPortal = () => {
                                   </div>
                                 )}
                               </td>
-                              <td className="py-4 px-6 text-right">
+                              <td className="py-4 px-4 sm:px-6 text-right">
                                 <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }} className="h-8 w-8 p-0 text-slate-500 hover:text-white rounded-lg"><ChevronRight size={16} /></Button>
                               </td>
                             </tr>
@@ -514,7 +514,7 @@ const AdminPortal = () => {
               )}
 
               {activeTab === 'ideas' && (
-                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4 sm:space-y-6">
                   <div className="flex items-center gap-4 mb-2">
                     {['all', 'pending', 'approved', 'funded'].map(s => (
                       <button
@@ -526,10 +526,10 @@ const AdminPortal = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                     {filteredIdeas.map((idea) => (
                       <Card key={idea.id} className="bg-slate-900 border-slate-800 shadow-xl rounded-2xl overflow-hidden hover:border-brand-yellow/50 hover:shadow-brand-yellow/10 transition-all cursor-pointer group" onClick={() => setSelectedIdea(idea)}>
-                        <div className="p-6 space-y-4">
+                        <div className="p-4 sm:p-6 space-y-4">
                           <div className="flex items-center justify-between">
                             <Badge className="bg-slate-800 text-slate-400 border-none text-[9px] font-black uppercase tracking-widest">{idea.domain}</Badge>
                             <Badge className={`${idea.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'} border-none text-[9px] font-black`}>{idea.status}</Badge>
@@ -556,17 +556,17 @@ const AdminPortal = () => {
               )}
 
               {activeTab === 'financials' && (
-                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4 sm:space-y-6">
                   <Card className="bg-[#020617] border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead>
                           <tr className="bg-slate-500/5 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-800">
-                            <th className="py-6 px-8">Transaction Hash</th>
-                            <th className="py-6 px-8">User Name</th>
-                            <th className="py-6 px-8">Amount (INR)</th>
-                            <th className="py-6 px-8">Timestamp</th>
-                            <th className="py-6 px-8 text-right">Status</th>
+                            <th className="py-4 sm:py-6 px-8">Transaction Hash</th>
+                            <th className="py-4 sm:py-6 px-8">User Name</th>
+                            <th className="py-4 sm:py-6 px-8">Amount (INR)</th>
+                            <th className="py-4 sm:py-6 px-8">Timestamp</th>
+                            <th className="py-4 sm:py-6 px-8 text-right">Status</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
@@ -607,7 +607,7 @@ const AdminPortal = () => {
               )}
 
               {activeTab === 'tools' && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
                   {[
                     { title: "Notification Engine", desc: "Push global infrastructure updates", icon: Bell, btn: "Dispatch Blast", color: "yellow" },
                     { title: "System Lockdown", desc: "Toggle platform maintenance states", icon: Hammer, btn: "Toggle Mode", color: "amber" },
@@ -616,8 +616,8 @@ const AdminPortal = () => {
                     { title: "Security Protocols", desc: "Configure worldwide IP restrictions", icon: Shield, btn: "Policy Engine", color: "rose" },
                     { title: "Support Interface", desc: "High-priority ticket management", icon: Mail, btn: "Open Desk", color: "yellow" }
                   ].map(({ icon: Icon, ...tool }, i) => (
-                    <Card key={i} className="bg-slate-900 border-slate-800 rounded-2xl p-6 hover:shadow-2xl transition-all group">
-                      <div className="flex gap-4 mb-6">
+                    <Card key={i} className="bg-slate-900 border-slate-800 rounded-2xl p-4 sm:p-6 hover:shadow-2xl transition-all group">
+                      <div className="flex gap-4 mb-4 sm:mb-6">
                         <div className={`p-3 rounded-xl bg-slate-800 text-${tool.color}-400 group-hover:bg-${tool.color}-600 group-hover:text-white transition-all`}>
                           <Icon size={24} />
                         </div>
@@ -646,7 +646,7 @@ const AdminPortal = () => {
           <DialogContent className="max-w-2xl bg-[#0f172a] border-slate-800 text-white rounded-[1.5rem] p-0 overflow-hidden outline-none">
             <ScrollArea className="max-h-[85vh]">
               <div className="p-10">
-                <div className="flex items-center gap-6 mb-10">
+                <div className="flex items-center gap-3 sm:gap-6 mb-10">
                   <Avatar className="w-16 h-16 border-2 border-brand-yellow/20">
                     <AvatarImage src={selectedUser?.avatar_url} />
                     <AvatarFallback className="bg-slate-800 text-2xl font-black">{selectedUser?.name?.charAt(0)}</AvatarFallback>
@@ -660,8 +660,8 @@ const AdminPortal = () => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 mb-10">
-                  <section className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-8 mb-10">
+                  <section className="space-y-4 sm:space-y-6">
                     <div className="space-y-4">
                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Professional Identity</p>
                       {[
@@ -676,9 +676,9 @@ const AdminPortal = () => {
                       ))}
                     </div>
                   </section>
-                  <section className="space-y-6">
+                  <section className="space-y-4 sm:space-y-6">
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Detailed Career Context</p>
-                    <div className="bg-slate-900 border border-slate-800/50 p-6 rounded-2xl h-[240px]">
+                    <div className="bg-slate-900 border border-slate-800/50 p-4 sm:p-6 rounded-2xl h-[240px]">
                       <ScrollArea className="h-full pr-4">
                         <p className="text-xs text-slate-400 leading-relaxed font-medium whitespace-pre-wrap">{selectedUser?.experience || "Professional narrative not submitted yet."}</p>
                       </ScrollArea>
@@ -689,10 +689,10 @@ const AdminPortal = () => {
                 {selectedUser?.user_type === 'investor' && (
                   <div className="mb-10 bg-brand-yellow/5 border border-brand-yellow/20 p-8 rounded-2xl">
                     <p className="text-[10px] font-black text-brand-yellow uppercase tracking-[0.2em] mb-4">Investment Framework</p>
-                    <div className="flex items-end justify-between gap-6">
+                    <div className="flex items-end justify-between gap-3 sm:gap-6">
                       <div>
                         <p className="text-[9px] text-brand-yellow/80 font-bold uppercase mb-1">Stated Capital Facility</p>
-                        <p className="text-4xl font-black text-white tabular-nums tracking-tighter">₹{selectedUser?.investment_capital?.toLocaleString()}</p>
+                        <p className="text-2xl sm:text-3xl sm:text-4xl font-black text-white tabular-nums tracking-tighter">₹{selectedUser?.investment_capital?.toLocaleString()}</p>
                       </div>
                       <div className="flex flex-wrap gap-2 justify-end">
                         {selectedUser?.interested_domains?.map((d: string) => (
@@ -730,7 +730,7 @@ const AdminPortal = () => {
                       <Badge className="bg-brand-yellow/10 text-brand-yellow border-none font-black text-[9px] tracking-widest">{selectedIdea?.domain}</Badge>
                       <Badge className="bg-slate-800 text-slate-500 border-none font-black text-[9px] tracking-widest">SUBMISSION #{selectedIdea?.id?.substring(0, 6)}</Badge>
                     </div>
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tight leading-none">{selectedIdea?.title}</h3>
+                    <h3 className="text-2xl sm:text-3xl sm:text-4xl font-black text-white uppercase tracking-tight leading-none">{selectedIdea?.title}</h3>
                     <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
                       Proposed by <span className="text-white hover:underline cursor-pointer">{selectedIdea?.founder?.name}</span>
                       <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
@@ -739,12 +739,12 @@ const AdminPortal = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-2">Live Status</p>
-                    <Badge className="bg-emerald-500/10 text-emerald-400 border-none font-bold text-xs px-6 py-2 rounded-xl">{selectedIdea?.status?.toUpperCase()}</Badge>
+                    <Badge className="bg-emerald-500/10 text-emerald-400 border-none font-bold text-xs px-4 sm:px-6 py-2 rounded-xl">{selectedIdea?.status?.toUpperCase()}</Badge>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-12">
-                  <div className="md:col-span-8 space-y-8 sm:space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 sm:gap-12">
+                  <div className="md:col-span-8 space-y-5 sm:space-y-8 sm:space-y-12">
                     <section>
                       <h5 className="text-[10px] font-black text-brand-yellow uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                         <Target size={14} /> Critical Problem
@@ -766,13 +766,13 @@ const AdminPortal = () => {
                       </div>
                     </section>
 
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-3 gap-3 sm:gap-6">
                       {[
                         { label: "Market Size", val: selectedIdea?.market_size || "Lite", icon: Globe, color: "yellow" },
                         { label: "Traction", val: selectedIdea?.traction || "Early", icon: TrendingUp, color: "emerald" },
                         { label: "Core Team", val: selectedIdea?.team_size || "1", icon: Users, color: "yellow" }
                       ].map(({ icon: Icon, ...item }, idx) => (
-                        <div key={idx} className="bg-slate-900 p-6 rounded-[2rem] text-center border border-slate-800/50 hover:border-slate-700 transition-all">
+                        <div key={idx} className="bg-slate-900 p-4 sm:p-6 rounded-[2rem] text-center border border-slate-800/50 hover:border-slate-700 transition-all">
                           <div className={`w-10 h-10 rounded-2xl bg-${item.color}-500/10 text-${item.color}-400 flex items-center justify-center mx-auto mb-3 shadow-sm`}>
                             <Icon size={20} />
                           </div>
@@ -783,13 +783,13 @@ const AdminPortal = () => {
                     </div>
                   </div>
 
-                  <div className="md:col-span-4 space-y-8 sm:space-y-12">
+                  <div className="md:col-span-4 space-y-5 sm:space-y-8 sm:space-y-12">
                     <section>
                       <h5 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4">Capitalization</h5>
-                      <div className="bg-slate-900 border border-slate-800/50 p-8 rounded-[2rem] space-y-8">
+                      <div className="bg-slate-900 border border-slate-800/50 p-8 rounded-[2rem] space-y-5 sm:space-y-8">
                         <div>
                           <p className="text-[10px] font-black text-slate-600 uppercase mb-2 tracking-widest">Funding Objective</p>
-                          <p className="text-4xl font-black text-white tabular-nums tracking-tighter">₹{selectedIdea?.investment_needed?.toLocaleString()}</p>
+                          <p className="text-2xl sm:text-3xl sm:text-4xl font-black text-white tabular-nums tracking-tighter">₹{selectedIdea?.investment_needed?.toLocaleString()}</p>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between text-[10px] font-black uppercase text-slate-600">

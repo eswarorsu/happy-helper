@@ -314,7 +314,7 @@ const Hero3D = ({ children }: Hero3DProps) => {
       {!use3D && <MobileFallback />}
 
       {/* Content Overlay - On top of 3D */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100vh] px-6">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100vh] px-4 sm:px-6">
         {children}
       </div>
 

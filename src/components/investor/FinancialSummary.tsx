@@ -39,14 +39,14 @@ export default function FinancialSummary({
     ];
 
     return (
-        <div className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-6 flex items-center gap-2">
+        <div className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 sm:mb-6 flex items-center gap-2">
                 <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
                 Financial Summary
             </h3>
 
             {/* Numbers Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 sm:mb-6">
                 <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1">
                         Funds Needed
@@ -82,7 +82,7 @@ export default function FinancialSummary({
             </div>
 
             {/* Funding Progress */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
                 <div className="flex justify-between text-xs text-slate-500 mb-1">
                     <span>Funding Progress</span>
                     <span>{fundingPercentage.toFixed(0)}%</span>

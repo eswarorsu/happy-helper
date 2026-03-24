@@ -381,8 +381,8 @@ const Marketplace = () => {
                     </div>
                 </header>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-                    <div className="flex flex-col lg:flex-row gap-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+                    <div className="flex flex-col lg:flex-row gap-3 sm:gap-6">
                         {/* Filter Sidebar */}
                         <AnimatePresence>
                             {showFilters && (
@@ -410,7 +410,7 @@ const Marketplace = () => {
                                             </div>
                                         </CardHeader>
                                         <ScrollArea className="h-[calc(100vh-220px)]">
-                                            <CardContent className="pt-4 space-y-6">
+                                            <CardContent className="pt-4 space-y-4 sm:space-y-6">
                                                 {/* Sort By */}
                                                 <div>
                                                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 block">

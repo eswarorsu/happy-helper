@@ -7,7 +7,7 @@ const PrivacyPolicy: React.FC = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full bg-background backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto flex items-center justify-between p-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between p-4 sm:p-6">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md">
               <Shield className="w-6 h-6 text-brand-yellow" />
@@ -22,11 +22,11 @@ const PrivacyPolicy: React.FC = () => {
 
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-slate-900 to-brand-charcoal text-white py-16">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
             <Lock className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
+          <h1 className="text-2xl sm:text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
           <p className="text-lg text-blue-100">
             Your privacy is critically important to us. We're committed to protecting your personal information.
           </p>
@@ -37,8 +37,8 @@ const PrivacyPolicy: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-xl border border-white/50 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-xl border border-white/50 space-y-5 sm:space-y-8">
 
           {/* Introduction */}
           <section>
@@ -331,7 +331,7 @@ const PrivacyPolicy: React.FC = () => {
               <h2 className="text-2xl font-bold text-foreground">Contact Us</h2>
             </div>
 
-            <div className="ml-13 bg-background rounded-lg p-6 space-y-2">
+            <div className="ml-13 bg-background rounded-lg p-4 sm:p-6 space-y-2">
               <p className="text-slate-700">
                 If you have any questions or concerns about this Privacy Policy, please contact us:
               </p>
@@ -348,8 +348,8 @@ const PrivacyPolicy: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-border py-6">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <footer className="bg-white border-t border-border py-4 sm:py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-slate-600">
             © 2026 INNOVESTOR. All rights reserved.
           </p>

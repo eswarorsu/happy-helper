@@ -6,7 +6,7 @@ const Footer = () => {
         <footer style={{ background: "rgb(0, 0, 0)" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-10">
                 {/* Main Footer */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-8 sm:mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 sm:gap-10 mb-5 sm:mb-8 sm:mb-12">
                     {/* Company */}
                     <div>
                         <div className="flex items-center gap-2.5 mb-5">
@@ -16,7 +16,7 @@ const Footer = () => {
                             </span>
                         </div>
                         <p
-                            className="text-sm leading-relaxed mb-6"
+                            className="text-sm leading-relaxed mb-4 sm:mb-6"
                             style={{ color: "#64748B" }}
                         >
                             Bridging the gap between visionary founders and strategic
@@ -195,7 +195,7 @@ const Footer = () => {
 
                 {/* Divider */}
                 <div
-                    className="h-px w-full mb-8"
+                    className="h-px w-full mb-5 sm:mb-8"
                     style={{ background: "rgba(255,255,255,0.08)" }}
                 />
 

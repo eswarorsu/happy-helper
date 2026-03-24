@@ -19,7 +19,7 @@ export function UnverifiedUserBanner({ userName }: UnverifiedUserBannerProps) {
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full mx-auto px-4 pb-6 mt-4"
         >
-            <div className="relative overflow-hidden rounded-3xl border-2 border-brand-yellow/30 bg-gradient-to-br from-amber-50 via-white to-yellow-50 shadow-lg shadow-brand-yellow/10 p-6">
+            <div className="relative overflow-hidden rounded-3xl border-2 border-brand-yellow/30 bg-gradient-to-br from-amber-50 via-white to-yellow-50 shadow-lg shadow-brand-yellow/10 p-4 sm:p-6">
                 {/* Animated background accent */}
                 <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-brand-yellow/10 blur-3xl animate-pulse pointer-events-none" />
                 <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-amber-200/20 blur-2xl animate-pulse pointer-events-none" style={{ animationDelay: "1s" }} />

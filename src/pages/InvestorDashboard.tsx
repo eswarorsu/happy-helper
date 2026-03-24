@@ -845,10 +845,10 @@ const InvestorDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-5 sm:mb-8"
           >
             <div className="bg-slate-900 rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 sm:mb-6">
                 <div className="w-14 h-14 rounded-2xl bg-slate-700/60 flex items-center justify-center border border-slate-600">
                   <span className="text-2xl font-black text-white">{profile?.name?.charAt(0) || 'I'}</span>
                 </div>
@@ -976,7 +976,7 @@ const InvestorDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
+            className="grid lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6 sm:mb-8"
           >
             {/* Left Col: Growth Chart (Cash on Hand equivalent) */}
             <Card className="lg:col-span-2 bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
@@ -998,7 +998,7 @@ const InvestorDashboard = () => {
                   </div>
                 </div>
                 {/* Summary Stats above chart like Reference */}
-                <div className="flex gap-8 mt-4">
+                <div className="flex gap-4 sm:gap-8 mt-4">
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Current Value</p>
                     <p className="text-lg font-bold text-slate-900">₹{(totalInvested + totalProfitReceived).toLocaleString()}</p>
@@ -1053,7 +1053,7 @@ const InvestorDashboard = () => {
             </Card>
 
             {/* Right Col: Upgrade / Info Card */}
-            <div className="bg-brand-charcoal rounded-xl p-6 text-white overflow-hidden relative shadow-lg shadow-brand-yellow/20 flex flex-col justify-between">
+            <div className="bg-brand-charcoal rounded-xl p-4 sm:p-6 text-white overflow-hidden relative shadow-lg shadow-brand-yellow/20 flex flex-col justify-between">
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 p-12 bg-brand-yellow/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
               <div className="absolute bottom-0 left-0 p-10 bg-brand-yellow/10 rounded-full blur-xl -ml-10 -mb-5 pointer-events-none" />
@@ -1064,7 +1064,7 @@ const InvestorDashboard = () => {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-brand-yellow">Premium Access</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2">Unlock Pearl Street+ Intelligence</h3>
-                <p className="text-white/70 text-sm leading-relaxed mb-6">
+                <p className="text-white/70 text-sm leading-relaxed mb-4 sm:mb-6">
                   Get advanced market insights, cap table modeling, and exclusive deal flow access.
                 </p>
               </div>
@@ -1082,10 +1082,10 @@ const InvestorDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
-            className="mb-8"
+            className="mb-5 sm:mb-8"
           >
             <Card className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+              <div className="px-4 sm:px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-900">Stakeholder</h2>
                 <Button variant="outline" size="sm" className="h-8 text-xs">View All</Button>
               </div>
@@ -1103,7 +1103,7 @@ const InvestorDashboard = () => {
               ) : (
                 <div className="overflow-x-auto">
                   {/* Table header */}
-                  <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-4 px-6 py-3 border-b border-slate-50 bg-slate-50/50 text-xs font-semibold text-slate-500">
+                  <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-4 px-4 sm:px-6 py-3 border-b border-slate-50 bg-slate-50/50 text-xs font-semibold text-slate-500">
                     <div className="w-5 h-5 border border-slate-300 rounded flex items-center justify-center bg-white" />
                     <div>Stakeholder</div>
                     <div>Ownership</div>
@@ -1128,7 +1128,7 @@ const InvestorDashboard = () => {
                         <button
                           key={request.id}
                           onClick={() => setSelectedChat(request)}
-                          className="w-full grid grid-cols-[auto_1fr_1fr_auto] items-center gap-4 px-6 py-4 border-b border-slate-50 hover:bg-slate-50/80 transition-colors text-left group"
+                          className="w-full grid grid-cols-[auto_1fr_1fr_auto] items-center gap-4 px-4 sm:px-6 py-4 border-b border-slate-50 hover:bg-slate-50/80 transition-colors text-left group"
                         >
                           {/* Checkbox visual */}
                           <div className="w-5 h-5 border border-slate-300 rounded flex items-center justify-center bg-white group-hover:border-brand-yellow transition-colors">

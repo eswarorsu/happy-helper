@@ -184,7 +184,7 @@ export function WeeklyLogSheet({
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="sm:max-w-md bg-white border-l border-slate-200 p-0 flex flex-col text-slate-900 shadow-2xl">
-                <div className="p-6 border-b border-slate-100 bg-white">
+                <div className="p-4 sm:p-6 border-b border-slate-100 bg-white">
                     <SheetHeader className="space-y-1">
                         <div className="flex items-center gap-2 mb-2">
                             <SheetTitle className="text-xl font-bold text-slate-900">Weekly Progress</SheetTitle>
@@ -290,7 +290,7 @@ export function WeeklyLogSheet({
                         </div>
                     )}
 
-                    <ScrollArea className="flex-1 p-6">
+                    <ScrollArea className="flex-1 p-4 sm:p-6">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center py-20 gap-3">
                                 <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
@@ -301,7 +301,7 @@ export function WeeklyLogSheet({
                                 <p className="text-slate-500 font-medium">No logs yet</p>
                             </div>
                         ) : (
-                            <div className="space-y-8 relative">
+                            <div className="space-y-5 sm:space-y-8 relative">
                                 <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-indigo-50" />
                                 {logs.map((log, index) => (
                                     <motion.div

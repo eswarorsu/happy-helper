@@ -548,7 +548,7 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
       </AnimatePresence>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-3 sm:px-4 py-3 bg-background">
+      <ScrollArea className="flex-1 px-2 sm:px-4 py-3 bg-background">
         <div className="space-y-4 pb-4">
           <AnimatePresence initial={false}>
             {messages.map((message, index) => {
@@ -560,17 +560,17 @@ const ChatBox = ({ chatRequest, currentUserId, onClose, onMessagesRead, onViewPr
                   key={message.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${isSent ? "justify-end" : "justify-start"}`}
+                  className={`flex gap-2 sm:gap-3 ${isSent ? "justify-end" : "justify-start"}`}
                 >
                   {!isSent && showAvatar ? (
-                    <Avatar className="w-8 h-8 mt-auto border border-white shadow-sm">
+                    <Avatar className="w-6 h-6 sm:w-8 sm:h-8 mt-auto border border-white shadow-sm shrink-0">
                       <AvatarImage src={otherPartyAvatar} />
-                      <AvatarFallback className="bg-slate-100 text-slate-500 text-[10px]">{otherPartyName?.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="bg-slate-100 text-slate-500 text-[10px] sm:text-xs flex items-center justify-center">{otherPartyName?.charAt(0)}</AvatarFallback>
                     </Avatar>
-                  ) : !isSent && <div className="w-8" />}
+                  ) : !isSent && <div className="w-6 sm:w-8 shrink-0" />}
 
-                  <div className={`flex flex-col max-w-[80%] sm:max-w-[75%] ${isSent ? "items-end" : "items-start"}`}>
-                    <div className={`px-4 py-2.5 shadow-sm ${isSent
+                  <div className={`flex flex-col max-w-[88%] sm:max-w-[75%] ${isSent ? "items-end" : "items-start"}`}>
+                    <div className={`px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm ${isSent
                       ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl rounded-br-none"
                       : "bg-white text-slate-800 border border-slate-100 rounded-2xl rounded-bl-none"
                       }`}>

@@ -101,7 +101,7 @@ const Profile = () => {
     return (
         <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
+            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-4 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Logo size="sm" />
@@ -122,16 +122,16 @@ const Profile = () => {
             </header>
 
             {/* Content */}
-            <main className="max-w-5xl mx-auto px-6 py-10">
-                <div className="grid md:grid-cols-3 gap-8">
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+                <div className="grid md:grid-cols-3 gap-4 sm:gap-8">
 
                     {/* Left Column: Identity Card */}
-                    <div className="md:col-span-1 space-y-6">
+                    <div className="md:col-span-1 space-y-4 sm:space-y-6">
                         <Card className="border border-slate-200 shadow-sm overflow-hidden rounded-3xl bg-white">
                             {/* Header Banner */}
                             <div className="h-24 bg-brand-yellow" />
 
-                            <CardContent className="pt-0 pb-6 px-6 -mt-12 relative">
+                            <CardContent className="pt-0 pb-6 px-4 sm:px-6 -mt-12 relative">
                                 <Avatar className="w-20 h-20 border-4 border-white shadow-lg mx-auto">
                                     <AvatarImage src={profile.avatar_url} className="object-cover" />
                                     <AvatarFallback className="text-2xl font-bold bg-brand-yellow/20 text-brand-charcoal">
@@ -186,7 +186,7 @@ const Profile = () => {
                                 </div>
 
                                 {/* Social Links */}
-                                <div className="mt-6 space-y-2">
+                                <div className="mt-4 sm:mt-6 space-y-2">
                                     {profile.linkedin_profile && (
                                         <a
                                             href={profile.linkedin_profile}
@@ -244,7 +244,7 @@ const Profile = () => {
                     </div>
 
                     {/* Right Column: Details */}
-                    <div className="md:col-span-2 space-y-6">
+                    <div className="md:col-span-2 space-y-4 sm:space-y-6">
                         <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white">
                             <CardHeader className="border-b border-border/60">
                                 <div className="flex items-center gap-3">
@@ -257,7 +257,7 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </CardHeader>
-                            <CardContent className="pt-6 space-y-6">
+                            <CardContent className="pt-6 space-y-4 sm:space-y-6">
                                 {/* Experience */}
                                 {profile.experience && (
                                     <div className="space-y-3">
@@ -273,7 +273,7 @@ const Profile = () => {
                                 )}
 
                                 {/* Education & Domain */}
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
                                     {profile.education && (
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
@@ -301,7 +301,7 @@ const Profile = () => {
 
                                 {/* Investment Details (Investors Only) */}
                                 {!isFounder && (
-                                    <div className="pt-4 border-t border-border/60 space-y-6">
+                                    <div className="pt-4 border-t border-border/60 space-y-4 sm:space-y-6">
                                         {profile.interested_domains && profile.interested_domains.length > 0 && (
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
@@ -322,8 +322,8 @@ const Profile = () => {
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-widest">
                                                     <DollarSign className="w-4 h-4" /> Investment Capacity
                                                 </div>
-                                                <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 shadow-sm">
-                                                    <p className="text-3xl font-black text-emerald-700">
+                                                <div className="p-4 sm:p-6 bg-emerald-50 rounded-2xl border border-emerald-100 shadow-sm">
+                                                    <p className="text-2xl sm:text-3xl font-black text-emerald-700">
                                                         ₹{profile.investment_capital.toLocaleString()}
                                                     </p>
                                                     <p className="text-sm text-emerald-600 font-medium mt-1">Ready to deploy capital</p>

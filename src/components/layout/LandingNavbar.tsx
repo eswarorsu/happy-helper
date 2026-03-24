@@ -64,7 +64,7 @@ const LandingNavbar = () => {
                         </Button>
                     </Link>
                     <Link to="/auth?mode=register" className="hidden sm:block">
-                        <Button className="text-sm font-medium px-6 text-brand-charcoal shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-brand-yellow hover:bg-brand-yellow/90 border-0 rounded-xl">
+                        <Button className="text-sm font-medium px-4 sm:px-6 text-brand-charcoal shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-brand-yellow hover:bg-brand-yellow/90 border-0 rounded-xl">
                             Join for free
                         </Button>
                     </Link>

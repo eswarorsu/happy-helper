@@ -725,7 +725,7 @@ const DealCenter = () => {
 
                 {/* Stats Cards */}
                 {/* Mobile: compact 3-col row | Desktop: full cards */}
-                <div className="hidden md:grid md:grid-cols-3 gap-4 mb-8">
+                <div className="hidden md:grid md:grid-cols-3 gap-4 mb-5 sm:mb-8">
                     <Card className="border-border bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
                         <div className="absolute inset-0 bg-blue-600/5 group-hover:bg-blue-600/10 transition-colors" />
                         <CardContent className="pt-6 relative">
@@ -797,7 +797,7 @@ const DealCenter = () => {
 
                 {/* Pending Profit Receipts (Investor View) */}
                 {!data.isFounder && profitTransactions.filter(t => t.status === 'founder_confirmed').length > 0 && (
-                    <Card className="border-orange-200 bg-orange-50 mb-8 overflow-hidden shadow-sm">
+                    <Card className="border-orange-200 bg-orange-50 mb-5 sm:mb-8 overflow-hidden shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-lg flex items-center gap-2 text-orange-700">
                                 <PiggyBank className="w-5 h-5" />
@@ -1085,7 +1085,7 @@ const DealCenter = () => {
                                         Record a profit distribution to {data.investor.name}
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-6">
+                                <CardContent className="space-y-4 sm:space-y-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="amount" className="text-sm font-medium text-slate-700">
                                             Profit Amount (₹)
@@ -1220,7 +1220,7 @@ const DealCenter = () => {
 
                                 <div className="space-y-2">
                                     <Label>Payment Screenshot</Label>
-                                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-brand-yellow transition-colors cursor-pointer relative">
+                                    <div className="border-2 border-dashed border-border rounded-lg p-4 sm:p-6 text-center hover:border-brand-yellow transition-colors cursor-pointer relative">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -1326,7 +1326,7 @@ const DealCenter = () => {
 
                                     <div className="relative">
                                         <p className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 sm:mb-2">Amount to Share</p>
-                                        <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-all">
+                                        <p className="text-2xl sm:text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-all">
                                             {formatCurrency(parseFloat(profitAmount) || 0)}
                                         </p>
 
@@ -1396,7 +1396,7 @@ const DealCenter = () => {
 
                                 <div className="space-y-2">
                                     <Label>Payment Screenshot</Label>
-                                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-emerald-500 transition-colors cursor-pointer relative">
+                                    <div className="border-2 border-dashed border-border rounded-lg p-4 sm:p-6 text-center hover:border-emerald-500 transition-colors cursor-pointer relative">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -1486,10 +1486,10 @@ const DealCenter = () => {
                         </DialogHeader>
 
                         {selectedProfitShare && (
-                            <div className="space-y-6 pt-4">
+                            <div className="space-y-4 sm:space-y-6 pt-4">
                                 <div className="text-center">
                                     <p className="text-sm text-slate-500 mb-1">Amount</p>
-                                    <p className="text-3xl font-bold text-emerald-600">
+                                    <p className="text-2xl sm:text-3xl font-bold text-emerald-600">
                                         {formatCurrency(selectedProfitShare.amount)}
                                     </p>
                                     <Badge variant="outline" className="mt-2 bg-emerald-100 text-emerald-700 border-emerald-200">

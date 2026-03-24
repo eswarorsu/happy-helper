@@ -120,9 +120,9 @@ const DealCenterIndex = () => {
                     <MobileNav />
                 </div>
 
-                <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
-                    <header className="mb-8">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
+                <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-6 sm:py-8">
+                    <header className="mb-5 sm:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
                             Deal Center
                         </h1>
                         <p className="text-muted-foreground mt-2">Manage your active negotiations and investments.</p>
@@ -148,7 +148,7 @@ const DealCenterIndex = () => {
 
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                                 {deals.map((deal, index) => (
                                     <motion.div
                                         key={deal.id}
@@ -157,7 +157,7 @@ const DealCenterIndex = () => {
                                         transition={{ delay: index * 0.1 }}
                                     >
                                         <Card className="h-full bg-white hover:border-brand-yellow/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-brand-yellow/5 group border-slate-200 rounded-3xl">
-                                            <CardContent className="p-6 space-y-6">
+                                            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                                                 {/* Founder & Venture Info */}
                                                 <div className="flex justify-between items-start gap-4">
                                                     <div className="flex items-center gap-3">

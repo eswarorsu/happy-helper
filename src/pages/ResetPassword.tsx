@@ -94,9 +94,9 @@ const ResetPassword = () => {
 
       <div className="w-full max-w-md relative z-10">
         {/* Brand Header */}
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-5 sm:mb-8">
           <Logo size="lg" />
-          <h1 className="text-2xl font-bold tracking-tight mt-6">Reset Your Password</h1>
+          <h1 className="text-2xl font-bold tracking-tight mt-4 sm:mt-6">Reset Your Password</h1>
           <p className="text-muted-foreground text-center text-sm mt-2 max-w-[280px]">
             Please enter a strong new password below to secure your INNOVESTOR account.
           </p>
@@ -105,7 +105,7 @@ const ResetPassword = () => {
         <Card className="bg-white/80 backdrop-blur-md border-border/50 shadow-2xl shadow-brand-charcoal/5">
           <CardContent className="p-7">
             {!sessionVerified ? (
-              <div className="py-8 text-center flex flex-col items-center">
+              <div className="py-5 sm:py-8 text-center flex flex-col items-center">
                 <div className="w-12 h-12 border-4 border-brand-yellow/30 border-t-brand-yellow rounded-full animate-spin mb-4" />
                 <p className="text-sm text-slate-600 font-medium">Verifying secure reset link...</p>
               </div>

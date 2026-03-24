@@ -11,7 +11,7 @@ interface FounderProfileProps {
  */
 export default function FounderProfile({ founder }: FounderProfileProps) {
     return (
-        <div className="border border-slate-200 rounded-2xl p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
+        <div className="border border-slate-200 rounded-2xl p-4 sm:p-6 bg-white shadow-sm text-slate-900 transition-all hover:shadow-md">
             {/* Header: Name + Avatar */}
             <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
