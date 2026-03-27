@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
     LayoutDashboard, Store, Receipt, Handshake,
     MessageSquare, User, LogOut, Settings, Search,
-    ChevronLeft
+    ChevronLeft, MapPin
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ interface InvestorSidebarProps {
 const NAV_ITEMS = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/investor-dashboard" },
     { label: "Idea Marketplace", icon: Search, path: "/marketplace" },
+    { label: "Startup Map", icon: MapPin, path: "/map" },
     { label: "Deal Center", icon: Handshake, path: "/deal-center" },
     { label: "Transactions", icon: Receipt, path: "/transactions" },
     { label: "Profile", icon: User, path: "/profile" },

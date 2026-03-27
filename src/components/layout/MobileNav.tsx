@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-    Home, Receipt, User, MessageSquare, Rocket, Store
+    Home, Receipt, User, MessageSquare, Rocket, Store, MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -38,9 +38,9 @@ const MobileNav = ({ userType, unreadCount = 0, onMessagesClick }: MobileNavProp
             isCentral: true,
         },
         {
-            label: "Txns",
-            icon: Receipt,
-            path: "/transactions",
+            label: isFounder ? "Txns" : "Map",
+            icon: isFounder ? Receipt : MapPin,
+            path: isFounder ? "/transactions" : "/map",
         },
         {
             label: "Profile",

@@ -199,6 +199,28 @@ const InvestorDashboard = () => {
     window.addEventListener("keydown", handleKeyPress);
     fetchData();
 
+    // ── Silent geolocation tracking (investor location for admin/AI) ──
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) return;
+            await (supabase as any)
+              .from("profiles")
+              .update({
+                last_known_lat: pos.coords.latitude,
+                last_known_lng: pos.coords.longitude,
+                last_location_updated_at: new Date().toISOString(),
+              })
+              .eq("user_id", session.user.id);
+          } catch (_) { /* Silent fail */ }
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+      );
+    }
+
     const channel = supabase
       .channel('investor-dashboard-sync')
       .on(

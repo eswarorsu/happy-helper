@@ -30,6 +30,7 @@ const DealCenter = lazy(() => import("./pages/DealCenter"));
 const DealCenterIndex = lazy(() => import("./pages/DealCenterIndex"));
 const MobileMessages = lazy(() => import("./pages/MobileMessages"));
 const MobileChat = lazy(() => import("./pages/MobileChat"));
+const MapPage = lazy(() => import("./pages/Map"));
 
 
 
@@ -66,6 +67,7 @@ const App = () => (
                 <Route path="/deal-center" element={<DealCenterIndex />} />
                 <Route path="/mobile-messages" element={<MobileMessages />} />
                 <Route path="/chat/:chatRequestId" element={<MobileChat />} />
+                <Route path="/map" element={<MapPage />} />
               </Route>
 
               {/* Admin-only route */}

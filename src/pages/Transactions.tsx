@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedGridBackground from "@/components/AnimatedGridBackground";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { InvestorSidebar } from "@/components/layout/InvestorSidebar";
 import { CopilotAgentButton } from "@/components/CopilotAgentButton";
 
 
@@ -61,6 +62,7 @@ const Transactions = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -86,97 +88,86 @@ const Transactions = () => {
             // Fetch transactions based on user type
             const filterColumn = profileData.user_type === "founder" ? "founder_id" : "investor_id";
 
-            const { data: investmentData, error: investmentError } = await (supabase as any)
-                .from("investment_records")
-                .select("*")
-                .eq(filterColumn, profileData.id)
-                .order("created_at", { ascending: false });
+            // Fetch investment records and profit shares in parallel
+            const [investmentResult, profitResult] = await Promise.all([
+                (supabase as any)
+                    .from("investment_records")
+                    .select("*")
+                    .eq(filterColumn, profileData.id)
+                    .order("created_at", { ascending: false }),
+                (supabase as any)
+                    .from("profit_shares")
+                    .select("*")
+                    .eq(filterColumn, profileData.id)
+                    .order("created_at", { ascending: false })
+            ]);
 
-            if (investmentError) {
-                console.error("Error fetching transactions:", investmentError);
+            if (investmentResult.error) {
+                console.error("Error fetching transactions:", investmentResult.error);
                 setIsLoading(false);
                 return;
             }
 
-            // Enrich with idea and profile data
+            const allInvestments = investmentResult.data || [];
+            const allProfits = profitResult.data || [];
+
+            // Collect all unique IDs for batch fetching
+            const ideaIds = new Set<string>();
+            const profileIds = new Set<string>();
+
+            [...allInvestments, ...allProfits].forEach((record: any) => {
+                if (record.idea_id) ideaIds.add(record.idea_id);
+                if (record.investor_id) profileIds.add(record.investor_id);
+                if (record.founder_id) profileIds.add(record.founder_id);
+            });
+
+            // Batch fetch all ideas and profiles in just 2 queries (instead of N*3)
+            const [ideasResult, profilesResult] = await Promise.all([
+                ideaIds.size > 0
+                    ? supabase.from("ideas").select("id, title, domain").in("id", Array.from(ideaIds))
+                    : { data: [] },
+                profileIds.size > 0
+                    ? supabase.from("profiles").select("id, name, avatar_url").in("id", Array.from(profileIds))
+                    : { data: [] }
+            ]);
+
+            // Build lookup maps
+            const ideasMap = new Map<string, { title: string; domain: string }>();
+            (ideasResult.data || []).forEach((idea: any) => ideasMap.set(idea.id, idea));
+
+            const profilesMap = new Map<string, { name: string; avatar_url: string | null }>();
+            (profilesResult.data || []).forEach((p: any) => profilesMap.set(p.id, p));
+
+            // Enrich all records using the lookup maps (zero additional queries)
             const enrichedTransactions: Transaction[] = [];
 
-            for (const inv of (investmentData || [])) {
-                // Fetch idea info
-                const { data: ideaData } = await supabase
-                    .from("ideas")
-                    .select("title, domain")
-                    .eq("id", inv.idea_id)
-                    .single();
-
-                // Fetch investor/founder info
-                const { data: investorData } = await supabase
-                    .from("profiles")
-                    .select("name, avatar_url")
-                    .eq("id", inv.investor_id)
-                    .single();
-
-                const { data: founderData } = await supabase
-                    .from("profiles")
-                    .select("name, avatar_url")
-                    .eq("id", inv.founder_id)
-                    .single();
-
+            allInvestments.forEach((inv: any) => {
                 enrichedTransactions.push({
                     ...inv,
                     payment_method: inv.payment_method || "bank_transfer",
                     transaction_date: inv.transaction_date || inv.created_at,
-                    idea: ideaData || undefined,
-                    investor: investorData || undefined,
-                    founder: founderData || undefined,
+                    idea: ideasMap.get(inv.idea_id) || undefined,
+                    investor: profilesMap.get(inv.investor_id) || undefined,
+                    founder: profilesMap.get(inv.founder_id) || undefined,
                     type: "investment"
                 });
-            }
+            });
 
-            // Fetch profit shares
-            const { data: profitData, error: profitError } = await (supabase as any)
-                .from("profit_shares")
-                .select("*")
-                .eq(filterColumn, profileData.id)
-                .order("created_at", { ascending: false });
-
-            if (!profitError && profitData) {
-                for (const profit of profitData) {
-                    // Fetch idea info
-                    const { data: ideaData } = await supabase
-                        .from("ideas")
-                        .select("title, domain")
-                        .eq("id", (profit as any).idea_id)
-                        .single();
-
-                    // Fetch investor/founder info
-                    const { data: investorData } = await supabase
-                        .from("profiles")
-                        .select("name, avatar_url")
-                        .eq("id", (profit as any).investor_id)
-                        .single();
-
-                    const { data: founderData } = await supabase
-                        .from("profiles")
-                        .select("name, avatar_url")
-                        .eq("id", (profit as any).founder_id)
-                        .single();
-
-                    enrichedTransactions.push({
-                        ...profit,
-                        status: "confirmed", // Profits are always confirmed for now
-                        payment_method: "bank_transfer",
-                        transaction_date: (profit as any).created_at,
-                        notes: (profit as any).description,
-                        idea: ideaData || undefined,
-                        investor: investorData || undefined,
-                        founder: founderData || undefined,
-                        type: "profit_share",
-                        chat_request_id: (profit as any).chat_request_id,
-                        payment_proof_url: (profit as any).payment_proof_url
-                    } as any);
-                }
-            }
+            allProfits.forEach((profit: any) => {
+                enrichedTransactions.push({
+                    ...profit,
+                    status: "confirmed",
+                    payment_method: "bank_transfer",
+                    transaction_date: profit.created_at,
+                    notes: profit.description,
+                    idea: ideasMap.get(profit.idea_id) || undefined,
+                    investor: profilesMap.get(profit.investor_id) || undefined,
+                    founder: profilesMap.get(profit.founder_id) || undefined,
+                    type: "profit_share",
+                    chat_request_id: profit.chat_request_id,
+                    payment_proof_url: profit.payment_proof_url
+                } as any);
+            });
 
             // Sort mixed transactions by date
             enrichedTransactions.sort((a, b) =>
@@ -270,9 +261,24 @@ const Transactions = () => {
         );
     }
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        navigate("/");
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
-            <div className="min-h-screen">
+        <div className="flex min-h-screen lg:h-screen bg-slate-50 text-foreground font-sans">
+            {profile?.user_type === "investor" && (
+                <InvestorSidebar
+                    collapsed={sidebarCollapsed}
+                    onToggleCollapse={() => setSidebarCollapsed(c => !c)}
+                    userName={profile?.name}
+                    onLogout={handleLogout}
+                    onMessagesClick={() => navigate("/mobile-messages")}
+                />
+            )}
+
+            <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">
                 {/* Header */}
                 <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md py-3 sm:py-4 px-2 sm:px-6">
                     <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">

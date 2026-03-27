@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { CopilotAgentButton } from "@/components/CopilotAgentButton";
+import { InvestorSidebar } from "@/components/layout/InvestorSidebar";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -99,6 +101,7 @@ const Marketplace = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
     const [chatRequests, setChatRequests] = useState<Record<string, string>>({});
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState("");
@@ -315,9 +318,22 @@ const Marketplace = () => {
         );
     }
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        navigate("/");
+    };
+
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            <div className="min-h-screen">
+        <div className="flex min-h-screen lg:h-screen bg-background text-foreground font-sans">
+            <InvestorSidebar
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={() => setSidebarCollapsed(c => !c)}
+                userName={profile?.name}
+                onLogout={handleLogout}
+                onMessagesClick={() => navigate("/mobile-messages")}
+            />
+
+            <div className="flex-1 overflow-y-auto min-h-screen">
                 {/* Header */}
                 <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6">
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">

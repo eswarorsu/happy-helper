@@ -19,6 +19,7 @@ import Logo from "@/components/ui/Logo";
 import { evaluateFounderSubmitAccess, ensurePremiumFlag, type SubmitAccessResult } from "@/lib/founderAccess";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { CopilotAgentButton } from "@/components/CopilotAgentButton";
+import LocationPicker from "@/components/LocationPicker";
 
 const DOMAINS = [
     "FinTech", "HealthTech", "EdTech", "AI/ML", "SaaS", "E-commerce",
@@ -55,7 +56,9 @@ const SubmitIdea = () => {
         website_url: "",
         founder_city: "",
         founder_phone: "",
-        work_mode: ""
+        work_mode: "",
+        location_lat: null as number | null,
+        location_lng: null as number | null,
     });
 
     useEffect(() => {
@@ -174,6 +177,8 @@ const SubmitIdea = () => {
                     founder_city: formData.founder_city || null,
                     founder_phone: formData.founder_phone || null,
                     work_mode: formData.work_mode || null,
+                    location_lat: (formData.location_lat && formData.location_lat !== 0) ? formData.location_lat : null,
+                    location_lng: (formData.location_lng && formData.location_lng !== 0) ? formData.location_lng : null,
                     status: "pending"
                 })
                 .select()
@@ -449,6 +454,25 @@ const SubmitIdea = () => {
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
+                                            </div>
+
+                                            {/* ── Map Location Picker ── */}
+                                            <div className="mt-5">
+                                                <LocationPicker
+                                                    lat={formData.location_lat}
+                                                    lng={formData.location_lng}
+                                                    onChange={(lat, lng) => setFormData({ ...formData, location_lat: lat, location_lng: lng })}
+                                                />
+                                                {formData.location_lat && formData.location_lng && (
+                                                    <div className="mt-2 flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                                                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span className="font-semibold">
+                                                            📍 Location saved: {formData.location_lat.toFixed(4)}°N, {formData.location_lng.toFixed(4)}°E
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="space-y-2 mt-4">
