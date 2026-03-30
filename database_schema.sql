@@ -78,6 +78,14 @@ CREATE TABLE IF NOT EXISTS public.ideas (
     linkedin_url TEXT,
     website_url TEXT,
     
+    -- Location & Contact
+    location_lat NUMERIC,
+    location_lng NUMERIC,
+    founder_city TEXT,
+    founder_phone TEXT,
+    work_mode TEXT,
+    company_logo_url TEXT,
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
