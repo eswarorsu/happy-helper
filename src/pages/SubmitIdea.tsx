@@ -131,7 +131,7 @@ const SubmitIdea = () => {
                 return false;
             }
             if (!formData.investment_needed || parseFloat(formData.investment_needed) < 1000) {
-                toast({ title: "Investment min $1,000", variant: "destructive" });
+                toast({ title: "Investment min ₹1,000", variant: "destructive" });
                 return false;
             }
         }
@@ -348,10 +348,10 @@ const SubmitIdea = () => {
                                         <div className="space-y-2">
                                             <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                                                 <DollarSign className="w-4 h-4 text-muted-foreground" />
-                                                Investment Goal (USD) *
+                                                Investment Goal (INR) *
                                             </Label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
                                                 <Input
                                                     type="number"
                                                     placeholder="50,000"
@@ -361,7 +361,7 @@ const SubmitIdea = () => {
                                                     min={1000}
                                                 />
                                             </div>
-                                            <p className="text-xs text-slate-500 font-medium">Minimum: $1,000</p>
+                                            <p className="text-xs text-slate-500 font-medium">Minimum: ₹1,000</p>
                                         </div>
                                     </>
                                 )}
@@ -412,7 +412,7 @@ const SubmitIdea = () => {
                                                 Market Size (TAM) <span className="text-xs font-normal text-muted-foreground">(Optional)</span>
                                             </Label>
                                             <Input
-                                                placeholder="e.g., $10B Global Market"
+                                                placeholder="e.g., ₹10B Global Market"
                                                 value={formData.market_size}
                                                 onChange={(e) => setFormData({ ...formData, market_size: e.target.value })}
                                                 className="h-11 bg-white border-slate-200 rounded-lg text-slate-900 focus:border-brand-yellow focus:ring-brand-yellow/50 transition-all placeholder:text-slate-400"

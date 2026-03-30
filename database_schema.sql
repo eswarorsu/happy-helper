@@ -31,16 +31,32 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     domain TEXT,
     linkedin_profile TEXT,
     website_url TEXT,
+    founder_context JSONB, -- Stores startup stage, goals, challenges, etc.
     
     -- Investor Specific
     investment_capital NUMERIC, -- Total capital available
     interested_domains TEXT[], -- Array of strings e.g. ["AI", "Fintech"]
+    date_of_birth DATE,
+    nationality TEXT,
+    city TEXT,
+    investor_type TEXT, -- 'angel', 'vc', 'individual', 'family_office', 'hni'
+    investing_experience INTEGER DEFAULT 0,
+    current_designation TEXT,
+    organization TEXT,
+    professional_bio TEXT,
+    investment_range TEXT, -- '1L-10L', '10L-50L', etc.
+    preferred_stage TEXT[], -- ['Pre-Seed', 'Seed']
+    previous_investments TEXT,
+    roi_timeline TEXT, -- '1-3years', '3-5years', '5+years'
+    pan_last4 TEXT,
+    is_accredited BOOLEAN DEFAULT false,
     
     -- Common
     education TEXT,
-    dob DATE,
+    dob DATE, -- Legacy, see date_of_birth
     phone TEXT,
     bio TEXT,
+    upi_id TEXT, -- UPI ID for payments (both founder receiving investments and investor receiving returns)
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -206,7 +222,7 @@ CREATE TABLE IF NOT EXISTS public.products (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     price NUMERIC NOT NULL,
-    currency TEXT DEFAULT 'USD',
+    currency TEXT DEFAULT 'INR',
     image_url TEXT,
     category TEXT,
     is_live BOOLEAN DEFAULT true,
@@ -381,6 +397,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     title TEXT NOT NULL,
     message TEXT NOT NULL,
     type TEXT, -- 'view', 'message', 'deal', etc.
+    redirect_url TEXT, -- URL to navigate when notification is clicked
     is_read BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -412,10 +429,12 @@ CREATE POLICY "Users can view their own notifications"
     ON public.notifications FOR SELECT 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = notifications.user_id));
 
+-- SECURITY FIX: Restrict notification inserts to authenticated users only
+-- Previously allowed ANY user to insert notifications to ANY user (spam vector)
 DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
-CREATE POLICY "System can insert notifications" 
+CREATE POLICY "Authenticated users can insert notifications" 
     ON public.notifications FOR INSERT 
-    WITH CHECK (true);
+    WITH CHECK (auth.uid() IS NOT NULL);
 
 DROP POLICY IF EXISTS "Users can update their own notifications" ON public.notifications;
 CREATE POLICY "Users can update their own notifications" 
@@ -432,3 +451,134 @@ DROP POLICY IF EXISTS "Founders can manage their own products" ON public.product
 CREATE POLICY "Founders can manage their own products" 
     ON public.products FOR ALL 
     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id));
+
+-- ==========================================
+-- 12. UPI TRANSACTIONS TABLE
+-- Tracks UPI-based investment payments between investors and founders.
+-- Flow: investor_confirmed → completed (when founder confirms receipt)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.upi_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    chat_request_id UUID REFERENCES public.chat_requests(id) ON DELETE CASCADE NOT NULL,
+    founder_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    investor_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    idea_id UUID REFERENCES public.ideas(id) ON DELETE CASCADE NOT NULL,
+    
+    amount NUMERIC NOT NULL,
+    founder_upi_id TEXT, -- UPI ID the payment was sent to
+    payment_proof_url TEXT, -- Screenshot of UPI payment
+    status TEXT DEFAULT 'investor_confirmed', -- 'investor_confirmed', 'completed'
+    
+    investor_confirmed_at TIMESTAMP WITH TIME ZONE,
+    founder_confirmed_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.upi_transactions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view their own UPI transactions" ON public.upi_transactions;
+CREATE POLICY "Users can view their own UPI transactions"
+    ON public.upi_transactions FOR SELECT
+    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+DROP POLICY IF EXISTS "Users can insert UPI transactions" ON public.upi_transactions;
+CREATE POLICY "Users can insert UPI transactions"
+    ON public.upi_transactions FOR INSERT
+    WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+DROP POLICY IF EXISTS "Users can update their own UPI transactions" ON public.upi_transactions;
+CREATE POLICY "Users can update their own UPI transactions"
+    ON public.upi_transactions FOR UPDATE
+    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+-- ==========================================
+-- 13. PROFIT TRANSACTIONS TABLE
+-- Tracks profit-sharing payments from founders to investors.
+-- Flow: founder_confirmed → completed (when investor confirms receipt)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.profit_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    chat_request_id UUID REFERENCES public.chat_requests(id) ON DELETE CASCADE NOT NULL,
+    founder_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    investor_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    idea_id UUID REFERENCES public.ideas(id) ON DELETE CASCADE NOT NULL,
+    
+    amount NUMERIC NOT NULL,
+    description TEXT,
+    investor_upi_id TEXT, -- UPI ID the profit was sent to
+    payment_proof_url TEXT, -- Screenshot of UPI payment
+    status TEXT DEFAULT 'founder_confirmed', -- 'founder_confirmed', 'completed'
+    
+    founder_confirmed_at TIMESTAMP WITH TIME ZONE,
+    investor_confirmed_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.profit_transactions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view their own profit transactions" ON public.profit_transactions;
+CREATE POLICY "Users can view their own profit transactions"
+    ON public.profit_transactions FOR SELECT
+    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+DROP POLICY IF EXISTS "Founders can insert profit transactions" ON public.profit_transactions;
+CREATE POLICY "Founders can insert profit transactions"
+    ON public.profit_transactions FOR INSERT
+    WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id));
+
+DROP POLICY IF EXISTS "Users can update profit transactions" ON public.profit_transactions;
+CREATE POLICY "Users can update profit transactions"
+    ON public.profit_transactions FOR UPDATE
+    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+-- ==========================================
+-- 14. PROFIT SHARES TABLE
+-- Official confirmed profit share records (created after investor confirms profit_transaction).
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.profit_shares (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    chat_request_id UUID REFERENCES public.chat_requests(id) ON DELETE CASCADE NOT NULL,
+    founder_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    investor_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    idea_id UUID REFERENCES public.ideas(id) ON DELETE CASCADE NOT NULL,
+    
+    amount NUMERIC NOT NULL,
+    description TEXT,
+    payment_proof_url TEXT,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.profit_shares ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view their own profit shares" ON public.profit_shares;
+CREATE POLICY "Users can view their own profit shares"
+    ON public.profit_shares FOR SELECT
+    USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+DROP POLICY IF EXISTS "Users can insert profit shares" ON public.profit_shares;
+CREATE POLICY "Users can insert profit shares"
+    ON public.profit_shares FOR INSERT
+    WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE id = founder_id OR id = investor_id));
+
+-- ==========================================
+-- PERFORMANCE INDEXES
+-- ==========================================
+CREATE INDEX IF NOT EXISTS idx_ideas_founder_id ON public.ideas(founder_id);
+CREATE INDEX IF NOT EXISTS idx_ideas_status ON public.ideas(status);
+CREATE INDEX IF NOT EXISTS idx_chat_requests_founder_id ON public.chat_requests(founder_id);
+CREATE INDEX IF NOT EXISTS idx_chat_requests_investor_id ON public.chat_requests(investor_id);
+CREATE INDEX IF NOT EXISTS idx_chat_requests_status ON public.chat_requests(status);
+CREATE INDEX IF NOT EXISTS idx_investment_records_founder_id ON public.investment_records(founder_id);
+CREATE INDEX IF NOT EXISTS idx_investment_records_investor_id ON public.investment_records(investor_id);
+CREATE INDEX IF NOT EXISTS idx_investment_records_idea_id ON public.investment_records(idea_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_upi_transactions_chat_request_id ON public.upi_transactions(chat_request_id);
+CREATE INDEX IF NOT EXISTS idx_profit_transactions_chat_request_id ON public.profit_transactions(chat_request_id);
+CREATE INDEX IF NOT EXISTS idx_profit_shares_chat_request_id ON public.profit_shares(chat_request_id);
+CREATE INDEX IF NOT EXISTS idx_view_logs_idea_id ON public.view_logs(idea_id);

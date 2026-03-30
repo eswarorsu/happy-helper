@@ -332,8 +332,8 @@ const VentureCard = ({
                         />
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-                        <span>${(idea.investment_received || 0).toLocaleString()} raised</span>
-                        <span>${idea.investment_needed.toLocaleString()} goal</span>
+                        <span>₹{(idea.investment_received || 0).toLocaleString()} raised</span>
+                        <span>₹{idea.investment_needed.toLocaleString()} goal</span>
                     </div>
                 </div>
             </motion.div>
@@ -1127,7 +1127,7 @@ const FounderDashboard = () => {
 
             toast({
                 title: "Investment Recorded! 🎉",
-                description: `Successfully recorded $${amount.toLocaleString()} investment`
+                description: `Successfully recorded ₹${amount.toLocaleString()} investment`
             });
 
             if (profile) await fetchIdeas(profile.id);
@@ -1476,7 +1476,7 @@ const FounderDashboard = () => {
 
                         {/* Metrics Grid */}
                         <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-6 sm:mb-8" variants={containerVariants}>
-                            <MetricCard title="Total Raised" value={`$${totalRaised.toLocaleString()}`} subtitle="Across all ventures" icon={DollarSign} accentColor="emerald"
+                            <MetricCard title="Total Raised" value={`₹${totalRaised.toLocaleString()}`} subtitle="Across all ventures" icon={DollarSign} accentColor="emerald"
                                 trend={totalRaised > 0 ? { value: "+12%", positive: true } : undefined} index={0} />
                             <MetricCard title="Active Ventures" value={ideas.length} subtitle="In your portfolio" icon={Lightbulb} accentColor="blue" index={1} />
                             <MetricCard title="Funded Ventures" value={fundedVentures} subtitle="Successfully funded" icon={Target} accentColor="amber" index={2} />
@@ -1512,11 +1512,11 @@ const FounderDashboard = () => {
                                                         tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))', fontWeight: 500 }} interval={0} dy={10} />
                                                     <YAxis axisLine={false} tickLine={false}
                                                         tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                                                        tickFormatter={(value) => value >= 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value}`} dx={-10} />
+                                                        tickFormatter={(value) => value >= 1000 ? `₹${(value / 1000).toFixed(0)}k` : `₹${value}`} dx={-10} />
                                                     <Tooltip
                                                         contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', fontSize: '12px' }}
                                                         cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
-                                                        formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
+                                                        formatter={(value: number, name: string) => [`₹${value.toLocaleString()}`, name]}
                                                         labelFormatter={(label, payload) => payload[0]?.payload?.fullName || label}
                                                     />
                                                     <Bar dataKey="target" fill="#cbd5e1" radius={[4, 4, 0, 0]} name="Target" />
@@ -1710,11 +1710,11 @@ const FounderDashboard = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <motion.div className="p-5 bg-white border border-border/60 rounded-2xl" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                                             <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">Target</p>
-                                            <p className="text-2xl sm:text-3xl font-black text-foreground">${viewingIdea.investment_needed.toLocaleString()}</p>
+                                            <p className="text-2xl sm:text-3xl font-black text-foreground">₹{viewingIdea.investment_needed.toLocaleString()}</p>
                                         </motion.div>
                                         <motion.div className="p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                                             <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider mb-1">Raised</p>
-                                            <p className="text-2xl sm:text-3xl font-black text-emerald-600">${viewingIdea.investment_received.toLocaleString()}</p>
+                                            <p className="text-2xl sm:text-3xl font-black text-emerald-600">₹{viewingIdea.investment_received.toLocaleString()}</p>
                                         </motion.div>
                                     </div>
                                     <div className="relative h-3 bg-secondary rounded-full overflow-hidden">
@@ -1761,8 +1761,8 @@ const FounderDashboard = () => {
                                     <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Venture</p>
                                     <p className="text-sm font-bold text-foreground">{recordInvestmentModal.idea.title}</p>
                                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                                        <span>Target: ${recordInvestmentModal.idea.investment_needed.toLocaleString()}</span>
-                                        <span>Raised: ${(recordInvestmentModal.idea.investment_received || 0).toLocaleString()}</span>
+                                        <span>Target: ₹{recordInvestmentModal.idea.investment_needed.toLocaleString()}</span>
+                                        <span>Raised: ₹{(recordInvestmentModal.idea.investment_received || 0).toLocaleString()}</span>
                                     </div>
                                 </div>
                                 {recordInvestmentModal.investorName && (
@@ -1779,7 +1779,7 @@ const FounderDashboard = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-foreground">Investment Amount *</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">₹</span>
                                         <Input type="number" placeholder="10,000" value={investmentAmount} onChange={(e) => setInvestmentAmount(e.target.value)}
                                             className="h-12 pl-8 bg-white border-border rounded-xl text-lg font-bold placeholder:font-normal" min={1} />
                                     </div>
@@ -1794,7 +1794,7 @@ const FounderDashboard = () => {
                                         initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-emerald-600 font-medium">After this investment:</span>
-                                            <span className="font-bold text-emerald-700">${((recordInvestmentModal.idea.investment_received || 0) + parseFloat(investmentAmount)).toLocaleString()}</span>
+                                            <span className="font-bold text-emerald-700">₹{((recordInvestmentModal.idea.investment_received || 0) + parseFloat(investmentAmount)).toLocaleString()}</span>
                                         </div>
                                         <div className="mt-2 h-2 bg-emerald-500/20 rounded-full overflow-hidden">
                                             <motion.div className="h-full bg-emerald-500 rounded-full" initial={{ width: 0 }}

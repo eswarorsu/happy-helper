@@ -628,11 +628,11 @@ const Marketplace = () => {
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <div className="bg-slate-100 rounded-lg p-2.5">
                                                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Target</p>
-                                                                <p className="text-sm font-bold text-slate-900">${idea.investment_needed.toLocaleString()}</p>
+                                                                <p className="text-sm font-bold text-slate-900">₹{idea.investment_needed.toLocaleString()}</p>
                                                             </div>
                                                             <div className="bg-brand-yellow/10 rounded-lg p-2.5">
                                                                 <p className="text-[9px] font-bold text-brand-yellow/80 uppercase tracking-wider">Raised</p>
-                                                                <p className="text-sm font-bold text-brand-yellow">${(idea.investment_received || 0).toLocaleString()}</p>
+                                                                <p className="text-sm font-bold text-brand-yellow">₹{(idea.investment_received || 0).toLocaleString()}</p>
                                                             </div>
                                                         </div>
 
